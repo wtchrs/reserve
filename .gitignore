@@ -35,3 +35,10 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Spring Setting File ###
+src/main/resources/application*.yml
+
+### Docker ###
+docker/*
+!docker/docker-compose.yml
