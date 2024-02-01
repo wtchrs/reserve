@@ -5,16 +5,18 @@ import org.springframework.http.*;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import reserve.global.exception.ErrorCode;
+import reserve.global.exception.*;
 import reserve.global.exception.dto.ErrorResponse;
-import reserve.global.exception.UsernameDuplicateException;
 import reserve.global.exception.dto.ParameterError;
 import reserve.global.exception.dto.ValidationErrorResponse;
 
 import java.util.List;
+
+import static reserve.global.exception.ErrorCode.INTERNAL_SERVER_ERROR;
 
 @RestControllerAdvice
 @Slf4j
@@ -29,18 +31,60 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     ) {
         List<FieldError> fieldErrors = ex.getBindingResult().getFieldErrors();
         List<ParameterError> paramErrors = fieldErrors.stream().map(ParameterError::from).toList();
-        return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body(new ValidationErrorResponse(
+        return ResponseEntity.badRequest().body(new ValidationErrorResponse(
                 ErrorCode.INVALID_REQUEST.getCode(),
                 ErrorCode.INVALID_REQUEST.getMessage(),
                 paramErrors
         ));
     }
 
-    @ExceptionHandler(UsernameDuplicateException.class)
-    public ResponseEntity<ErrorResponse> handleUsernameDuplicateException(UsernameDuplicateException e) {
+    @ExceptionHandler(WrongCredentialException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse handleWrongCredential(WrongCredentialException e) {
         log.warn(e.getMessage(), e);
-        ErrorResponse body = new ErrorResponse(e.getErrorCode().getCode(), e.getErrorCode().getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+        return new ErrorResponse(e.getErrorCode().getCode(), e.getErrorCode().getMessage());
+    }
+
+    @ExceptionHandler(InvalidAuthorizationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidAuthorization(InvalidAuthorizationException e) {
+        log.warn(e.getMessage(), e);
+        return new ErrorResponse(e.getErrorCode().getCode(), e.getErrorCode().getMessage());
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleAuthentication(AuthenticationException e) {
+        log.warn(e.getMessage(), e);
+        return new ErrorResponse(e.getErrorCode().getCode(), e.getErrorCode().getMessage());
+    }
+
+    @ExceptionHandler(AccessTokenException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse handleAccessToken(AccessTokenException e) {
+        log.warn(e.getMessage(), e);
+        return new ErrorResponse(e.getErrorCode().getCode(), e.getErrorCode().getMessage());
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleResourceNotFound(ResourceNotFoundException e) {
+        log.warn(e.getMessage(), e);
+        return new ErrorResponse(e.getErrorCode().getCode(), e.getErrorCode().getMessage());
+    }
+
+    @ExceptionHandler(UsernameDuplicateException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleUsernameDuplicate(UsernameDuplicateException e) {
+        log.warn(e.getMessage(), e);
+        return new ErrorResponse(e.getErrorCode().getCode(), e.getErrorCode().getMessage());
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleException(Exception e) {
+        log.warn(e.getMessage(), e);
+        return new ErrorResponse(INTERNAL_SERVER_ERROR.getCode(), INTERNAL_SERVER_ERROR.getMessage());
     }
 
 }

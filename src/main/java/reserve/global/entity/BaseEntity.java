@@ -1,4 +1,4 @@
-package reserve.global;
+package reserve.global.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

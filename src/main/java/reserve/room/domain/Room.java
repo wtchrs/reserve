@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import reserve.global.BaseEntity;
+import reserve.global.entity.BaseEntity;
 import reserve.user.domain.User;
 
 @Entity

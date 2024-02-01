@@ -5,11 +5,11 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
-import reserve.global.BaseEntity;
+import reserve.global.entity.BaseEntity;
 
 @Entity
 @Table(name = "users")
-@SQLRestriction("status = 'AVAILABLE'")
+@SQLRestriction("status = 'available'")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class User extends BaseEntity {

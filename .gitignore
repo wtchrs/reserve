@@ -42,3 +42,6 @@ src/main/resources/application*.yml
 ### Docker ###
 docker/*
 !docker/docker-compose.yml
+
+### SSL Certificate ###
+**/*.p12
