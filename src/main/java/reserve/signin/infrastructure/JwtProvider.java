@@ -44,7 +44,7 @@ public class JwtProvider {
 
     private String generateToken(String subject, int expirationPeriod) {
         Date now = new Date();
-        Date expiration = new Date(now.getTime() + expirationPeriod);
+        Date expiration = new Date(now.getTime() + expirationPeriod * 1000L);
         return Jwts.builder()
                 .setHeaderParam(JWT_TYPE_HEADER_NAME, JWT_TYPE_HEADER_VALUE)
                 .setSubject(subject)

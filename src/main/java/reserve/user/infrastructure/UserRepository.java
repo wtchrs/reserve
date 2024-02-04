@@ -1,4 +1,4 @@
-package reserve.user.domain.repository;
+package reserve.user.infrastructure;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

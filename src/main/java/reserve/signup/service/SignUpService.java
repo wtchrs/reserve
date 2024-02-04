@@ -7,7 +7,7 @@ import reserve.global.exception.ErrorCode;
 import reserve.global.exception.UsernameDuplicateException;
 import reserve.signup.infrastructure.PasswordEncoder;
 import reserve.user.domain.User;
-import reserve.user.domain.repository.UserRepository;
+import reserve.user.infrastructure.UserRepository;
 import reserve.signup.dto.request.SignUpRequest;
 
 @Service

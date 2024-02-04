@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.SQLRestriction;
 import reserve.global.entity.BaseEntity;
 
@@ -26,8 +27,10 @@ public class User extends BaseEntity {
     private String passwordHash;
 
     @Column(nullable = false)
+    @Setter
     private String nickname;
 
+    @Setter
     private String description;
 
     public User(String username, String passwordHash, String nickname, String description) {
@@ -37,4 +40,7 @@ public class User extends BaseEntity {
         this.description = description;
     }
 
+    public void changePassword(String newPasswordHash) {
+        this.passwordHash = newPasswordHash;
+    }
 }

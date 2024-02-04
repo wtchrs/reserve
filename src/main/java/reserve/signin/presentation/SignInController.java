@@ -1,7 +1,6 @@
 package reserve.signin.presentation;
 
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
@@ -30,20 +29,37 @@ public class SignInController {
     @PostMapping("/sign-in")
     public SignInResponse signIn(@RequestBody @Validated SignInRequest signInRequest, HttpServletResponse response) {
         SignInToken signInToken = signInService.signIn(signInRequest);
-        Cookie refreshCookie = new Cookie("refresh", signInToken.getRefreshToken());
-        refreshCookie.setHttpOnly(true);
-        refreshCookie.setMaxAge(refreshTokenExpire);
-        refreshCookie.setPath("/");
-        refreshCookie.setSecure(true);
-        response.addCookie(refreshCookie);
+        response.addCookie(createRefreshCookie(signInToken));
         return new SignInResponse(signInToken.getAccessToken());
     }
 
     @PostMapping("/token-refresh")
-    public SignInResponse refreshAccessToken(@CookieValue("refresh") Cookie refreshCookie) {
-        String refreshToken = refreshCookie.getValue();
-        SignInToken signInToken = signInService.refreshAccessToken(refreshToken);
+    public SignInResponse refreshAccessToken(
+            @CookieValue("refresh") Cookie refreshCookie,
+            HttpServletResponse response
+    ) {
+        String refreshTokenValue = refreshCookie.getValue();
+        SignInToken signInToken = signInService.refreshAccessToken(refreshTokenValue);
+        response.addCookie(createRefreshCookie(signInToken));
         return new SignInResponse(signInToken.getAccessToken());
+    }
+
+    private Cookie createRefreshCookie(SignInToken signInToken) {
+        Cookie newRefreshCookie = new Cookie("refresh", signInToken.getRefreshToken());
+        newRefreshCookie.setHttpOnly(true);
+        newRefreshCookie.setMaxAge(refreshTokenExpire);
+        newRefreshCookie.setPath("/");
+        newRefreshCookie.setSecure(true);
+        return newRefreshCookie;
+    }
+
+    @PostMapping("/sign-out")
+    public void signOut(@CookieValue("refresh") Cookie refreshCookie, HttpServletResponse response) {
+        signInService.signOut(refreshCookie.getValue());
+        // delete cookie
+        refreshCookie.setMaxAge(0);
+        refreshCookie.setValue("");
+        response.addCookie(refreshCookie);
     }
 
 }
