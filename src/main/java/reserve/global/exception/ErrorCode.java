@@ -24,6 +24,7 @@ public enum ErrorCode {
 
     // 3xx: Not found errors.
     USER_NOT_FOUND(301, "User does not exist."),
+    ROOM_NOT_FOUND(302, "Room does not exist."),
 
     // 4xx: Conflict errors.
     USERNAME_DUPLICATE(401, "Username already exists."),

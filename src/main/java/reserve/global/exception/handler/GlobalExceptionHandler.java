@@ -60,6 +60,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return handleErrorCodeException(e);
     }
 
+    @ExceptionHandler(RefreshTokenException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse handleRefreshToken(RefreshTokenException e) {
+        return handleErrorCodeException(e);
+    }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleResourceNotFound(ResourceNotFoundException e) {

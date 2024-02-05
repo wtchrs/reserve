@@ -45,3 +45,6 @@ docker/*
 
 ### SSL Certificate ###
 **/*.p12
+
+### Generated files ###
+src/**/generated
