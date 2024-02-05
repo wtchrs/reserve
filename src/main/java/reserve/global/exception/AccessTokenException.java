@@ -1,12 +1,9 @@
 package reserve.global.exception;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+public class AccessTokenException extends ErrorCodeException {
 
-@RequiredArgsConstructor
-@Getter
-public class AccessTokenException extends RuntimeException{
-
-    private final ErrorCode errorCode;
+    public AccessTokenException(ErrorCode errorCode) {
+        super(errorCode);
+    }
 
 }

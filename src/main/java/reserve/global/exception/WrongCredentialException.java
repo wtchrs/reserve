@@ -1,12 +1,9 @@
 package reserve.global.exception;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+public class WrongCredentialException extends ErrorCodeException {
 
-@RequiredArgsConstructor
-@Getter
-public class WrongCredentialException extends RuntimeException {
-
-    private final ErrorCode errorCode;
+    public WrongCredentialException(ErrorCode errorCode) {
+        super(errorCode);
+    }
 
 }

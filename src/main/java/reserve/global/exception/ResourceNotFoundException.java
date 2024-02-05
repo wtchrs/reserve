@@ -1,12 +1,9 @@
 package reserve.global.exception;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+public class ResourceNotFoundException extends ErrorCodeException {
 
-@RequiredArgsConstructor
-@Getter
-public class ResourceNotFoundException extends RuntimeException {
-
-    private final ErrorCode errorCode;
+    public ResourceNotFoundException(ErrorCode errorCode) {
+        super(errorCode);
+    }
 
 }

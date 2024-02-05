@@ -1,14 +1,9 @@
 package reserve.global.exception;
 
-import lombok.Getter;
-
-@Getter
-public class UsernameDuplicateException extends RuntimeException {
-
-    private final ErrorCode errorCode;
+public class UsernameDuplicateException extends ErrorCodeException {
 
     public UsernameDuplicateException(ErrorCode errorCode) {
-        this.errorCode = errorCode;
+        super(errorCode);
     }
 
 }

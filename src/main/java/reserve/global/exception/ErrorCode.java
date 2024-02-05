@@ -34,4 +34,9 @@ public enum ErrorCode {
     private final int code;
     private final String message;
 
+    @Override
+    public String toString() {
+        return this.code + ": " + this.message;
+    }
+
 }

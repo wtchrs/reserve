@@ -1,12 +1,9 @@
 package reserve.global.exception;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+public class InvalidAuthorizationException extends ErrorCodeException {
 
-@RequiredArgsConstructor
-@Getter
-public class InvalidAuthorizationException extends RuntimeException {
-
-    private final ErrorCode errorCode;
+    public InvalidAuthorizationException(ErrorCode errorCode) {
+        super(errorCode);
+    }
 
 }

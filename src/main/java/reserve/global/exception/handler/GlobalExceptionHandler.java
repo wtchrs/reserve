@@ -16,8 +16,6 @@ import reserve.global.exception.dto.ValidationErrorResponse;
 
 import java.util.List;
 
-import static reserve.global.exception.ErrorCode.INTERNAL_SERVER_ERROR;
-
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -41,50 +39,52 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(WrongCredentialException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorResponse handleWrongCredential(WrongCredentialException e) {
-        log.warn(e.getMessage(), e);
-        return new ErrorResponse(e.getErrorCode().getCode(), e.getErrorCode().getMessage());
+        return handleErrorCodeException(e);
     }
 
     @ExceptionHandler(InvalidAuthorizationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleInvalidAuthorization(InvalidAuthorizationException e) {
-        log.warn(e.getMessage(), e);
-        return new ErrorResponse(e.getErrorCode().getCode(), e.getErrorCode().getMessage());
+        return handleErrorCodeException(e);
     }
 
     @ExceptionHandler(AuthenticationException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse handleAuthentication(AuthenticationException e) {
-        log.warn(e.getMessage(), e);
-        return new ErrorResponse(e.getErrorCode().getCode(), e.getErrorCode().getMessage());
+        return handleErrorCodeException(e);
     }
 
     @ExceptionHandler(AccessTokenException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorResponse handleAccessToken(AccessTokenException e) {
-        log.warn(e.getMessage(), e);
-        return new ErrorResponse(e.getErrorCode().getCode(), e.getErrorCode().getMessage());
+        return handleErrorCodeException(e);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleResourceNotFound(ResourceNotFoundException e) {
-        log.warn(e.getMessage(), e);
-        return new ErrorResponse(e.getErrorCode().getCode(), e.getErrorCode().getMessage());
+        return handleErrorCodeException(e);
     }
 
     @ExceptionHandler(UsernameDuplicateException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleUsernameDuplicate(UsernameDuplicateException e) {
-        log.warn(e.getMessage(), e);
-        return new ErrorResponse(e.getErrorCode().getCode(), e.getErrorCode().getMessage());
+        return handleErrorCodeException(e);
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleException(Exception e) {
         log.warn(e.getMessage(), e);
-        return new ErrorResponse(INTERNAL_SERVER_ERROR.getCode(), INTERNAL_SERVER_ERROR.getMessage());
+        return new ErrorResponse(
+                ErrorCode.INTERNAL_SERVER_ERROR.getCode(),
+                ErrorCode.INTERNAL_SERVER_ERROR.getMessage()
+        );
+    }
+
+    private static ErrorResponse handleErrorCodeException(ErrorCodeException e) {
+        log.warn(e.getMessage(), e);
+        return new ErrorResponse(e.getErrorCode().getCode(), e.getErrorCode().getMessage());
     }
 
 }

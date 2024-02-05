@@ -1,12 +1,9 @@
 package reserve.global.exception;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+public class RefreshTokenException extends ErrorCodeException {
 
-@RequiredArgsConstructor
-@Getter
-public class RefreshTokenException extends RuntimeException {
-
-    private final ErrorCode errorCode;
+    public RefreshTokenException(ErrorCode errorCode) {
+        super(errorCode);
+    }
 
 }
