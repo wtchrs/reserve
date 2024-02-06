@@ -1,10 +1,13 @@
 package reserve.room.infrastructure;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -20,20 +23,27 @@ import static reserve.room.domain.QRoom.*;
 @Repository
 public class RoomQueryRepository {
 
+    private final double matchThreshold;
+
     private final JPAQueryFactory queryFactory;
 
-    public RoomQueryRepository(EntityManager em) {
+    public RoomQueryRepository(
+            @Value("${application.matchThreshold}") double matchThreshold,
+            EntityManager em
+    ) {
+        this.matchThreshold = matchThreshold;
         this.queryFactory = new JPAQueryFactory(em);
     }
 
     public Page<RoomInfoResponse> findResponsesBySearch(RoomSearchRequest roomSearchRequest, Pageable pageable) {
+        BooleanBuilder condition = new BooleanBuilder();
+        condition.and(registrantUsernameCondition(roomSearchRequest.getRegistrant()));
+        condition.and(queryStringCondition(roomSearchRequest.getQuery()));
+
         List<RoomInfoResponse> content = queryFactory
                 .select(getRoomInfoResponseProjection())
                 .from(room)
-                .where(
-                        registrantUsernameCondition(roomSearchRequest.getRegistrant()),
-                        queryStringCondition(roomSearchRequest.getQuery())
-                )
+                .where(condition)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -41,12 +51,7 @@ public class RoomQueryRepository {
         Long count = queryFactory
                 .select(room.count())
                 .from(room)
-                .where(
-                        registrantUsernameCondition(roomSearchRequest.getRegistrant()),
-                        queryStringCondition(roomSearchRequest.getQuery())
-                )
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
+                .where(condition)
                 .fetchOne();
 
         return new PageImpl<>(content, pageable, count);
@@ -73,10 +78,9 @@ public class RoomQueryRepository {
 
     private BooleanExpression queryStringCondition(String query) {
         if (StringUtils.hasText(query)) {
-            // TODO: Replace Full-text search
-            return room.name.like("%" + query + "%")
-                    .or(room.address.like("%" + query + "%"))
-                    .or(room.description.like("%" + query + "%"));
+            return Expressions
+                    .numberTemplate(Double.class, "fulltext_search(name, address, description, {0})", query)
+                    .gt(matchThreshold);
         }
         return null;
     }
