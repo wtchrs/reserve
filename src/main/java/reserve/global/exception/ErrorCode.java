@@ -24,10 +24,14 @@ public enum ErrorCode {
 
     // 3xx: Not found errors.
     USER_NOT_FOUND(301, "User does not exist."),
-    ROOM_NOT_FOUND(302, "Room does not exist."),
+    STORE_NOT_FOUND(302, "Store does not exist."),
+    RESERVATION_NOT_FOUND(303, "Reservation does not exist."),
 
-    // 4xx: Conflict errors.
-    USERNAME_DUPLICATE(401, "Username already exists."),
+    // 4xx: Access denied errors.
+    ACCESS_DENIED(400, "Access denied."),
+
+    // 5xx: Conflict errors.
+    USERNAME_DUPLICATE(501, "Username already exists."),
 
     // 9xx: server errors.
     INTERNAL_SERVER_ERROR(900, "An internal server error has occurred. Please try again later.");

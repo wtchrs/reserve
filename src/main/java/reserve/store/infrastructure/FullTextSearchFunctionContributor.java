@@ -1,4 +1,4 @@
-package reserve.room.infrastructure;
+package reserve.store.infrastructure;
 
 import org.hibernate.boot.model.FunctionContributions;
 import org.hibernate.boot.model.FunctionContributor;

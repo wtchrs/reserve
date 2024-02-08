@@ -1,4 +1,4 @@
-package reserve.room.domain;
+package reserve.store.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -10,15 +10,15 @@ import reserve.global.entity.BaseEntity;
 import reserve.user.domain.User;
 
 @Entity
-@Table(name = "rooms")
+@Table(name = "stores")
 @SQLRestriction("status = 'AVAILABLE'")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class Room extends BaseEntity {
+public class Store extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "room_id", nullable = false)
+    @Column(name = "store_id", nullable = false)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -41,7 +41,7 @@ public class Room extends BaseEntity {
     @Setter
     private String description;
 
-    public Room(User user, String name, int price, String address, String description) {
+    public Store(User user, String name, int price, String address, String description) {
         this.user = user;
         this.name = name;
         this.price = price;

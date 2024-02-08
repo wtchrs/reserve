@@ -1,4 +1,4 @@
-package reserve.room.infrastructure;
+package reserve.store.infrastructure;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
@@ -13,21 +13,21 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
-import reserve.room.dto.request.RoomSearchRequest;
-import reserve.room.dto.response.RoomInfoResponse;
+import reserve.store.dto.request.StoreSearchRequest;
+import reserve.store.dto.response.StoreInfoResponse;
 
 import java.util.List;
 
-import static reserve.room.domain.QRoom.*;
+import static reserve.store.domain.QStore.*;
 
 @Repository
-public class RoomQueryRepository {
+public class StoreQueryRepository {
 
     private final double matchThreshold;
 
     private final JPAQueryFactory queryFactory;
 
-    public RoomQueryRepository(
+    public StoreQueryRepository(
             @Value("${application.matchThreshold}") double matchThreshold,
             EntityManager em
     ) {
@@ -35,43 +35,43 @@ public class RoomQueryRepository {
         this.queryFactory = new JPAQueryFactory(em);
     }
 
-    public Page<RoomInfoResponse> findResponsesBySearch(RoomSearchRequest roomSearchRequest, Pageable pageable) {
+    public Page<StoreInfoResponse> findResponsesBySearch(StoreSearchRequest storeSearchRequest, Pageable pageable) {
         BooleanBuilder condition = new BooleanBuilder();
-        condition.and(registrantUsernameCondition(roomSearchRequest.getRegistrant()));
-        condition.and(queryStringCondition(roomSearchRequest.getQuery()));
+        condition.and(registrantUsernameCondition(storeSearchRequest.getRegistrant()));
+        condition.and(queryStringCondition(storeSearchRequest.getQuery()));
 
-        List<RoomInfoResponse> content = queryFactory
-                .select(getRoomInfoResponseProjection())
-                .from(room)
+        List<StoreInfoResponse> content = queryFactory
+                .select(getStoreInfoResponseProjection())
+                .from(store)
                 .where(condition)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
         Long count = queryFactory
-                .select(room.count())
-                .from(room)
+                .select(store.count())
+                .from(store)
                 .where(condition)
                 .fetchOne();
 
         return new PageImpl<>(content, pageable, count);
     }
 
-    private static ConstructorExpression<RoomInfoResponse> getRoomInfoResponseProjection() {
+    private static ConstructorExpression<StoreInfoResponse> getStoreInfoResponseProjection() {
         return Projections.constructor(
-                RoomInfoResponse.class,
-                room.id,
-                room.user.username,
-                room.name,
-                room.price,
-                room.address,
-                room.description
+                StoreInfoResponse.class,
+                store.id,
+                store.user.username,
+                store.name,
+                store.price,
+                store.address,
+                store.description
         );
     }
 
     private static BooleanExpression registrantUsernameCondition(String registrant) {
         if (StringUtils.hasText(registrant)) {
-            return room.user.username.eq(registrant);
+            return store.user.username.eq(registrant);
         }
         return null;
     }

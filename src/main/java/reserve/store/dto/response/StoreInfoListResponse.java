@@ -1,4 +1,4 @@
-package reserve.room.dto.response;
+package reserve.store.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Getter
 @JsonPropertyOrder({"count", "pageSize", "pageNumber", "hasNext", "results"})
-public class RoomInfoListResponse {
+public class StoreInfoListResponse {
 
     private final long count;
     private final int pageSize;
@@ -21,15 +21,15 @@ public class RoomInfoListResponse {
     @Getter(AccessLevel.PRIVATE)
     private final boolean hasNext;
 
-    private final List<RoomInfoResponse> results;
+    private final List<StoreInfoResponse> results;
 
     @JsonProperty("hasNext")
     public boolean hasNext() {
         return this.hasNext;
     }
 
-    public static RoomInfoListResponse from(Page<RoomInfoResponse> page) {
-        return new RoomInfoListResponse(
+    public static StoreInfoListResponse from(Page<StoreInfoResponse> page) {
+        return new StoreInfoListResponse(
                 page.getTotalElements(),
                 page.getPageable().getPageSize(),
                 page.getPageable().getPageNumber(),

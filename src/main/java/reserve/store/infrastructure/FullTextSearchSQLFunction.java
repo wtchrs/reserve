@@ -1,4 +1,4 @@
-package reserve.room.infrastructure;
+package reserve.store.infrastructure;
 
 import org.hibernate.dialect.function.StandardSQLFunction;
 import org.hibernate.query.ReturnableType;

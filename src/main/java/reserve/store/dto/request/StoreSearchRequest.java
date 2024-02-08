@@ -1,4 +1,4 @@
-package reserve.room.dto.request;
+package reserve.store.dto.request;
 
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -8,7 +8,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Setter
 @Getter
-public class RoomSearchRequest {
+public class StoreSearchRequest {
 
     @Size(min = 0, message = "'registrant' cannot be empty string.")
     private String registrant;
