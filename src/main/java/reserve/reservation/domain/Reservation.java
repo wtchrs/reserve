@@ -5,8 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.SQLRestriction;
-import reserve.global.entity.BaseEntity;
+import reserve.global.entity.DeletableBaseEntity;
 import reserve.store.domain.Store;
 import reserve.user.domain.User;
 
@@ -14,10 +13,9 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "reservations")
-@SQLRestriction("status = 'AVAILABLE'")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class Reservation extends BaseEntity {
+public class Reservation extends DeletableBaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

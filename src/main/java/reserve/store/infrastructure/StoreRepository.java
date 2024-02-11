@@ -15,6 +15,9 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
 
     Optional<Store> findByIdAndUserId(Long storeId, Long userId);
 
+    @Query("SELECT store.user.id FROM Store store WHERE store.id = :storeId")
+    Long findUserIdById(@Param("storeId") Long storeId);
+
     @Query("""
            SELECT new reserve.store.dto.response.StoreInfoResponse(
                store.id, store.user.username, store.name, store.price, store.address, store.description

@@ -1,6 +1,8 @@
 package reserve.global.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -22,17 +24,5 @@ public class BaseEntity {
     @LastModifiedDate
     @Column(nullable = false)
     private LocalDateTime modifiedAt;
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private StatusType status = StatusType.AVAILABLE;
-
-    public boolean isDeleted() {
-        return status.equals(StatusType.DELETED);
-    }
-
-    public void delete() {
-        status = StatusType.DELETED;
-    }
 
 }

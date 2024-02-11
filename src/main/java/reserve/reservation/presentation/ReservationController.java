@@ -7,6 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reserve.auth.domain.AuthInfo;
 import reserve.auth.infrastructure.Authentication;
+import reserve.notification.service.NotificationService;
 import reserve.reservation.dto.request.ReservationCreateRequest;
 import reserve.reservation.dto.request.ReservationSearchRequest;
 import reserve.reservation.dto.request.ReservationUpdateRequest;
@@ -23,12 +24,20 @@ public class ReservationController {
 
     private final ReservationService reservationService;
 
+    private final NotificationService notificationService;
+
     @PostMapping
     public ResponseEntity<Void> create(
             @Authentication AuthInfo authInfo,
             @RequestBody @Validated ReservationCreateRequest reservationCreateRequest
     ) {
         Long reservationId = reservationService.create(authInfo.getUserId(), reservationCreateRequest);
+        notificationService.notifyReservation(
+                authInfo.getUserId(),
+                reservationId,
+                "Reservation has been created.",
+                "New customer has made a reservation."
+        );
         return ResponseEntity.created(URI.create("/v1/reservations/" + reservationId)).build();
     }
 
@@ -56,11 +65,23 @@ public class ReservationController {
             @RequestBody @Validated ReservationUpdateRequest reservationUpdateRequest
     ) {
         reservationService.update(authInfo.getUserId(), reservationId, reservationUpdateRequest);
+        notificationService.notifyReservation(
+                authInfo.getUserId(),
+                reservationId,
+                "Reservation has been updated.",
+                "Customer has updated the reservation."
+        );
     }
 
     @DeleteMapping("/{reservationId}")
     public void delete(@Authentication AuthInfo authInfo, @PathVariable("reservationId") Long reservationId) {
         reservationService.delete(authInfo.getUserId(), reservationId);
+        notificationService.notifyReservation(
+                authInfo.getUserId(),
+                reservationId,
+                "Reservation has been canceled.",
+                "Customer has canceled the reservation."
+        );
     }
 
 }

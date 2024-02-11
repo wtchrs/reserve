@@ -26,6 +26,7 @@ public enum ErrorCode {
     USER_NOT_FOUND(301, "User does not exist."),
     STORE_NOT_FOUND(302, "Store does not exist."),
     RESERVATION_NOT_FOUND(303, "Reservation does not exist."),
+    NOTIFICATION_NOT_FOUND(304, "Notification does not exist."),
 
     // 4xx: Access denied errors.
     ACCESS_DENIED(400, "Access denied."),
