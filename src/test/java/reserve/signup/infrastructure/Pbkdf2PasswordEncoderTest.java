@@ -1,11 +1,9 @@
 package reserve.signup.infrastructure;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 
-@Slf4j
 class Pbkdf2PasswordEncoderTest {
 
     final PasswordEncoder passwordEncoder = new Pbkdf2PasswordEncoder();

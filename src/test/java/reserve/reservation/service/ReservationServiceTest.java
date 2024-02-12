@@ -112,7 +112,7 @@ class ReservationServiceTest {
         Mockito.when(request.getHour()).thenReturn(10);
 
         Reservation reservation = new Reservation(Mockito.mock(), Mockito.mock(), now, 1);
-        Mockito.when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+        Mockito.when(reservationRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(reservation));
 
         reservationService.update(1L, 1L, request);
 

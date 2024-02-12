@@ -18,6 +18,7 @@ import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,6 +42,7 @@ class NotificationServiceTest {
     void notifyReservation() {
         Mockito.when(userRepository.existsById(1L)).thenReturn(true);
         Mockito.when(reservationRepository.existsById(1L)).thenReturn(true);
+        Mockito.when(reservationRepository.findStoreUserIdByIdIncludeDeleted(1L)).thenReturn(Optional.of(1L));
 
         notificationService.notifyReservation(1L, 1L, "message for user", "message for store registrant");
 

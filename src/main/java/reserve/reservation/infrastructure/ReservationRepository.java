@@ -11,8 +11,15 @@ import java.util.Optional;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
+    @Query("""
+           SELECT r
+           FROM Reservation r
+           WHERE r.id = :reservationId and r.user.id = :userId and r.status = 'AVAILABLE'
+           """)
+    Optional<Reservation> findByIdAndUserId(@Param("reservationId") Long reservationId, @Param("userId") Long userId);
+
     @Query("SELECT r.store.user.id FROM Reservation r WHERE r.id = :reservationId")
-    Long findStoreUserIdByIdIncludeDeleted(@Param("reservationId") Long reservationId);
+    Optional<Long> findStoreUserIdByIdIncludeDeleted(@Param("reservationId") Long reservationId);
 
     @Query("""
            SELECT new reserve.reservation.dto.response.ReservationInfoResponse(
@@ -26,6 +33,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("userId") Long userId
     );
 
+    @Override
     @Modifying
     @Query("UPDATE Reservation r SET r.status = 'DELETED' WHERE r.id = :id")
     void deleteById(@Param("id") Long id);

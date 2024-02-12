@@ -38,12 +38,14 @@ public class NotificationService {
                 reservationId,
                 message
         ));
-        notificationRepository.save(new Notification(
-                userRepository.getReferenceById(reservationRepository.findStoreUserIdByIdIncludeDeleted(reservationId)),
-                ResourceType.RESERVATION,
-                reservationId,
-                registrantMessage
-        ));
+        reservationRepository.findStoreUserIdByIdIncludeDeleted(reservationId).ifPresent(
+                storeRegistrantId -> notificationRepository.save(new Notification(
+                        userRepository.getReferenceById(storeRegistrantId),
+                        ResourceType.RESERVATION,
+                        reservationId,
+                        registrantMessage
+                ))
+        );
     }
 
     @Transactional

@@ -4,12 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import reserve.global.exception.AuthenticationException;
 import reserve.global.exception.ErrorCode;
 import reserve.global.exception.ResourceNotFoundException;
-import reserve.notification.service.NotificationService;
 import reserve.reservation.domain.Reservation;
 import reserve.reservation.dto.request.ReservationCreateRequest;
 import reserve.reservation.dto.request.ReservationSearchRequest;
@@ -69,7 +67,7 @@ public class ReservationService {
 
     @Transactional
     public void update(Long userId, Long reservationId, ReservationUpdateRequest reservationUpdateRequest) {
-        Reservation reservation = reservationRepository.findById(reservationId)
+        Reservation reservation = reservationRepository.findByIdAndUserId(reservationId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND));
         reservation.setDate(reservationUpdateRequest.getDate());
         reservation.setHour(reservationUpdateRequest.getHour());
