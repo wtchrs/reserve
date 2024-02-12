@@ -68,7 +68,7 @@ public class StoreService {
             store.setAddress(storeUpdateRequest.getAddress());
         }
         if (StringUtils.hasText(storeUpdateRequest.getDescription())) {
-            store.setAddress(storeUpdateRequest.getDescription());
+            store.setDescription(storeUpdateRequest.getDescription());
         }
     }
 
