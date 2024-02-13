@@ -1,5 +1,6 @@
 package reserve.store.infrastructure;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,7 +22,8 @@ class StoreRepositoryTest {
     UserRepository userRepository;
 
     @Test
-    void findResponseById() {
+    @DisplayName("Testing store response retrieval by ID")
+    void testStoreRetrieval() {
         User user = userRepository.save(new User("username", "password", "hello", "description"));
         Store store = storeRepository.save(new Store(user, "name", 1000, "address", "description"));
 
@@ -36,7 +38,8 @@ class StoreRepositoryTest {
     }
 
     @Test
-    void deleteById() {
+    @DisplayName("Testing store deletion by ID")
+    void testStoreDeletion() {
         User user = userRepository.save(new User("username", "password", "hello", "description"));
         Store store = storeRepository.save(new Store(user, "name", 1000, "address", "description"));
 

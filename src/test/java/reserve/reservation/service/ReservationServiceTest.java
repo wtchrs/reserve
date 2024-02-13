@@ -1,5 +1,6 @@
 package reserve.reservation.service;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,7 +47,8 @@ class ReservationServiceTest {
     ReservationService reservationService;
 
     @Test
-    void create() {
+    @DisplayName("Testing reservation creation")
+    void testReservationCreation() {
         ReservationCreateRequest reservationCreateRequest = Mockito.mock(ReservationCreateRequest.class);
         Mockito.when(reservationCreateRequest.getStoreId()).thenReturn(1L);
         Mockito.when(reservationCreateRequest.getDate()).thenReturn(LocalDate.now());
@@ -66,7 +68,8 @@ class ReservationServiceTest {
     }
 
     @Test
-    void getReservationInfo() {
+    @DisplayName("Testing retrieval of reservation information")
+    void testReservationInfoRetrieval() {
         ReservationInfoResponse reservationInfoResponse =
                 new ReservationInfoResponse(1L, 1L, "registrant", "username", LocalDate.now(), 1);
         Mockito.when(reservationRepository.findResponseByIdAndUserId(1L, 1L))
@@ -78,7 +81,8 @@ class ReservationServiceTest {
     }
 
     @Test
-    void search() {
+    @DisplayName("Testing reservation search functionality")
+    void testReservationSearch() {
         ReservationSearchRequest reservationSearchRequest = new ReservationSearchRequest();
         PageRequest pageable = PageRequest.of(0, 20);
         ReservationInfoResponse reservationInfo1 =
@@ -103,7 +107,8 @@ class ReservationServiceTest {
     }
 
     @Test
-    void update() {
+    @DisplayName("Testing reservation update functionality")
+    void testReservationUpdating() {
         LocalDate now = LocalDate.now();
         LocalDate newDate = now.plusDays(1);
 
@@ -121,7 +126,8 @@ class ReservationServiceTest {
     }
 
     @Test
-    void delete() {
+    @DisplayName("Testing reservation deletion functionality")
+    void testReservationDeletion() {
         Mockito.when(reservationQueryRepository.existsByIdAndUserId(1L, 1L)).thenReturn(true);
 
         reservationService.delete(1L, 1L);

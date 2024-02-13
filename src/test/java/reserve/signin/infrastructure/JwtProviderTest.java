@@ -1,5 +1,6 @@
 package reserve.signin.infrastructure;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import reserve.global.exception.InvalidAuthorizationException;
 import reserve.signin.dto.SignInToken;
@@ -13,7 +14,8 @@ class JwtProviderTest {
     JwtProvider jwtProvider = new JwtProvider(SECRET_KEY_SIMPLE, 600, 604800);
 
     @Test
-    void generateSignInToken() {
+    @DisplayName("Testing sign-in token generation")
+    void testSignInTokenGeneration() {
         SignInToken signInToken = jwtProvider.generateSignInToken("1");
 
         assertNotNull(signInToken.getAccessToken());
@@ -21,7 +23,8 @@ class JwtProviderTest {
     }
 
     @Test
-    void isAccessTokenExpired() {
+    @DisplayName("Testing access token expiration")
+    void testAccessTokenExpiration() {
         assertThrows(InvalidAuthorizationException.class, () -> jwtProvider.isAccessTokenExpired("Not a valid token"));
         assertFalse(jwtProvider.isAccessTokenExpired(jwtProvider.generateSignInToken("1").getAccessToken()));
         assertTrue(jwtProvider.isAccessTokenExpired(
@@ -29,7 +32,8 @@ class JwtProviderTest {
     }
 
     @Test
-    void isRefreshTokenExpired() {
+    @DisplayName("Testing refresh token expiration")
+    void testRefreshTokenExpiration() {
         assertThrows(InvalidAuthorizationException.class, () -> jwtProvider.isRefreshTokenExpired("Not a valid token"));
         assertFalse(jwtProvider.isRefreshTokenExpired(jwtProvider.generateSignInToken("1").getRefreshToken()));
         assertTrue(jwtProvider.isRefreshTokenExpired(
@@ -37,7 +41,8 @@ class JwtProviderTest {
     }
 
     @Test
-    void extractSubject() {
+    @DisplayName("Testing subject extraction from token")
+    void testSubjectExtraction() {
         assertEquals("1", jwtProvider.extractSubject(jwtProvider.generateSignInToken("1").getAccessToken()));
     }
 

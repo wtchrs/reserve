@@ -1,5 +1,6 @@
 package reserve.user.service;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,7 +35,8 @@ class UserServiceTest {
     UserService userService;
 
     @Test
-    void getUserInfo() {
+    @DisplayName("Testing user information retrieval")
+    void testUserInfoRetrieval() {
         User user = new User("username", "passwordHash", "nickname", "description");
         user = Mockito.spy(user);
         Mockito.when(user.getCreatedAt()).thenReturn(LocalDateTime.now());
@@ -48,7 +50,8 @@ class UserServiceTest {
     }
 
     @Test
-    void update() {
+    @DisplayName("Testing user update")
+    void testUserUpdate() {
         User user = new User("username", "passwordHash", "nickname", "description");
         Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
@@ -62,7 +65,8 @@ class UserServiceTest {
     }
 
     @Test
-    void updatePassword() {
+    @DisplayName("Testing password update")
+    void testPasswordUpdate() {
         User user = new User("username", passwordEncoder.encode("password"), "nickname", "description");
         Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
@@ -75,7 +79,8 @@ class UserServiceTest {
     }
 
     @Test
-    void delete() {
+    @DisplayName("Testing user deletion")
+    void testUserDeletion() {
         User user = new User("username", passwordEncoder.encode("password"), "nickname", "description");
         Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 

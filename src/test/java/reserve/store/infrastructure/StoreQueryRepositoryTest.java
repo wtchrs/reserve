@@ -1,9 +1,8 @@
 package reserve.store.infrastructure;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +22,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class StoreQueryRepositoryTest {
-
-    @PersistenceContext
-    EntityManager em;
 
     @Autowired
     UserRepository userRepository;
@@ -59,7 +55,8 @@ class StoreQueryRepositoryTest {
     }
 
     @Test
-    void findResponsesBySearch() {
+    @DisplayName("Testing store search by user and query")
+    void testStoreSearchByUserAndQuery() {
         StoreSearchRequest request = Mockito.mock(StoreSearchRequest.class);
         Mockito.when(request.getRegistrant()).thenReturn("user1");
         Mockito.when(request.getQuery()).thenReturn("pasta");

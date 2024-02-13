@@ -1,6 +1,7 @@
 package reserve.signin.service;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -46,7 +47,8 @@ class SignInServiceTest {
     }
 
     @Test
-    void signIn() {
+    @DisplayName("Testing sign-in functionality")
+    void testSignIn() {
         User user = new User("username", passwordEncoder.encode("password"), "nickname", "description");
         user = Mockito.spy(user);
         Mockito.when(user.getId()).thenReturn(1L);
@@ -66,7 +68,8 @@ class SignInServiceTest {
     }
 
     @Test
-    void refreshAccessToken() {
+    @DisplayName("Testing access token refresh functionality")
+    void testRefreshAccessToken() {
         RefreshToken refreshToken = new RefreshToken("refreshToken", 1L, 604800);
         Mockito.when(refreshTokenRepository.findById("refreshToken")).thenReturn(Optional.of(refreshToken));
         Mockito.doReturn(false).when(jwtProvider).isRefreshTokenExpired("refreshToken");
@@ -77,7 +80,8 @@ class SignInServiceTest {
     }
 
     @Test
-    void signOut() {
+    @DisplayName("Testing sign-out functionality")
+    void testSignOut() {
         Mockito.doReturn(false).when(jwtProvider).isRefreshTokenExpired("refreshToken");
 
         signInService.signOut("refreshToken");

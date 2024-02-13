@@ -2,6 +2,7 @@ package reserve.notification.infrastructure;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,7 +39,8 @@ class NotificationRepositoryTest {
     NotificationRepository notificationRepository;
 
     @Test
-    void findAllByUserIdOrderByCreatedAtDesc() {
+    @DisplayName("Testing retrieval of user's notifications list")
+    void testUserNotificationsListRetrieval() {
         User user = userRepository.save(new User("user1", "password", "hello", "description"));
         Notification notification1 =
                 notificationRepository.save(new Notification(user, ResourceType.RESERVATION, 1L, "message1"));
@@ -58,7 +60,8 @@ class NotificationRepositoryTest {
     }
 
     @Test
-    void setReadByUserIdAndId() {
+    @DisplayName("Testing marking a specific notification as read")
+    void testMarkingNotificationAsRead() {
         User user = userRepository.save(new User("user1", "password", "hello", "description"));
         Notification notification =
                 notificationRepository.save(new Notification(user, ResourceType.RESERVATION, 1L, "message"));
@@ -72,7 +75,8 @@ class NotificationRepositoryTest {
     }
 
     @Test
-    void setReadAllByUserId() {
+    @DisplayName("Testing marking all notifications of a user as read")
+    void testMarkingAllUserNotificationsAsRead() {
         User user = userRepository.save(new User("user1", "password", "hello", "description"));
         Notification notification1 =
                 notificationRepository.save(new Notification(user, ResourceType.RESERVATION, 1L, "message1"));

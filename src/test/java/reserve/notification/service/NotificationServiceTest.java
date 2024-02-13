@@ -1,5 +1,6 @@
 package reserve.notification.service;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,7 +40,8 @@ class NotificationServiceTest {
     NotificationService notificationService;
 
     @Test
-    void notifyReservation() {
+    @DisplayName("Testing creation of notification for reservation")
+    void testCreationOfNotificationForReservation() {
         Mockito.when(userRepository.existsById(1L)).thenReturn(true);
         Mockito.when(reservationRepository.existsById(1L)).thenReturn(true);
         Mockito.when(reservationRepository.findStoreUserIdByIdIncludeDeleted(1L)).thenReturn(Optional.of(1L));
@@ -51,7 +53,8 @@ class NotificationServiceTest {
     }
 
     @Test
-    void getUserNotifications() {
+    @DisplayName("Testing user notification retrieval")
+    void testUserNotificationRetrieval() {
         Pageable pageable = PageRequest.of(0, 20);
         User user = Mockito.mock(User.class);
 
@@ -75,14 +78,16 @@ class NotificationServiceTest {
     }
 
     @Test
-    void readNotification() {
+    @DisplayName("Testing marking a specific notification as read")
+    void testMarkingNotificationAsRead() {
         notificationService.readNotification(1L, 1L);
 
         Mockito.verify(notificationRepository).setReadByUserIdAndId(1L, 1L);
     }
 
     @Test
-    void readAllNotifications() {
+    @DisplayName("Testing marking all user notifications as read")
+    void testMarkingAllUserNotificationAsRead() {
         notificationService.readAllNotifications(1L);
 
         Mockito.verify(notificationRepository).setReadAllByUserId(1L);

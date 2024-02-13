@@ -1,5 +1,6 @@
 package reserve.store.service;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -43,7 +44,8 @@ class StoreServiceTest {
     StoreService storeService;
 
     @Test
-    void create() {
+    @DisplayName("Testing store creation")
+    void testStoreCreation() {
         StoreCreateRequest storeCreateRequest = Mockito.spy(new StoreCreateRequest());
         Mockito.when(storeCreateRequest.getName()).thenReturn("name");
         Mockito.when(storeCreateRequest.getPrice()).thenReturn(1000);
@@ -65,7 +67,8 @@ class StoreServiceTest {
     }
 
     @Test
-    void getStoreInfo() {
+    @DisplayName("Testing retrieval of store information")
+    void testStoreInfoRetrieval() {
         StoreInfoResponse response = new StoreInfoResponse(1L, "username", "name", 1000, "address", "description");
         Mockito.when(storeRepository.findResponseById(1L)).thenReturn(Optional.of(response));
 
@@ -74,7 +77,8 @@ class StoreServiceTest {
     }
 
     @Test
-    void search() {
+    @DisplayName("Testing store search")
+    void testStoreSearch() {
         StoreSearchRequest storeSearchRequest = Mockito.mock(StoreSearchRequest.class);
         Pageable pageable = PageRequest.of(0, 20);
 
@@ -97,7 +101,8 @@ class StoreServiceTest {
     }
 
     @Test
-    void update() {
+    @DisplayName("Testing store update")
+    void testStoreUpdate() {
         Store store = Mockito.spy(new Store(Mockito.mock(User.class), "name", 1000, "address", "description"));
         Mockito.when(storeRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(store));
 
@@ -116,7 +121,8 @@ class StoreServiceTest {
     }
 
     @Test
-    void delete() {
+    @DisplayName("Testing store deletion")
+    void testStoreDeletion() {
         Mockito.when(storeRepository.existsByIdAndUserId(1L, 1L)).thenReturn(true);
 
         storeService.delete(1L, 1L);

@@ -1,6 +1,7 @@
 package reserve.reservation.infrastructure;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,8 +48,9 @@ class ReservationQueryRepositoryTest {
     }
 
     @Test
+    @DisplayName("Verifying reservation existence by ID and user ID")
     @Transactional
-    void existsByIdAndUserId() {
+    void testReservationExistence() {
         User user = userRepository.save(new User("user1", "password", "hello", "description"));
         Store store = storeRepository.save(new Store(user, "Pasta", 1000, "address", "Pasta only"));
         Reservation reservation = reservationRepository.save(new Reservation(user, store, LocalDate.now(), 12));
@@ -61,7 +63,8 @@ class ReservationQueryRepositoryTest {
     }
 
     @Test
-    void findResponsesBySearch() {
+    @DisplayName("Testing reservation search by user ID, search criteria, and date")
+    void testReservationSearch() {
         User user1 = userRepository.save(new User("user1", "password", "hello", "description"));
         User user2 = userRepository.save(new User("user2", "password", "hello", "description"));
         Store store1 = storeRepository.save(new Store(user1, "Pasta", 1000, "address", "Pasta only"));
@@ -96,7 +99,8 @@ class ReservationQueryRepositoryTest {
         assertEquals(5, response.getTotalElements());
         response.forEach(reservationInfoResponse -> {
             assertEquals(user1.getUsername(), reservationInfoResponse.getReservationName());
-            assertThat(reservationInfoResponse.getStoreId()).isIn(store1.getId(), store2.getId(), store3.getId(), store5.getId());
+            assertThat(reservationInfoResponse.getStoreId())
+                    .isIn(store1.getId(), store2.getId(), store3.getId(), store5.getId());
         });
     }
 

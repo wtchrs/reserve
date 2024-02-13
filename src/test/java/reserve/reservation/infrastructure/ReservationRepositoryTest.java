@@ -34,7 +34,8 @@ class ReservationRepositoryTest {
     ReservationRepository reservationRepository;
 
     @Test
-    void findStoreUserIdByIdIncludeDeleted() {
+    @DisplayName("Testing store user ID retrieval by reservation ID, including deleted reservations")
+    void testStoreUserIdRetrieval() {
         User user1 = userRepository.save(new User("user1", "password", "hello", "description"));
         Store store1 = storeRepository.save(new Store(user1, "Pasta", 1000, "address", "Pasta only"));
 
@@ -53,7 +54,8 @@ class ReservationRepositoryTest {
     }
 
     @Test
-    void findResponseByIdAndUserId() {
+    @DisplayName("Testing response retrieval by reservation ID and user ID, excluding deleted reservations.")
+    void testResponseRetrieval() {
         User user1 = userRepository.save(new User("user1", "password", "hello", "description"));
         Store store1 = storeRepository.save(new Store(user1, "Pasta", 1000, "address", "Pasta only"));
 
@@ -70,7 +72,8 @@ class ReservationRepositoryTest {
     }
 
     @Test
-    void deleteById() {
+    @DisplayName("Testing reservation deletion by ID and its retrievability.")
+    void testReservationDeletion() {
         User user1 = userRepository.save(new User("user1", "password", "hello", "description"));
         Store store1 = storeRepository.save(new Store(user1, "Pasta", 1000, "address", "Pasta only"));
         Reservation reservation = reservationRepository.save(new Reservation(user1, store1, LocalDate.now(), 12));

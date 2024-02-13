@@ -1,5 +1,6 @@
 package reserve.signup.service;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,7 +27,8 @@ class SignUpServiceTest {
     SignUpService signUpService;
 
     @Test
-    void signUp() {
+    @DisplayName("Testing user sign up")
+    void testSignUp() {
         SignUpRequest signUpRequest = Mockito.spy(new SignUpRequest());
         Mockito.when(signUpRequest.getUsername()).thenReturn("username");
         Mockito.when(signUpRequest.getPassword()).thenReturn("password");
