@@ -12,4 +12,9 @@ public class ErrorCodeException extends RuntimeException {
         this.errorCode = errorCode;
     }
 
+    public ErrorCodeException(ErrorCode errorCode, Throwable e) {
+        super(errorCode.toString(), e);
+        this.errorCode = errorCode;
+    }
+
 }

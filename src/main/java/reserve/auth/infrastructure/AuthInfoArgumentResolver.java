@@ -47,7 +47,7 @@ public class AuthInfoArgumentResolver implements HandlerMethodArgumentResolver {
         if (token == null) {
             return AuthInfo.guest(true);
         }
-        Long userId = Long.valueOf(jwtProvider.extractSubject(token));
+        Long userId = Long.valueOf(jwtProvider.extractAccessTokenSubject(token));
         return AuthInfo.user(userId);
     }
 

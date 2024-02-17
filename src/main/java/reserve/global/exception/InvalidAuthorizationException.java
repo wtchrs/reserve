@@ -6,4 +6,8 @@ public class InvalidAuthorizationException extends ErrorCodeException {
         super(errorCode);
     }
 
+    public InvalidAuthorizationException(ErrorCode errorCode, Throwable e) {
+        super(errorCode, e);
+    }
+
 }

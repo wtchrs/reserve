@@ -25,7 +25,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 class SignInServiceTest {
 
-    final String SECRET_KEY_SIMPLE = "1234567890123456789012345678901234567890123456789012345678901234";
+    final String ACCESS_TOKEN_SECRET = "1234567890123456789012345678901234567890123456789012345678901234";
+    final String REFRESH_TOKEN_SECRET = "9876543210987654321098765432109876543210987654321098765432109876";
 
     @Mock
     UserRepository userRepository;
@@ -37,7 +38,7 @@ class SignInServiceTest {
     PasswordEncoder passwordEncoder = new Pbkdf2PasswordEncoder();
 
     @Spy
-    JwtProvider jwtProvider = new JwtProvider(SECRET_KEY_SIMPLE, 600, 604800);
+    JwtProvider jwtProvider = new JwtProvider(ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET, 600, 604800);
 
     SignInService signInService;
 

@@ -15,34 +15,48 @@ import java.util.Date;
 @Component
 public class JwtProvider {
 
-    public static final String EMPTY_SUBJECT_PLACEHOLDER = "";
-
     public static final String JWT_TYPE_HEADER_NAME = "typ";
     public static final String JWT_TYPE_HEADER_VALUE = "JWT";
     public static final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
 
-    private final Key secretKey;
+    private final Key accessTokenSigningKey;
+    private final Key refreshTokenSigningKey;
     private final int accessTokenExpPeriod;
     private final int refreshTokenExpPeriod;
 
     public JwtProvider(
-            @Value("${application.security.jwt.secretKey}") String secretKeyString,
+            @Value("${application.security.jwt.accessTokenSecretKey}") String accessTokenSecret,
+            @Value("${application.security.jwt.refreshTokenSecretKey}") String refreshTokenSecret,
             @Value("${application.security.jwt.accessTokenExpire}") int accessTokenExpPeriod,
             @Value("${application.security.jwt.refreshTokenExpire}") int refreshTokenExpPeriod
     ) {
-        this.secretKey =
-                new SecretKeySpec(secretKeyString.getBytes(StandardCharsets.UTF_8), SIGNATURE_ALGORITHM.getJcaName());
+        this.accessTokenSigningKey = new SecretKeySpec(
+                accessTokenSecret.getBytes(StandardCharsets.UTF_8),
+                SIGNATURE_ALGORITHM.getJcaName()
+        );
+        this.refreshTokenSigningKey = new SecretKeySpec(
+                refreshTokenSecret.getBytes(StandardCharsets.UTF_8),
+                SIGNATURE_ALGORITHM.getJcaName()
+        );
         this.accessTokenExpPeriod = accessTokenExpPeriod;
         this.refreshTokenExpPeriod = refreshTokenExpPeriod;
     }
 
     public SignInToken generateSignInToken(String subject) {
-        String accessToken = generateToken(subject, accessTokenExpPeriod);
-        String refreshToken = generateToken(EMPTY_SUBJECT_PLACEHOLDER, refreshTokenExpPeriod);
+        String accessToken = generateAccessToken(subject);
+        String refreshToken = generateRefreshToken(subject);
         return new SignInToken(accessToken, refreshToken);
     }
 
-    private String generateToken(String subject, int expirationPeriod) {
+    private String generateAccessToken(String subject) {
+        return generateToken(subject, accessTokenExpPeriod, accessTokenSigningKey);
+    }
+
+    private String generateRefreshToken(String subject) {
+        return generateToken(subject, refreshTokenExpPeriod, refreshTokenSigningKey);
+    }
+
+    private String generateToken(String subject, int expirationPeriod, Key signingKey) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + expirationPeriod * 1000L);
         return Jwts.builder()
@@ -50,39 +64,47 @@ public class JwtProvider {
                 .setSubject(subject)
                 .setExpiration(expiration)
                 .setIssuedAt(now)
-                .signWith(secretKey)
+                .signWith(signingKey)
                 .compact();
     }
 
     public boolean isAccessTokenExpired(String jwt) {
         try {
-            parseToken(jwt);
+            parseToken(jwt, accessTokenSigningKey);
         } catch (ExpiredJwtException e) {
             return true;
         } catch (JwtException | IllegalArgumentException e) {
-            throw new InvalidAuthorizationException(ErrorCode.INVALID_ACCESS_TOKEN_FORMAT);
+            throw new InvalidAuthorizationException(ErrorCode.INVALID_ACCESS_TOKEN_FORMAT, e);
         }
         return false;
     }
 
     public boolean isRefreshTokenExpired(String jwt) {
         try {
-            parseToken(jwt);
+            parseToken(jwt, refreshTokenSigningKey);
         } catch (ExpiredJwtException e) {
             return true;
         } catch (JwtException | IllegalArgumentException e) {
-            throw new InvalidAuthorizationException(ErrorCode.INVALID_REFRESH_TOKEN_FORMAT);
+            throw new InvalidAuthorizationException(ErrorCode.INVALID_REFRESH_TOKEN_FORMAT, e);
         }
         return false;
     }
 
-    public String extractSubject(String jwt) {
-        return parseToken(jwt).getBody().getSubject();
+    public String extractAccessTokenSubject(String jwt) {
+        return extractSubject(jwt, accessTokenSigningKey);
     }
 
-    private Jws<Claims> parseToken(String jwt) {
+    public String extractRefreshTokenSubject(String jwt) {
+        return extractSubject(jwt, refreshTokenSigningKey);
+    }
+
+    private String extractSubject(String jwt, Key signingKey) {
+        return parseToken(jwt, signingKey).getBody().getSubject();
+    }
+
+    private static Jws<Claims> parseToken(String jwt, Key signingKey) {
         return Jwts.parserBuilder()
-                .setSigningKey(secretKey)
+                .setSigningKey(signingKey)
                 .build()
                 .parseClaimsJws(jwt);
     }

@@ -9,9 +9,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class JwtProviderTest {
 
-    final String SECRET_KEY_SIMPLE = "1234567890123456789012345678901234567890123456789012345678901234";
+    final String ACCESS_TOKEN_SECRET = "1234567890123456789012345678901234567890123456789012345678901234";
+    final String REFRESH_TOKEN_SECRET = "9876543210987654321098765432109876543210987654321098765432109876";
 
-    JwtProvider jwtProvider = new JwtProvider(SECRET_KEY_SIMPLE, 600, 604800);
+    JwtProvider jwtProvider = new JwtProvider(ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET, 600, 604800);
 
     @Test
     @DisplayName("Testing sign-in token generation")
@@ -37,13 +38,13 @@ class JwtProviderTest {
         assertThrows(InvalidAuthorizationException.class, () -> jwtProvider.isRefreshTokenExpired("Not a valid token"));
         assertFalse(jwtProvider.isRefreshTokenExpired(jwtProvider.generateSignInToken("1").getRefreshToken()));
         assertTrue(jwtProvider.isRefreshTokenExpired(
-                "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJleHAiOjE3MDc2NTk4MjEsImlhdCI6MTcwNzY2OTgyMX0.wqeuezYqSzYexc_wr50BQa8c-A_JEa9Kqn2RiFZGUfV5UT29CmBNJp-UW626Fj6O9OHjJOlCRIyNCuYZ2K62Aw"));
+                "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzA2NjY5NjM4LCJpYXQiOjE3MDc2Njk2Mzh9.ToGdMnUdbpzwMkj5uju18AKb1c5m__99hhieTuIgTFc94Wot1ANbN7sd1nzKJgtBkIbMK5N8iR9874c2S8QzHA"));
     }
 
     @Test
     @DisplayName("Testing subject extraction from token")
     void testSubjectExtraction() {
-        assertEquals("1", jwtProvider.extractSubject(jwtProvider.generateSignInToken("1").getAccessToken()));
+        assertEquals("1", jwtProvider.extractAccessTokenSubject(jwtProvider.generateSignInToken("1").getAccessToken()));
     }
 
 }
