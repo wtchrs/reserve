@@ -5,12 +5,14 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import reserve.signup.infrastructure.validator.Confirmation;
 import reserve.signup.infrastructure.validator.Password;
 import reserve.signup.infrastructure.validator.PasswordConfirmationCheck;
 
 @NoArgsConstructor
 @Getter
+@Setter
 @PasswordConfirmationCheck(
         targetClass = PasswordUpdateRequest.class,
         message = "Not matched new password and new password confirmation."
