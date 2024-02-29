@@ -1,6 +1,5 @@
 package reserve.reservation.infrastructure;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -8,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 import reserve.reservation.domain.Reservation;
 import reserve.reservation.dto.request.ReservationSearchRequest;
@@ -37,15 +35,6 @@ class ReservationQueryRepositoryTest {
 
     @Autowired
     ReservationQueryRepository reservationQueryRepository;
-
-    @Transactional
-    @Commit
-    @AfterEach
-    void tearDown() {
-        reservationRepository.deleteAll();
-        storeRepository.deleteAll();
-        userRepository.deleteAll();
-    }
 
     @Test
     @DisplayName("Verifying reservation existence by ID and user ID")
@@ -102,6 +91,11 @@ class ReservationQueryRepositoryTest {
             assertThat(reservationInfoResponse.getStoreId())
                     .isIn(store1.getId(), store2.getId(), store3.getId(), store5.getId());
         });
+
+        // clean up
+        reservationRepository.deleteAll();
+        storeRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
 }

@@ -5,7 +5,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import reserve.global.exception.AuthenticationException;
 import reserve.global.exception.ErrorCode;
 import reserve.global.exception.ResourceNotFoundException;
 import reserve.notification.domain.Notification;
@@ -13,6 +12,8 @@ import reserve.notification.domain.ResourceType;
 import reserve.notification.dto.response.NotificationInfo;
 import reserve.notification.dto.response.NotificationInfoListResponse;
 import reserve.notification.infrastructure.NotificationRepository;
+import reserve.reservation.dto.ReservationForNotifyDto;
+import reserve.reservation.infrastructure.ReservationQueryRepository;
 import reserve.reservation.infrastructure.ReservationRepository;
 import reserve.user.infrastructure.UserRepository;
 
@@ -23,34 +24,29 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
     private final ReservationRepository reservationRepository;
+    private final ReservationQueryRepository reservationQueryRepository;
 
     @Transactional
-    public void notifyReservation(Long userId, Long reservationId, String message, String registrantMessage) {
-        if (!userRepository.existsById(userId)) {
-            throw new AuthenticationException(ErrorCode.INVALID_SIGN_IN_INFO);
-        }
-        if (!reservationRepository.existsById(reservationId)) {
-            throw new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND);
-        }
+    public void notifyReservation(Long reservationId, String message, String registrantMessage) {
+        ReservationForNotifyDto reservationForNotifyDto = reservationQueryRepository.findForNotifyById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND));
         notificationRepository.save(new Notification(
-                userRepository.getReferenceById(userId),
+                userRepository.getReferenceById(reservationForNotifyDto.getUserId()),
                 ResourceType.RESERVATION,
                 reservationId,
                 message
         ));
-        reservationRepository.findStoreUserIdByIdIncludeDeleted(reservationId).ifPresent(
-                storeRegistrantId -> notificationRepository.save(new Notification(
-                        userRepository.getReferenceById(storeRegistrantId),
-                        ResourceType.RESERVATION,
-                        reservationId,
-                        registrantMessage
-                ))
-        );
+        notificationRepository.save(new Notification(
+                userRepository.getReferenceById(reservationForNotifyDto.getRegistrantId()),
+                ResourceType.RESERVATION,
+                reservationId,
+                registrantMessage
+        ));
     }
 
     @Transactional
-    public void notifyReservation(Long userId, Long reservationId, String message) {
-        notifyReservation(userId, reservationId, message, message);
+    public void notifyReservation(Long reservationId, String message) {
+        notifyReservation(reservationId, message, message);
     }
 
     @Transactional(readOnly = true)

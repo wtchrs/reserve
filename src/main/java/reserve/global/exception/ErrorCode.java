@@ -19,8 +19,11 @@ public enum ErrorCode {
     EXPIRED_ACCESS_TOKEN(120, "Access token is expired."),
     EXPIRED_REFRESH_TOKEN(121, "Refresh token is expired."),
 
-    // 2xx: Wrong request format errors.
+    // 2xx: Wrong request.
     INVALID_REQUEST(200, "Request is invalid."),
+    RESERVATION_CANNOT_CANCEL(211, "Failed to cancel the reservation as it is already in service or completed."),
+    RESERVATION_CANNOT_START(212, "Failed to start the reservation as it is not ready state."),
+    RESERVATION_NOT_IN_SERVICE(213, "Failed to complete the reservation as it is not in service."),
 
     // 3xx: Not found errors.
     USER_NOT_FOUND(301, "User does not exist."),

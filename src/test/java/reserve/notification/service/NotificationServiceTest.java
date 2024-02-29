@@ -14,6 +14,8 @@ import reserve.notification.domain.Notification;
 import reserve.notification.domain.ResourceType;
 import reserve.notification.dto.response.NotificationInfoListResponse;
 import reserve.notification.infrastructure.NotificationRepository;
+import reserve.reservation.dto.ReservationForNotifyDto;
+import reserve.reservation.infrastructure.ReservationQueryRepository;
 import reserve.reservation.infrastructure.ReservationRepository;
 import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
@@ -36,19 +38,20 @@ class NotificationServiceTest {
     @Mock
     ReservationRepository reservationRepository;
 
+    @Mock
+    ReservationQueryRepository reservationQueryRepository;
+
     @InjectMocks
     NotificationService notificationService;
 
     @Test
     @DisplayName("Testing creation of notification for reservation")
     void testCreationOfNotificationForReservation() {
-        Mockito.when(userRepository.existsById(1L)).thenReturn(true);
-        Mockito.when(reservationRepository.existsById(1L)).thenReturn(true);
-        Mockito.when(reservationRepository.findStoreUserIdByIdIncludeDeleted(1L)).thenReturn(Optional.of(1L));
+        Mockito.when(reservationQueryRepository.findForNotifyById(1L))
+                .thenReturn(Optional.of(new ReservationForNotifyDto(1L, 1L, 1L)));
 
-        notificationService.notifyReservation(1L, 1L, "message for user", "message for store registrant");
+        notificationService.notifyReservation(1L, "message for user", "message for store registrant");
 
-        Mockito.verify(reservationRepository).findStoreUserIdByIdIncludeDeleted(1L);
         Mockito.verify(notificationRepository, Mockito.times(2)).save(Mockito.any());
     }
 

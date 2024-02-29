@@ -1,13 +1,13 @@
-create table notifications
+CREATE TABLE notifications
 (
-    notification_id bigint auto_increment,
-    user_id         bigint                  not null,
-    resource_type   enum ('RESERVATION')    not null,
-    resource_id     bigint                  not null,
-    message         varchar(255)            not null,
-    status          enum ('UNREAD', 'READ') not null,
-    created_at      datetime(6)             not null,
-    modified_at     datetime(6)             not null,
-    primary key (notification_id),
-    constraint fk_notifications_users_userid foreign key (user_id) references users (user_id)
+    notification_id BIGINT AUTO_INCREMENT,
+    user_id         BIGINT                  NOT NULL,
+    resource_type   ENUM ('RESERVATION')    NOT NULL,
+    resource_id     BIGINT                  NOT NULL,
+    message         VARCHAR(255)            NOT NULL,
+    status          ENUM ('UNREAD', 'READ') NOT NULL,
+    created_at      DATETIME(6)             NOT NULL,
+    modified_at     DATETIME(6)             NOT NULL,
+    PRIMARY KEY (notification_id),
+    CONSTRAINT fk_notifications_users_userid FOREIGN KEY (user_id) REFERENCES users (user_id)
 );

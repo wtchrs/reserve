@@ -33,7 +33,6 @@ public class ReservationController {
     ) {
         Long reservationId = reservationService.create(authInfo.getUserId(), reservationCreateRequest);
         notificationService.notifyReservation(
-                authInfo.getUserId(),
                 reservationId,
                 "Reservation has been created.",
                 "New customer has made a reservation."
@@ -66,7 +65,6 @@ public class ReservationController {
     ) {
         reservationService.update(authInfo.getUserId(), reservationId, reservationUpdateRequest);
         notificationService.notifyReservation(
-                authInfo.getUserId(),
                 reservationId,
                 "Reservation has been updated.",
                 "Customer has updated the reservation."
@@ -77,7 +75,6 @@ public class ReservationController {
     public void delete(@Authentication AuthInfo authInfo, @PathVariable("reservationId") Long reservationId) {
         reservationService.delete(authInfo.getUserId(), reservationId);
         notificationService.notifyReservation(
-                authInfo.getUserId(),
                 reservationId,
                 "Reservation has been canceled.",
                 "Customer has canceled the reservation."

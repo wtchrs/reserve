@@ -13,12 +13,13 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
-import reserve.global.entity.StatusType;
+import reserve.reservation.dto.ReservationForNotifyDto;
 import reserve.reservation.dto.request.ReservationSearchRequest;
 import reserve.reservation.dto.response.ReservationInfoResponse;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static reserve.reservation.domain.QReservation.*;
 
@@ -39,12 +40,28 @@ public class ReservationQueryRepository {
                 .from(reservation)
                 .where(
                         reservation.id.eq(reservationId),
-                        reservation.user.id.eq(userId).or(reservation.store.user.id.eq(userId)),
-                        reservation.status.eq(StatusType.AVAILABLE)
+                        reservation.user.id.eq(userId).or(reservation.store.user.id.eq(userId))
                 )
                 .fetchFirst();
 
         return result != null && result == 1;
+    }
+
+    public Optional<ReservationForNotifyDto> findForNotifyById(Long reservationId) {
+        ReservationForNotifyDto result = queryFactory
+                .select(
+                        Projections.constructor(
+                                ReservationForNotifyDto.class,
+                                reservation.id,
+                                reservation.user.id,
+                                reservation.store.user.id
+                        )
+                )
+                .from(reservation)
+                .where(reservation.id.eq(reservationId))
+                .fetchOne();
+
+        return Optional.ofNullable(result);
     }
 
     public Page<ReservationInfoResponse> findResponsesBySearch(
@@ -55,7 +72,6 @@ public class ReservationQueryRepository {
         condition.and(registrantOrCustomerCondition(reservationSearchRequest.getType(), userId));
         condition.and(storeQueryCondition(reservationSearchRequest.getQuery()));
         condition.and(dateCondition(reservationSearchRequest.getDate()));
-        condition.and(reservation.status.eq(StatusType.AVAILABLE));
 
         List<ReservationInfoResponse> result = queryFactory.select(getReservationInfoResponseProjection())
                 .from(reservation)

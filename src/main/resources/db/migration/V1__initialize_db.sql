@@ -7,7 +7,7 @@ CREATE TABLE users
     description   TEXT,
     created_at    DATETIME(6)                  NOT NULL,
     modified_at   DATETIME(6)                  NOT NULL,
-    status        enum ('AVAILABLE','DELETED') not null,
+    status        ENUM ('AVAILABLE','DELETED') NOT NULL,
     PRIMARY KEY (user_id),
     UNIQUE INDEX ux_users_username (username)
 );
@@ -22,7 +22,7 @@ CREATE TABLE rooms
     description TEXT,
     created_at  DATETIME(6)                  NOT NULL,
     modified_at DATETIME(6)                  NOT NULL,
-    status      enum ('AVAILABLE','DELETED') not null,
+    status      ENUM ('AVAILABLE','DELETED') NOT NULL,
     PRIMARY KEY (room_id),
     CONSTRAINT fk_rooms_users_user_id FOREIGN KEY (user_id) REFERENCES users (user_id)
 );
@@ -36,7 +36,7 @@ CREATE TABLE reservations
     end_date       DATE                         NOT NULL,
     created_at     DATETIME(6)                  NOT NULL,
     modified_at    DATETIME(6)                  NOT NULL,
-    status         enum ('AVAILABLE','DELETED') not null,
+    status         ENUM ('AVAILABLE','DELETED') NOT NULL,
     PRIMARY KEY (reservation_id),
     CONSTRAINT fk_reservations_users_user_id FOREIGN KEY (user_id) REFERENCES users (user_id),
     CONSTRAINT fk_reservations_rooms_room_id FOREIGN KEY (room_id) REFERENCES rooms (room_id)
