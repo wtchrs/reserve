@@ -7,7 +7,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reserve.signin.dto.SignInToken;
 import reserve.signin.dto.request.SignInRequest;
-import reserve.signin.dto.response.SignInResponse;
 import reserve.signin.service.SignInService;
 
 @RestController
@@ -27,21 +26,21 @@ public class SignInController {
     }
 
     @PostMapping("/sign-in")
-    public SignInResponse signIn(@RequestBody @Validated SignInRequest signInRequest, HttpServletResponse response) {
+    public void signIn(@RequestBody @Validated SignInRequest signInRequest, HttpServletResponse response) {
         SignInToken signInToken = signInService.signIn(signInRequest);
+        response.setHeader("Authorization", signInToken.getAccessToken());
         response.addCookie(createRefreshCookie(signInToken));
-        return new SignInResponse(signInToken.getAccessToken());
     }
 
     @PostMapping("/token-refresh")
-    public SignInResponse refreshAccessToken(
+    public void refreshAccessToken(
             @CookieValue("refresh") Cookie refreshCookie,
             HttpServletResponse response
     ) {
         String refreshTokenValue = refreshCookie.getValue();
         SignInToken signInToken = signInService.refreshAccessToken(refreshTokenValue);
+        response.setHeader("Authorization", signInToken.getAccessToken());
         response.addCookie(createRefreshCookie(signInToken));
-        return new SignInResponse(signInToken.getAccessToken());
     }
 
     private Cookie createRefreshCookie(SignInToken signInToken) {

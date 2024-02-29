@@ -5,7 +5,6 @@ import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,7 +15,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 import reserve.signin.dto.request.SignInRequest;
-import reserve.signin.dto.response.SignInResponse;
 import reserve.signin.infrastructure.JwtProvider;
 import reserve.signin.infrastructure.RefreshTokenRepository;
 import reserve.signup.infrastructure.PasswordEncoder;
@@ -79,8 +77,8 @@ class SignInControllerTest {
         resultActions
                 .andExpect(status().isOk())
                 .andExpectAll(
-                        cookie().exists("refresh"),
-                        jsonPath("$.accessToken").isString()
+                        header().exists("Authorization"), // Access token
+                        cookie().exists("refresh")
                 );
 
         String refresh = resultActions.andReturn().getResponse().getCookie("refresh").getValue();
@@ -115,8 +113,10 @@ class SignInControllerTest {
 
         resultActions
                 .andExpect(status().isOk())
-                .andExpect(cookie().exists("refresh"))
-                .andExpect(jsonPath("$.accessToken").isString());
+                .andExpectAll(
+                        header().exists("Authorization"), // Access token
+                        cookie().exists("refresh")
+                );
 
         String newRefresh = resultActions.andReturn().getResponse().getCookie("refresh").getValue();
         assertNotEquals(refreshCookie.getValue(), newRefresh);
@@ -142,8 +142,7 @@ class SignInControllerTest {
                         .content(objectMapper.writeValueAsString(signInRequest))
         );
 
-        String content = resultActions.andReturn().getResponse().getContentAsString();
-        String accessToken = objectMapper.readValue(content, SignInResponse.class).getAccessToken();
+        String accessToken = resultActions.andReturn().getResponse().getHeader("Authorization");
         Cookie refresh = resultActions.andReturn().getResponse().getCookie("refresh");
 
         mockMvc.perform(post("/v1/sign-out")
