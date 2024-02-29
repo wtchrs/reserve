@@ -4,12 +4,14 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import reserve.signup.infrastructure.validator.Confirmation;
 import reserve.signup.infrastructure.validator.Password;
 import reserve.signup.infrastructure.validator.PasswordConfirmationCheck;
 
-@Getter
 @NoArgsConstructor
+@Getter
+@Setter
 @PasswordConfirmationCheck(targetClass = SignUpRequest.class)
 public class SignUpRequest {
 
