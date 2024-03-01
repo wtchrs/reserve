@@ -128,11 +128,12 @@ class ReservationServiceTest {
     @Test
     @DisplayName("Testing reservation deletion functionality")
     void testReservationDeletion() {
-        Mockito.when(reservationQueryRepository.existsByIdAndUserId(1L, 1L)).thenReturn(true);
+        Reservation reservation = Mockito.mock(Reservation.class);
+        Mockito.when(reservationRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(reservation));
 
-        reservationService.delete(1L, 1L);
+        reservationService.cancel(1L, 1L);
 
-        Mockito.verify(reservationRepository).deleteById(1L);
+        Mockito.verify(reservation, Mockito.times(1)).cancel();
     }
 
 }

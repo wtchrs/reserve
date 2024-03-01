@@ -74,11 +74,11 @@ public class ReservationService {
     }
 
     @Transactional
-    public void delete(Long userId, Long reservationId) {
-        if (!reservationQueryRepository.existsByIdAndUserId(reservationId, userId)) {
-            throw new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND);
-        }
-        reservationRepository.deleteById(reservationId);
+    public void cancel(Long userId, Long reservationId) {
+        reservationRepository
+                .findByIdAndUserId(reservationId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND))
+                .cancel();
     }
 
 }

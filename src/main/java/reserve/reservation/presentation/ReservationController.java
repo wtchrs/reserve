@@ -71,9 +71,9 @@ public class ReservationController {
         );
     }
 
-    @DeleteMapping("/{reservationId}")
-    public void delete(@Authentication AuthInfo authInfo, @PathVariable("reservationId") Long reservationId) {
-        reservationService.delete(authInfo.getUserId(), reservationId);
+    @PostMapping("/{reservationId}/cancel")
+    public void cancel(@Authentication AuthInfo authInfo, @PathVariable("reservationId") Long reservationId) {
+        reservationService.cancel(authInfo.getUserId(), reservationId);
         notificationService.notifyReservation(
                 reservationId,
                 "Reservation has been canceled.",
