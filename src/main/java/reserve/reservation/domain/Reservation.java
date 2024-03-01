@@ -52,21 +52,21 @@ public class Reservation extends BaseEntity {
     }
 
     public void cancel() {
-        if (status.equals(ReservationStatusType.COMPLETED) || status.equals(ReservationStatusType.IN_SERVICE)) {
+        if (!status.equals(ReservationStatusType.READY) && !status.equals(ReservationStatusType.CANCELLED)) {
             throw new ReservationStatusException(ErrorCode.RESERVATION_CANNOT_CANCEL);
         }
         status = ReservationStatusType.CANCELLED;
     }
 
     public void start() {
-        if (!status.equals(ReservationStatusType.READY)) {
+        if (!status.equals(ReservationStatusType.READY) && !status.equals(ReservationStatusType.IN_SERVICE)) {
             throw new ReservationStatusException(ErrorCode.RESERVATION_CANNOT_START);
         }
         status = ReservationStatusType.IN_SERVICE;
     }
 
     public void complete() {
-        if (!status.equals(ReservationStatusType.IN_SERVICE)) {
+        if (!status.equals(ReservationStatusType.IN_SERVICE) && !status.equals(ReservationStatusType.COMPLETED)) {
             throw new ReservationStatusException(ErrorCode.RESERVATION_NOT_IN_SERVICE);
         }
         status = ReservationStatusType.COMPLETED;

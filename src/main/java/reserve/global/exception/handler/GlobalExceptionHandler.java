@@ -74,6 +74,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return handleErrorCodeException(e);
     }
 
+    @ExceptionHandler(ReservationStatusException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleReservationStatus(ReservationStatusException e) {
+        return handleErrorCodeException(e);
+    }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleResourceNotFound(ResourceNotFoundException e) {

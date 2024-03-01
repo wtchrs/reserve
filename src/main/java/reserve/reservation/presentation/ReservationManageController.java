@@ -19,7 +19,7 @@ public class ReservationManageController {
     private final NotificationService notificationService;
 
     @PostMapping("/{reservationId}/cancel")
-    public void cancel(@Authentication AuthInfo authInfo, @PathVariable Long reservationId) {
+    public void cancel(@Authentication AuthInfo authInfo, @PathVariable("reservationId") Long reservationId) {
         reservationManageService.cancel(authInfo.getUserId(), reservationId);
         notificationService.notifyReservation(
                 reservationId,
@@ -29,13 +29,13 @@ public class ReservationManageController {
     }
 
     @PostMapping("/{reservationId}/start")
-    public void startService(@Authentication AuthInfo authInfo, @PathVariable Long reservationId) {
+    public void startService(@Authentication AuthInfo authInfo, @PathVariable("reservationId") Long reservationId) {
         reservationManageService.startService(authInfo.getUserId(), reservationId);
         notificationService.notifyReservation(reservationId, "Service has been started.");
     }
 
     @PostMapping("/{reservationId}/complete")
-    public void complete(@Authentication AuthInfo authInfo, @PathVariable Long reservationId) {
+    public void complete(@Authentication AuthInfo authInfo, @PathVariable("reservationId") Long reservationId) {
         reservationManageService.complete(authInfo.getUserId(), reservationId);
         notificationService.notifyReservation(reservationId, "Service has been completed.");
     }
