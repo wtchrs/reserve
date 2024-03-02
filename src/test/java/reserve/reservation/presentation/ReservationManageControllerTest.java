@@ -75,28 +75,24 @@ class ReservationManageControllerTest {
         SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
 
         mockMvc.perform(
-                        post(urlTemplate, ready.getId())
-                                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                )
-                .andExpect(status().isOk());
+                post(urlTemplate, ready.getId())
+                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
+        ).andExpect(status().isOk());
 
         mockMvc.perform(
-                        post(urlTemplate, inService.getId())
-                                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                )
-                .andExpect(status().isConflict());
+                post(urlTemplate, inService.getId())
+                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
+        ).andExpect(status().isConflict());
 
         mockMvc.perform(
-                        post(urlTemplate, completed.getId())
-                                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                )
-                .andExpect(status().isConflict());
+                post(urlTemplate, completed.getId())
+                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
+        ).andExpect(status().isConflict());
 
         mockMvc.perform(
-                        post(urlTemplate, cancelled.getId())
-                                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                )
-                .andExpect(status().isOk());
+                post(urlTemplate, cancelled.getId())
+                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
+        ).andExpect(status().isOk());
     }
 
     @Test
@@ -107,28 +103,24 @@ class ReservationManageControllerTest {
         SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
 
         mockMvc.perform(
-                        post(urlTemplate, ready.getId())
-                                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                )
-                .andExpect(status().isOk());
+                post(urlTemplate, ready.getId())
+                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
+        ).andExpect(status().isOk());
 
         mockMvc.perform(
-                        post(urlTemplate, inService.getId())
-                                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                )
-                .andExpect(status().isOk());
+                post(urlTemplate, inService.getId())
+                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
+        ).andExpect(status().isOk());
 
         mockMvc.perform(
-                        post(urlTemplate, completed.getId())
-                                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                )
-                .andExpect(status().isConflict());
+                post(urlTemplate, completed.getId())
+                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
+        ).andExpect(status().isConflict());
 
         mockMvc.perform(
-                        post(urlTemplate, cancelled.getId())
-                                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                )
-                .andExpect(status().isConflict());
+                post(urlTemplate, cancelled.getId())
+                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
+        ).andExpect(status().isConflict());
     }
 
     @Test
@@ -139,28 +131,24 @@ class ReservationManageControllerTest {
         SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
 
         mockMvc.perform(
-                        post(urlTemplate, ready.getId())
-                                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                )
-                .andExpect(status().isConflict());
+                post(urlTemplate, ready.getId())
+                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
+        ).andExpect(status().isConflict());
 
         mockMvc.perform(
-                        post(urlTemplate, inService.getId())
-                                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                )
-                .andExpect(status().isOk());
+                post(urlTemplate, inService.getId())
+                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
+        ).andExpect(status().isOk());
 
         mockMvc.perform(
-                        post(urlTemplate, completed.getId())
-                                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                )
-                .andExpect(status().isOk());
+                post(urlTemplate, completed.getId())
+                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
+        ).andExpect(status().isOk());
 
         mockMvc.perform(
-                        post(urlTemplate, cancelled.getId())
-                                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                )
-                .andExpect(status().isConflict());
+                post(urlTemplate, cancelled.getId())
+                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
+        ).andExpect(status().isConflict());
     }
 
 }

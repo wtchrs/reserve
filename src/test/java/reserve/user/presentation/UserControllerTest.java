@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,15 +59,16 @@ class UserControllerTest {
     @Test
     @DisplayName("Testing GET /v1/users/{username} endpoint")
     void testGetUserInfoEndpoint() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/v1/users/{username}", "username"))
-                .andExpect(status().isOk())
-                .andExpectAll(
-                        content().contentType("application/json"),
-                        jsonPath("$.username").value("username"),
-                        jsonPath("$.nickname").value("nickname"),
-                        jsonPath("$.description").value("description"),
-                        jsonPath("$.signUpDate").exists()
-                );
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/v1/users/{username}", "username")
+        ).andExpectAll(
+                status().isOk(),
+                content().contentType("application/json"),
+                jsonPath("$.username").value("username"),
+                jsonPath("$.nickname").value("nickname"),
+                jsonPath("$.description").value("description"),
+                jsonPath("$.signUpDate").exists()
+        );
     }
 
     @Test
@@ -76,11 +78,12 @@ class UserControllerTest {
         userUpdateRequest.setNickname("newNickname");
         userUpdateRequest.setDescription("newDescription");
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/v1/users")
-                                .content(objectMapper.writeValueAsString(userUpdateRequest))
-                                .contentType("application/json")
-                                .header("Authorization", "Bearer " + accessToken))
-                .andExpect(status().isOk());
+        mockMvc.perform(
+                MockMvcRequestBuilders.put("/v1/users")
+                        .content(objectMapper.writeValueAsString(userUpdateRequest))
+                        .contentType("application/json")
+                        .header("Authorization", "Bearer " + accessToken)
+        ).andExpect(status().isOk());
 
         userRepository.findByUsername("username").ifPresentOrElse(
                 user -> {
@@ -99,11 +102,12 @@ class UserControllerTest {
         passwordUpdateRequest.setNewPassword("newPassword");
         passwordUpdateRequest.setConfirmation("newPassword");
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/v1/users/password")
-                                .content(objectMapper.writeValueAsString(passwordUpdateRequest))
-                                .contentType("application/json")
-                                .header("Authorization", "Bearer " + accessToken))
-                .andExpect(status().isOk());
+        mockMvc.perform(
+                MockMvcRequestBuilders.put("/v1/users/password")
+                        .content(objectMapper.writeValueAsString(passwordUpdateRequest))
+                        .contentType("application/json")
+                        .header("Authorization", "Bearer " + accessToken)
+        ).andExpect(status().isOk());
 
         userRepository.findByUsername("username").ifPresentOrElse(
                 user -> assertTrue(passwordEncoder.matches("newPassword", user.getPasswordHash())),
@@ -117,11 +121,12 @@ class UserControllerTest {
         UserDeleteRequest userDeleteRequest = new UserDeleteRequest();
         userDeleteRequest.setPassword("password");
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/v1/users")
-                                .content(objectMapper.writeValueAsString(userDeleteRequest))
-                                .contentType("application/json")
-                                .header("Authorization", "Bearer " + accessToken))
-                .andExpect(status().isOk());
+        mockMvc.perform(
+                MockMvcRequestBuilders.delete("/v1/users")
+                        .content(objectMapper.writeValueAsString(userDeleteRequest))
+                        .contentType("application/json")
+                        .header("Authorization", "Bearer " + accessToken)
+        ).andExpect(status().isOk());
 
         userRepository.findByUsername("username").ifPresent(user -> fail("User not deleted"));
     }

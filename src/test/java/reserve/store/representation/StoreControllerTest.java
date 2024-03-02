@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.Commit;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,14 +63,15 @@ class StoreControllerTest {
         SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user.getId()));
 
         mockMvc.perform(
-                        post("/v1/stores")
-                                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(storeCreateRequest))
-                )
-                .andExpect(status().isCreated())
-                .andExpect(header().string("Location", Matchers.startsWith("/v1/stores/")))
-                .andExpect(content().string(""));
+                post("/v1/stores")
+                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(storeCreateRequest))
+        ).andExpectAll(
+                status().isCreated(),
+                header().string("Location", Matchers.startsWith("/v1/stores/")),
+                content().string("")
+        );
 
         assertEquals(1, storeRepository.count());
     }
@@ -85,17 +87,18 @@ class StoreControllerTest {
                 "Store description"
         ));
 
-        mockMvc.perform(get("/v1/stores/{id}", store.getId()))
-                .andExpect(status().isOk())
-                .andExpectAll(
-                        content().contentType("application/json"),
-                        jsonPath("$.storeId").value(store.getId()),
-                        jsonPath("$.registrant").value("username"),
-                        jsonPath("$.name").value("Store name"),
-                        jsonPath("$.price").value(10000),
-                        jsonPath("$.address").value("City, Street, Zipcode"),
-                        jsonPath("$.description").value("Store description")
-                );
+        mockMvc.perform(
+                get("/v1/stores/{id}", store.getId())
+        ).andExpectAll(
+                status().isOk(),
+                content().contentType("application/json"),
+                jsonPath("$.storeId").value(store.getId()),
+                jsonPath("$.registrant").value("username"),
+                jsonPath("$.name").value("Store name"),
+                jsonPath("$.price").value(10000),
+                jsonPath("$.address").value("City, Street, Zipcode"),
+                jsonPath("$.description").value("Store description")
+        );
     }
 
     @Nested
@@ -127,21 +130,20 @@ class StoreControllerTest {
         @Transactional(propagation = Propagation.NOT_SUPPORTED)
         void testSearchEndpoint() throws Exception {
             mockMvc.perform(
-                            get("/v1/stores")
-                                    .param("registrant", "username")
-                                    .param("query", "pasta")
-                    )
-                    .andExpect(status().isOk())
-                    .andExpectAll(
-                            jsonPath("$.count").value(3),
-                            jsonPath("$.pageSize").value(20),
-                            jsonPath("$.pageNumber").value(0),
-                            jsonPath("$.hasNext").value(false),
-                            jsonPath("$.results.length()").value(3),
-                            jsonPath("$.results[0].name").value("Pasta"),
-                            jsonPath("$.results[1].name").value("Pizza"),
-                            jsonPath("$.results[2].name").value("Hamburger")
-                    );
+                    get("/v1/stores")
+                            .param("registrant", "username")
+                            .param("query", "pasta")
+            ).andExpectAll(
+                    status().isOk(),
+                    jsonPath("$.count").value(3),
+                    jsonPath("$.pageSize").value(20),
+                    jsonPath("$.pageNumber").value(0),
+                    jsonPath("$.hasNext").value(false),
+                    jsonPath("$.results.length()").value(3),
+                    jsonPath("$.results[0].name").value("Pasta"),
+                    jsonPath("$.results[1].name").value("Pizza"),
+                    jsonPath("$.results[2].name").value("Hamburger")
+            );
         }
 
     }
@@ -166,12 +168,11 @@ class StoreControllerTest {
         SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user.getId()));
 
         mockMvc.perform(
-                        put("/v1/stores/{id}", store.getId())
-                                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(storeUpdateRequest))
-                )
-                .andExpect(status().isOk());
+                put("/v1/stores/{id}", store.getId())
+                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(storeUpdateRequest))
+        ).andExpect(status().isOk());
 
         storeRepository.findById(store.getId()).ifPresentOrElse(
                 updatedStore -> {
@@ -198,11 +199,10 @@ class StoreControllerTest {
         SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user.getId()));
 
         mockMvc.perform(
-                        delete("/v1/stores/{id}", store.getId())
-                                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                                .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andExpect(status().isOk());
+                delete("/v1/stores/{id}", store.getId())
+                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
 
         assertFalse(storeRepository.existsById(store.getId()));
     }

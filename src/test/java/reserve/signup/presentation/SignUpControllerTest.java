@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,11 +49,14 @@ class SignUpControllerTest {
         signUpRequest.setPasswordConfirmation("password");
         signUpRequest.setNickname("nickname");
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/v1/sign-up")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(signUpRequest)))
-                .andExpect(status().isCreated())
-                .andExpect(header().stringValues("Location", "/v1/users/username"));
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/v1/sign-up")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(signUpRequest))
+        ).andExpectAll(
+                status().isCreated(),
+                header().stringValues("Location", "/v1/users/username")
+        );
 
         userRepository.findByUsername("username").ifPresentOrElse(
                 user -> {

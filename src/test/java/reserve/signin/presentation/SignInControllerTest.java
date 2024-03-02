@@ -47,18 +47,17 @@ class SignInControllerTest {
     @Autowired
     RefreshTokenRepository refreshTokenRepository;
 
-    Long userId;
+    User user;
 
     @BeforeEach
     void setUp(WebApplicationContext context) {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
-        User user = userRepository.save(new User(
+        user = userRepository.save(new User(
                 "username",
                 passwordEncoder.encode("password"),
                 "nickname",
                 "description"
         ));
-        userId = user.getId();
     }
 
     @Test
@@ -68,24 +67,24 @@ class SignInControllerTest {
         signInRequest.setUsername("username");
         signInRequest.setPassword("password");
 
-        ResultActions resultActions = mockMvc.perform(
+        mockMvc.perform(
                 post("/v1/sign-in")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(signInRequest))
-        );
+        ).andExpectAll(
+                status().isOk(),
+                header().exists("Authorization"), // Access token
+                cookie().exists("refresh")
+        ).andDo(mvcResult -> {
+            String accessToken = mvcResult.getResponse().getHeader("Authorization");
+            assertFalse(jwtProvider.isAccessTokenExpired(accessToken));
 
-        resultActions
-                .andExpect(status().isOk())
-                .andExpectAll(
-                        header().exists("Authorization"), // Access token
-                        cookie().exists("refresh")
-                );
-
-        String refresh = resultActions.andReturn().getResponse().getCookie("refresh").getValue();
-        refreshTokenRepository.findById(refresh).ifPresentOrElse(
-                refreshToken -> assertEquals(userId, refreshToken.getUserId()),
-                () -> fail("Refresh token not found")
-        );
+            String refresh = mvcResult.getResponse().getCookie("refresh").getValue();
+            refreshTokenRepository.findById(refresh).ifPresentOrElse(
+                    refreshToken -> assertEquals(user.getId(), refreshToken.getUserId()),
+                    () -> fail("Refresh token not found")
+            );
+        });
     }
 
     @Test
@@ -96,11 +95,10 @@ class SignInControllerTest {
         signInRequest.setPassword("password");
 
         Cookie refreshCookie = mockMvc.perform(
-                        post("/v1/sign-in")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(signInRequest))
-                )
-                .andReturn().getResponse().getCookie("refresh");
+                post("/v1/sign-in")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(signInRequest))
+        ).andReturn().getResponse().getCookie("refresh");
 
         ResultActions resultActions;
 
@@ -111,22 +109,24 @@ class SignInControllerTest {
             resultActions = mockMvc.perform(post("/v1/token-refresh").cookie(refreshCookie));
         }
 
-        resultActions
-                .andExpect(status().isOk())
-                .andExpectAll(
-                        header().exists("Authorization"), // Access token
-                        cookie().exists("refresh")
-                );
+        resultActions.andExpectAll(
+                status().isOk(),
+                header().exists("Authorization"), // Access token
+                cookie().exists("refresh")
+        ).andDo(mvcResult -> {
+            String accessToken = mvcResult.getResponse().getHeader("Authorization");
+            assertFalse(jwtProvider.isAccessTokenExpired(accessToken));
 
-        String newRefresh = resultActions.andReturn().getResponse().getCookie("refresh").getValue();
-        assertNotEquals(refreshCookie.getValue(), newRefresh);
+            String newRefresh = mvcResult.getResponse().getCookie("refresh").getValue();
+            assertNotEquals(refreshCookie.getValue(), newRefresh);
 
-        refreshTokenRepository.findById(refreshCookie.getValue())
-                .ifPresent(refreshToken -> fail("Old refresh token not deleted"));
-        refreshTokenRepository.findById(newRefresh).ifPresentOrElse(
-                refreshToken -> assertEquals(userId, refreshToken.getUserId()),
-                () -> fail("New refresh token not found")
-        );
+            refreshTokenRepository.findById(refreshCookie.getValue())
+                    .ifPresent(refreshToken -> fail("Old refresh token not deleted"));
+            refreshTokenRepository.findById(newRefresh).ifPresentOrElse(
+                    refreshToken -> assertEquals(user.getId(), refreshToken.getUserId()),
+                    () -> fail("New refresh token not found")
+            );
+        });
     }
 
     @Test
@@ -136,23 +136,28 @@ class SignInControllerTest {
         signInRequest.setUsername("username");
         signInRequest.setPassword("password");
 
-        ResultActions resultActions = mockMvc.perform(
+        mockMvc.perform(
                 post("/v1/sign-in")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(signInRequest))
-        );
+        ).andExpect(
+                status().isOk()
+        ).andDo(mvcResult -> {
+            String accessToken = mvcResult.getResponse().getHeader("Authorization");
+            Cookie refresh = mvcResult.getResponse().getCookie("refresh");
 
-        String accessToken = resultActions.andReturn().getResponse().getHeader("Authorization");
-        Cookie refresh = resultActions.andReturn().getResponse().getCookie("refresh");
+            mockMvc.perform(
+                    post("/v1/sign-out")
+                            .header("Authorization", "Bearer " + accessToken)
+                            .cookie(refresh)
+            ).andExpectAll(
+                    status().isOk(),
+                    cookie().maxAge("refresh", 0)
+            );
 
-        mockMvc.perform(post("/v1/sign-out")
-                                .header("Authorization", "Bearer " + accessToken)
-                                .cookie(refresh))
-                .andExpect(status().isOk())
-                .andExpect(cookie().maxAge("refresh", 0));
-
-        refreshTokenRepository.findById(refresh.getValue())
-                .ifPresent(refreshToken -> fail("Refresh token not deleted"));
+            refreshTokenRepository.findById(refresh.getValue())
+                    .ifPresent(refreshToken -> fail("Refresh token not deleted"));
+        });
     }
 
 }

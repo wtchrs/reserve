@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Commit;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -167,58 +168,61 @@ class ReservationControllerTest {
             SignInToken signInToken2 = jwtProvider.generateSignInToken(String.valueOf(user2.getId()));
 
             mockMvc.perform(
-                            get("/v1/reservations")
-                                    .header("Authorization", "Bearer " + signInToken1.getAccessToken())
-                                    .param("type", ReservationSearchRequest.SearchType.CUSTOMER.toString())
-                                    .param("query", "pasta")
-                                    .param("date", LocalDate.now().plusDays(7).toString())
-                    )
-                    .andExpect(status().isOk())
-                    .andExpectAll(
-                            content().contentType("application/json"),
-                            jsonPath("$.count").value(3),
-                            jsonPath("$.results[*].storeId", everyItem(equalTo(store1.getId().intValue()))),
-                            jsonPath("$.results[*].date", everyItem(equalTo(LocalDate.now().plusDays(7).toString()))),
-                            jsonPath("$.results[0].hour").value(12),
-                            jsonPath("$.results[1].hour").value(13),
-                            jsonPath("$.results[2].hour").value(20)
-                    );
+                    get("/v1/reservations")
+                            .header("Authorization", "Bearer " + signInToken1.getAccessToken())
+                            .param("type", ReservationSearchRequest.SearchType.CUSTOMER.toString())
+                            .param("query", "pasta")
+                            .param("date", LocalDate.now().plusDays(7).toString())
+            ).andExpectAll(
+                    status().isOk(),
+                    content().contentType("application/json"),
+                    jsonPath("$.count").value(3),
+                    jsonPath("$.results[*].storeId", everyItem(equalTo(store1.getId().intValue()))),
+                    jsonPath("$.results[*].date", everyItem(equalTo(LocalDate.now().plusDays(7).toString()))),
+                    jsonPath("$.results[0].hour").value(12),
+                    jsonPath("$.results[1].hour").value(13),
+                    jsonPath("$.results[2].hour").value(20)
+            );
 
             mockMvc.perform(
-                            get("/v1/reservations")
-                                    .header("Authorization", "Bearer " + signInToken1.getAccessToken())
-                                    .param("type", ReservationSearchRequest.SearchType.CUSTOMER.toString())
-                    )
-                    .andExpect(status().isOk())
-                    .andExpect(content().contentType("application/json"))
-                    .andExpect(jsonPath("$.count").value(7));
+                    get("/v1/reservations")
+                            .header("Authorization", "Bearer " + signInToken1.getAccessToken())
+                            .param("type", ReservationSearchRequest.SearchType.CUSTOMER.toString())
+            ).andExpectAll(
+                    status().isOk(),
+                    content().contentType("application/json"),
+                    jsonPath("$.count").value(7)
+            );
 
             mockMvc.perform(
-                            get("/v1/reservations")
-                                    .header("Authorization", "Bearer " + signInToken2.getAccessToken())
-                                    .param("type", ReservationSearchRequest.SearchType.CUSTOMER.toString())
-                    )
-                    .andExpect(status().isOk())
-                    .andExpect(content().contentType("application/json"))
-                    .andExpect(jsonPath("$.count").value(2));
+                    get("/v1/reservations")
+                            .header("Authorization", "Bearer " + signInToken2.getAccessToken())
+                            .param("type", ReservationSearchRequest.SearchType.CUSTOMER.toString())
+            ).andExpectAll(
+                    status().isOk(),
+                    content().contentType("application/json"),
+                    jsonPath("$.count").value(2)
+            );
 
             mockMvc.perform(
-                            get("/v1/reservations")
-                                    .header("Authorization", "Bearer " + signInToken1.getAccessToken())
-                                    .param("type", ReservationSearchRequest.SearchType.REGISTRANT.toString())
-                    )
-                    .andExpect(status().isOk())
-                    .andExpect(content().contentType("application/json"))
-                    .andExpect(jsonPath("$.count").value(5));
+                    get("/v1/reservations")
+                            .header("Authorization", "Bearer " + signInToken1.getAccessToken())
+                            .param("type", ReservationSearchRequest.SearchType.REGISTRANT.toString())
+            ).andExpectAll(
+                    status().isOk(),
+                    content().contentType("application/json"),
+                    jsonPath("$.count").value(5)
+            );
 
             mockMvc.perform(
-                            get("/v1/reservations")
-                                    .header("Authorization", "Bearer " + signInToken2.getAccessToken())
-                                    .param("type", ReservationSearchRequest.SearchType.REGISTRANT.toString())
-                    )
-                    .andExpect(status().isOk())
-                    .andExpect(content().contentType("application/json"))
-                    .andExpect(jsonPath("$.count").value(4));
+                    get("/v1/reservations")
+                            .header("Authorization", "Bearer " + signInToken2.getAccessToken())
+                            .param("type", ReservationSearchRequest.SearchType.REGISTRANT.toString())
+            ).andExpectAll(
+                    status().isOk(),
+                    content().contentType("application/json"),
+                    jsonPath("$.count").value(4)
+            );
         }
 
     }
@@ -240,12 +244,11 @@ class ReservationControllerTest {
         SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user1.getId()));
 
         mockMvc.perform(
-                        put("/v1/reservations/{reservationId}", reservation.getId())
-                                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                                .contentType("application/json")
-                                .content(objectMapper.writeValueAsString(reservationUpdateRequest))
-                )
-                .andExpect(status().isOk());
+                put("/v1/reservations/{reservationId}", reservation.getId())
+                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(reservationUpdateRequest))
+        ).andExpect(status().isOk());
 
         reservationRepository.findById(reservation.getId()).ifPresentOrElse(
                 updatedReservation -> {
@@ -269,10 +272,9 @@ class ReservationControllerTest {
         SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user1.getId()));
 
         mockMvc.perform(
-                        post("/v1/reservations/{reservationId}/cancel", reservation.getId())
-                                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                )
-                .andExpect(status().isOk());
+                post("/v1/reservations/{reservationId}/cancel", reservation.getId())
+                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
+        ).andExpect(status().isOk());
 
         reservationRepository.findById(reservation.getId()).ifPresentOrElse(
                 updatedReservation -> assertEquals(ReservationStatusType.CANCELLED, updatedReservation.getStatus()),

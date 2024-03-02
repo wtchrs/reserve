@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
@@ -98,14 +99,15 @@ class NotificationControllerTest {
     void testGetUserNotificationsEndpoint() throws Exception {
         SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user.getId()));
 
-        mockMvc.perform(get("/v1/notifications").header("Authorization", "Bearer " + signInToken.getAccessToken()))
-                .andExpect(status().isOk())
-                .andExpectAll(
-                        jsonPath("$.count").value(3),
-                        jsonPath("$.results[2].message").value("message1"),
-                        jsonPath("$.results[1].message").value("message2"),
-                        jsonPath("$.results[0].message").value("message3")
-                );
+        mockMvc.perform(
+                get("/v1/notifications").header("Authorization", "Bearer " + signInToken.getAccessToken())
+        ).andExpectAll(
+                status().isOk(),
+                jsonPath("$.count").value(3),
+                jsonPath("$.results[2].message").value("message1"),
+                jsonPath("$.results[1].message").value("message2"),
+                jsonPath("$.results[0].message").value("message3")
+        );
     }
 
     @Test
@@ -114,10 +116,9 @@ class NotificationControllerTest {
         SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user.getId()));
 
         mockMvc.perform(
-                        post("/v1/notifications/{notificationId}/read", notification1.getId())
-                                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                )
-                .andExpect(status().isOk());
+                post("/v1/notifications/{notificationId}/read", notification1.getId())
+                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
+        ).andExpect(status().isOk());
 
         em.flush();
         em.clear();
@@ -142,10 +143,9 @@ class NotificationControllerTest {
         SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user.getId()));
 
         mockMvc.perform(
-                        post("/v1/notifications/read-all")
-                                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                )
-                .andExpect(status().isOk());
+                post("/v1/notifications/read-all")
+                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
+        ).andExpect(status().isOk());
 
         em.flush();
         em.clear();
