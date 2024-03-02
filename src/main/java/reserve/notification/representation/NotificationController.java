@@ -20,8 +20,11 @@ public class NotificationController {
         return notificationService.getUserNotifications(authInfo.getUserId(), pageable);
     }
 
-    @PostMapping("/read/{notificationId}")
-    public void readNotification(@Authentication AuthInfo authInfo, @PathVariable Long notificationId) {
+    @PostMapping("/{notificationId}/read")
+    public void readNotification(
+            @Authentication AuthInfo authInfo,
+            @PathVariable("notificationId") Long notificationId
+    ) {
         notificationService.readNotification(authInfo.getUserId(), notificationId);
     }
 
