@@ -24,13 +24,9 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
            """)
     Optional<StoreInfoResponse> findResponseById(@Param("storeId") Long storeId);
 
+    @Override
     @Modifying
-    @Query(
-            """
-            UPDATE Store store
-            SET store.status = 'DELETED'
-            WHERE store.id = :storeId
-            """)
+    @Query("UPDATE Store store SET store.status = 'DELETED' WHERE store.id = :storeId")
     void deleteById(@Param("storeId") Long storeId);
 
 }
