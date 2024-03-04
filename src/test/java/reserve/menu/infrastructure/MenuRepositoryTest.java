@@ -38,7 +38,7 @@ class MenuRepositoryTest {
     @BeforeEach
     void setUp() {
         user = userRepository.save(new User("user1", "password", "hello", "description"));
-        store = storeRepository.save(new Store(user, "Pasta", 1000, "address", "Pasta only"));
+        store = storeRepository.save(new Store(user, "Pasta", "address", "Pasta only"));
         menu1 = menuRepository.save(new Menu(
                 store,
                 "Spaghetti Aglio e Olio",

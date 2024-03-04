@@ -11,3 +11,5 @@ CREATE TABLE menus
     PRIMARY KEY (menu_id),
     CONSTRAINT fk_menus_stores_storeid FOREIGN KEY (store_id) REFERENCES stores (store_id)
 );
+
+ALTER TABLE stores DROP COLUMN price;

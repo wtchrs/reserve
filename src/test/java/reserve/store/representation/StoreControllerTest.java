@@ -8,7 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.Commit;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,7 +55,6 @@ class StoreControllerTest {
     void testCreateEndpoint() throws Exception {
         StoreCreateRequest storeCreateRequest = new StoreCreateRequest();
         storeCreateRequest.setName("Store name");
-        storeCreateRequest.setPrice(10000);
         storeCreateRequest.setAddress("City, Street, Zipcode");
         storeCreateRequest.setDescription("Store description");
 
@@ -82,7 +80,6 @@ class StoreControllerTest {
         Store store = storeRepository.save(new Store(
                 user,
                 "Store name",
-                10000,
                 "City, Street, Zipcode",
                 "Store description"
         ));
@@ -95,7 +92,6 @@ class StoreControllerTest {
                 jsonPath("$.storeId").value(store.getId()),
                 jsonPath("$.registrant").value("username"),
                 jsonPath("$.name").value("Store name"),
-                jsonPath("$.price").value(10000),
                 jsonPath("$.address").value("City, Street, Zipcode"),
                 jsonPath("$.description").value("Store description")
         );
@@ -109,12 +105,12 @@ class StoreControllerTest {
         @Commit
         void registerStores() {
             User user2 = userRepository.save(new User("user2", "password", "hello", "description"));
-            storeRepository.save(new Store(user, "Pasta", 1000, "address", "Pasta only"));
-            storeRepository.save(new Store(user, "Pizza", 1000, "address", "Pizza and Pasta"));
-            storeRepository.save(new Store(user, "Hamburger", 1000, "pasta street", "Hamburger"));
-            storeRepository.save(new Store(user, "Korean food", 1000, "address", "Kimchi and Bulgogi"));
-            storeRepository.save(new Store(user2, "Italian", 1000, "address", "Steak and Pasta"));
-            storeRepository.save(new Store(user2, "Ramen", 1000, "address", "Ramen and Gyoza"));
+            storeRepository.save(new Store(user, "Pasta", "address", "Pasta only"));
+            storeRepository.save(new Store(user, "Pizza", "address", "Pizza and Pasta"));
+            storeRepository.save(new Store(user, "Hamburger", "pasta street", "Hamburger"));
+            storeRepository.save(new Store(user, "Korean food", "address", "Kimchi and Bulgogi"));
+            storeRepository.save(new Store(user2, "Italian", "address", "Steak and Pasta"));
+            storeRepository.save(new Store(user2, "Ramen", "address", "Ramen and Gyoza"));
         }
 
         @AfterEach
@@ -154,14 +150,12 @@ class StoreControllerTest {
         Store store = storeRepository.save(new Store(
                 user,
                 "Store name",
-                10000,
                 "City, Street, Zipcode",
                 "Store description"
         ));
 
         StoreUpdateRequest storeUpdateRequest = new StoreUpdateRequest();
         storeUpdateRequest.setName("New name");
-        storeUpdateRequest.setPrice(20000);
         storeUpdateRequest.setAddress("New address");
         storeUpdateRequest.setDescription("New description");
 
@@ -177,7 +171,6 @@ class StoreControllerTest {
         storeRepository.findById(store.getId()).ifPresentOrElse(
                 updatedStore -> {
                     assertEquals("New name", updatedStore.getName());
-                    assertEquals(20000, updatedStore.getPrice());
                     assertEquals("New address", updatedStore.getAddress());
                     assertEquals("New description", updatedStore.getDescription());
                 },
@@ -191,7 +184,6 @@ class StoreControllerTest {
         Store store = storeRepository.save(new Store(
                 user,
                 "Store name",
-                10000,
                 "City, Street, Zipcode",
                 "Store description"
         ));

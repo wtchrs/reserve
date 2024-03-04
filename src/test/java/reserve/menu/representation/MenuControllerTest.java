@@ -56,7 +56,7 @@ class MenuControllerTest {
     void setUp(WebApplicationContext context) {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
         user = userRepository.save(new User("username", "password", "nickname", "description"));
-        store = storeRepository.save(new Store(user, "Italian Restaurant", 1000, "address", "Pasta and Pizza"));
+        store = storeRepository.save(new Store(user, "Italian Restaurant", "address", "Pasta and Pizza"));
     }
 
     @Test

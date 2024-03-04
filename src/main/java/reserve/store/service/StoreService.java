@@ -35,7 +35,6 @@ public class StoreService {
         Store store = storeRepository.save(new Store(
                 userRepository.getReferenceById(userId),
                 storeCreateRequest.getName(),
-                storeCreateRequest.getPrice(),
                 storeCreateRequest.getAddress(),
                 storeCreateRequest.getDescription()
         ));
@@ -60,9 +59,6 @@ public class StoreService {
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.STORE_NOT_FOUND));
         if (StringUtils.hasText(storeUpdateRequest.getName())) {
             store.setName(storeUpdateRequest.getName());
-        }
-        if (storeUpdateRequest.getPrice() != null) {
-            store.setPrice(storeUpdateRequest.getPrice());
         }
         if (StringUtils.hasText(storeUpdateRequest.getAddress())) {
             store.setAddress(storeUpdateRequest.getAddress());

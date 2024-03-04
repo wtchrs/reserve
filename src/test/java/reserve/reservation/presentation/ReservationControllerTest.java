@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Commit;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,8 +62,8 @@ class ReservationControllerTest {
         user1 = userRepository.save(new User("user1", "password", "hello", "description"));
         user2 = userRepository.save(new User("user2", "password", "world", "description"));
         user3 = userRepository.save(new User("user3", "password", "foo", "description"));
-        store1 = storeRepository.save(new Store(user1, "Pasta", 10000, "address", "description"));
-        store2 = storeRepository.save(new Store(user2, "Pizza", 20000, "address", "description"));
+        store1 = storeRepository.save(new Store(user1, "Pasta", "address", "description"));
+        store2 = storeRepository.save(new Store(user2, "Pizza", "address", "description"));
     }
 
     @Test

@@ -38,7 +38,7 @@ class MenuQueryRepositoryTest {
     void setUp() {
         user1 = userRepository.save(new User("user1", "password", "hello", "description"));
         user2 = userRepository.save(new User("user2", "password", "world", "description"));
-        store = storeRepository.save(new Store(user1, "Pasta", 1000, "address", "Pasta only"));
+        store = storeRepository.save(new Store(user1, "Pasta", "address", "Pasta only"));
         menu = menuRepository.save(new Menu(store, "Spaghetti Aglio e Olio", 1000, "Spaghetti with garlic and olive oil"));
     }
 

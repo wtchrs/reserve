@@ -1,21 +1,22 @@
 package reserve.store.dto.request;
 
-import jakarta.validation.constraints.Min;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import reserve.global.validation.NullOrNotEmpty;
 
 @NoArgsConstructor
 @Getter
 @Setter
 public class StoreUpdateRequest {
 
+    @NullOrNotEmpty
     private String name;
 
-    @Min(value = 0, message = "Price must be larger than 0.")
-    private Integer price;
-
+    @NullOrNotEmpty
     private String address;
+
+    @NullOrNotEmpty
     private String description;
 
 }

@@ -1,4 +1,4 @@
-package reserve.reservation.infrastructure.validator;
+package reserve.global.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;

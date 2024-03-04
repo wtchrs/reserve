@@ -31,20 +31,15 @@ public class Store extends DeletableBaseEntity {
 
     @Column(nullable = false)
     @Setter
-    private int price;
-
-    @Column(nullable = false)
-    @Setter
     private String address;
 
     @Column(nullable = false)
     @Setter
     private String description;
 
-    public Store(User user, String name, int price, String address, String description) {
+    public Store(User user, String name, String address, String description) {
         this.user = user;
         this.name = name;
-        this.price = price;
         this.address = address;
         this.description = description;
     }

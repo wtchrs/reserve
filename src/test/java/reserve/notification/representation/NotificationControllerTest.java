@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
@@ -71,7 +70,7 @@ class NotificationControllerTest {
 
         user = userRepository.save(new User("user", "password", "nickname", "description"));
         registrant = userRepository.save(new User("registrant", "password", "nickname", "description"));
-        store = storeRepository.save(new Store(registrant, "store", 1000, "address", "description"));
+        store = storeRepository.save(new Store(registrant, "store", "address", "description"));
         reservation = reservationRepository.save(new Reservation(user, store, LocalDate.now().plusDays(7), 12));
 
         notification1 = notificationRepository.save(new Notification(

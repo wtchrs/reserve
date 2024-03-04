@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import reserve.reservation.infrastructure.validator.NullOrNotEmpty;
+import reserve.global.validation.NullOrNotEmpty;
 
 import java.time.LocalDate;
 

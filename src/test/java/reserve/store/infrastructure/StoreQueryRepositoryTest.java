@@ -38,12 +38,12 @@ class StoreQueryRepositoryTest {
     void setUp() {
         User user1 = userRepository.save(new User("user1", "password", "hello", "description"));
         User user2 = userRepository.save(new User("user2", "password", "hello", "description"));
-        storeRepository.save(new Store(user1, "Pasta", 1000, "address", "Pasta only"));
-        storeRepository.save(new Store(user1, "Pizza", 1000, "address", "Pizza and Pasta"));
-        storeRepository.save(new Store(user1, "Hamburger", 1000, "pasta street", "Hamburger"));
-        storeRepository.save(new Store(user1, "Korean food", 1000, "address", "Kimchi and Bulgogi"));
-        storeRepository.save(new Store(user2, "Italian", 1000, "address", "Steak and Pasta"));
-        storeRepository.save(new Store(user2, "Ramen", 1000, "address", "Ramen and Gyoza"));
+        storeRepository.save(new Store(user1, "Pasta", "address", "Pasta only"));
+        storeRepository.save(new Store(user1, "Pizza", "address", "Pizza and Pasta"));
+        storeRepository.save(new Store(user1, "Hamburger", "pasta street", "Hamburger"));
+        storeRepository.save(new Store(user1, "Korean food", "address", "Kimchi and Bulgogi"));
+        storeRepository.save(new Store(user2, "Italian", "address", "Steak and Pasta"));
+        storeRepository.save(new Store(user2, "Ramen", "address", "Ramen and Gyoza"));
     }
 
     @Transactional

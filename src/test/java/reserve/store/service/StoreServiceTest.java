@@ -48,7 +48,6 @@ class StoreServiceTest {
     void testStoreCreation() {
         StoreCreateRequest storeCreateRequest = Mockito.spy(new StoreCreateRequest());
         Mockito.when(storeCreateRequest.getName()).thenReturn("name");
-        Mockito.when(storeCreateRequest.getPrice()).thenReturn(1000);
         Mockito.when(storeCreateRequest.getAddress()).thenReturn("address");
         Mockito.when(storeCreateRequest.getDescription()).thenReturn("description");
         Mockito.when(userRepository.existsById(1L)).thenReturn(true);
@@ -69,7 +68,7 @@ class StoreServiceTest {
     @Test
     @DisplayName("Testing retrieval of store information")
     void testStoreInfoRetrieval() {
-        StoreInfoResponse response = new StoreInfoResponse(1L, "username", "name", 1000, "address", "description");
+        StoreInfoResponse response = new StoreInfoResponse(1L, "username", "name", "address", "description");
         Mockito.when(storeRepository.findResponseById(1L)).thenReturn(Optional.of(response));
 
         StoreInfoResponse result = storeService.getStoreInfo(1L);
@@ -82,11 +81,11 @@ class StoreServiceTest {
         StoreSearchRequest storeSearchRequest = Mockito.mock(StoreSearchRequest.class);
         Pageable pageable = PageRequest.of(0, 20);
 
-        StoreInfoResponse storeInfo1 = new StoreInfoResponse(1L, "username", "Pasta", 1000, "address", "Pasta");
+        StoreInfoResponse storeInfo1 = new StoreInfoResponse(1L, "username", "Pasta", "address", "Pasta");
         StoreInfoResponse storeInfo2 =
-                new StoreInfoResponse(1L, "username", "Italian", 1000, "address", "Steak and pasta");
+                new StoreInfoResponse(1L, "username", "Italian", "address", "Steak and pasta");
         StoreInfoResponse storeInfo3 =
-                new StoreInfoResponse(1L, "username", "Pizza", 1000, "address", "Pizza and pasta");
+                new StoreInfoResponse(1L, "username", "Pizza", "address", "Pizza and pasta");
         Mockito.when(storeQueryRepository.findResponsesBySearch(storeSearchRequest, pageable))
                 .thenReturn(new PageImpl<>(List.of(storeInfo1, storeInfo2, storeInfo3), pageable, 3));
 
@@ -103,19 +102,17 @@ class StoreServiceTest {
     @Test
     @DisplayName("Testing store update")
     void testStoreUpdate() {
-        Store store = Mockito.spy(new Store(Mockito.mock(User.class), "name", 1000, "address", "description"));
+        Store store = Mockito.spy(new Store(Mockito.mock(User.class), "name", "address", "description"));
         Mockito.when(storeRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(store));
 
         StoreUpdateRequest storeUpdateRequest = Mockito.spy(new StoreUpdateRequest());
         Mockito.when(storeUpdateRequest.getName()).thenReturn("newName");
-        Mockito.when(storeUpdateRequest.getPrice()).thenReturn(2000);
         Mockito.when(storeUpdateRequest.getAddress()).thenReturn("newAddress");
         Mockito.when(storeUpdateRequest.getDescription()).thenReturn("newDescription");
 
         storeService.update(1L, 1L, storeUpdateRequest);
 
         Mockito.verify(store).setName("newName");
-        Mockito.verify(store).setPrice(2000);
         Mockito.verify(store).setAddress("newAddress");
         Mockito.verify(store).setDescription("newDescription");
     }

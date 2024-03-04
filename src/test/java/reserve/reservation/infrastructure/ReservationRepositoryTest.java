@@ -33,7 +33,7 @@ class ReservationRepositoryTest {
     @DisplayName("Testing store user ID retrieval by reservation ID, including reservations in all states")
     void testStoreUserIdRetrieval() {
         User user1 = userRepository.save(new User("user1", "password", "hello", "description"));
-        Store store1 = storeRepository.save(new Store(user1, "Pasta", 1000, "address", "Pasta only"));
+        Store store1 = storeRepository.save(new Store(user1, "Pasta", "address", "Pasta only"));
 
         Reservation reservationReady = reservationRepository.save(new Reservation(user1, store1, LocalDate.now(), 12));
         Reservation reservationInService =
@@ -69,7 +69,7 @@ class ReservationRepositoryTest {
     @DisplayName("Testing response retrieval by reservation ID and user ID, for reservations in all states.")
     void testResponseRetrieval() {
         User user1 = userRepository.save(new User("user1", "password", "hello", "description"));
-        Store store1 = storeRepository.save(new Store(user1, "Pasta", 1000, "address", "Pasta only"));
+        Store store1 = storeRepository.save(new Store(user1, "Pasta", "address", "Pasta only"));
 
         Reservation reservationReady = reservationRepository.save(new Reservation(user1, store1, LocalDate.now(), 12));
         Reservation reservationInService =
@@ -105,7 +105,7 @@ class ReservationRepositoryTest {
     @DisplayName("Testing reservation state changes.")
     void testReservationStateChanges() {
         User user1 = userRepository.save(new User("user1", "password", "hello", "description"));
-        Store store1 = storeRepository.save(new Store(user1, "Pasta", 1000, "address", "Pasta only"));
+        Store store1 = storeRepository.save(new Store(user1, "Pasta", "address", "Pasta only"));
         Reservation reservation = reservationRepository.save(new Reservation(user1, store1, LocalDate.now(), 12));
 
         reservation.start();

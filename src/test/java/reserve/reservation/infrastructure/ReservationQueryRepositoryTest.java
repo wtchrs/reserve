@@ -41,7 +41,7 @@ class ReservationQueryRepositoryTest {
     @Transactional
     void testReservationExistence() {
         User user = userRepository.save(new User("user1", "password", "hello", "description"));
-        Store store = storeRepository.save(new Store(user, "Pasta", 1000, "address", "Pasta only"));
+        Store store = storeRepository.save(new Store(user, "Pasta", "address", "Pasta only"));
         Reservation reservation = reservationRepository.save(new Reservation(user, store, LocalDate.now(), 12));
 
         assertTrue(reservationQueryRepository.existsByIdAndUserId(reservation.getId(), user.getId()));
@@ -56,12 +56,12 @@ class ReservationQueryRepositoryTest {
     void testReservationSearch() {
         User user1 = userRepository.save(new User("user1", "password", "hello", "description"));
         User user2 = userRepository.save(new User("user2", "password", "hello", "description"));
-        Store store1 = storeRepository.save(new Store(user1, "Pasta", 1000, "address", "Pasta only"));
-        Store store2 = storeRepository.save(new Store(user1, "Pizza", 1000, "address", "Pizza and Pasta"));
-        Store store3 = storeRepository.save(new Store(user1, "Hamburger", 1000, "pasta street", "Hamburger"));
-        Store store4 = storeRepository.save(new Store(user1, "Korean food", 1000, "address", "Kimchi and Bulgogi"));
-        Store store5 = storeRepository.save(new Store(user2, "Italian", 1000, "address", "Steak and Pasta"));
-        Store store6 = storeRepository.save(new Store(user2, "Ramen", 1000, "address", "Ramen and Gyoza"));
+        Store store1 = storeRepository.save(new Store(user1, "Pasta", "address", "Pasta only"));
+        Store store2 = storeRepository.save(new Store(user1, "Pizza", "address", "Pizza and Pasta"));
+        Store store3 = storeRepository.save(new Store(user1, "Hamburger", "pasta street", "Hamburger"));
+        Store store4 = storeRepository.save(new Store(user1, "Korean food", "address", "Kimchi and Bulgogi"));
+        Store store5 = storeRepository.save(new Store(user2, "Italian", "address", "Steak and Pasta"));
+        Store store6 = storeRepository.save(new Store(user2, "Ramen", "address", "Ramen and Gyoza"));
 
         reservationRepository.save(new Reservation(user1, store1, LocalDate.now(), 12));
         reservationRepository.save(new Reservation(user1, store2, LocalDate.now(), 12));

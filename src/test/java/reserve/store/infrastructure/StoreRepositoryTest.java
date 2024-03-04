@@ -25,13 +25,12 @@ class StoreRepositoryTest {
     @DisplayName("Testing store response retrieval by ID")
     void testStoreRetrieval() {
         User user = userRepository.save(new User("username", "password", "hello", "description"));
-        Store store = storeRepository.save(new Store(user, "name", 1000, "address", "description"));
+        Store store = storeRepository.save(new Store(user, "name", "address", "description"));
 
         storeRepository.findResponseById(store.getId()).ifPresentOrElse(storeInfoResponse -> {
             assertEquals(store.getId(), storeInfoResponse.getStoreId());
             assertEquals(store.getUser().getUsername(), storeInfoResponse.getRegistrant());
             assertEquals(store.getName(), storeInfoResponse.getName());
-            assertEquals(store.getPrice(), storeInfoResponse.getPrice());
             assertEquals(store.getAddress(), storeInfoResponse.getAddress());
             assertEquals(store.getDescription(), storeInfoResponse.getDescription());
         }, () -> fail("Store not found"));
@@ -41,7 +40,7 @@ class StoreRepositoryTest {
     @DisplayName("Testing store deletion by ID")
     void testStoreDeletion() {
         User user = userRepository.save(new User("username", "password", "hello", "description"));
-        Store store = storeRepository.save(new Store(user, "name", 1000, "address", "description"));
+        Store store = storeRepository.save(new Store(user, "name", "address", "description"));
 
         storeRepository.deleteById(store.getId());
 

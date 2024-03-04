@@ -63,7 +63,6 @@ public class StoreQueryRepository {
                 store.id,
                 store.user.username,
                 store.name,
-                store.price,
                 store.address,
                 store.description
         );

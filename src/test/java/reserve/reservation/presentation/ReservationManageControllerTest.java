@@ -55,7 +55,7 @@ class ReservationManageControllerTest {
 
         user = userRepository.save(new User("username", "password", "nickname", "description"));
         registrant = userRepository.save(new User("registrant", "password", "nickname", "description"));
-        store = storeRepository.save(new Store(registrant, "store", 1000, "address", "description"));
+        store = storeRepository.save(new Store(registrant, "store", "address", "description"));
         ready = reservationRepository.save(new Reservation(user, store, LocalDate.now().plusDays(7), 12));
         inService = reservationRepository.save(new Reservation(user, store, LocalDate.now().plusDays(7), 12));
         completed = reservationRepository.save(new Reservation(user, store, LocalDate.now().plusDays(7), 12));
