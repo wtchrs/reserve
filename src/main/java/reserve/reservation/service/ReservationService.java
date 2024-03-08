@@ -8,16 +8,24 @@ import org.springframework.transaction.annotation.Transactional;
 import reserve.global.exception.AuthenticationException;
 import reserve.global.exception.ErrorCode;
 import reserve.global.exception.ResourceNotFoundException;
+import reserve.menu.domain.Menu;
+import reserve.menu.infrastructure.MenuRepository;
 import reserve.reservation.domain.Reservation;
+import reserve.reservation.domain.ReservationMenu;
 import reserve.reservation.dto.request.ReservationCreateRequest;
+import reserve.reservation.dto.request.ReservationMenuCreateRequest;
 import reserve.reservation.dto.request.ReservationSearchRequest;
 import reserve.reservation.dto.request.ReservationUpdateRequest;
-import reserve.reservation.dto.response.ReservationInfoListResponse;
-import reserve.reservation.dto.response.ReservationInfoResponse;
+import reserve.reservation.dto.response.*;
+import reserve.reservation.infrastructure.ReservationMenuRepository;
 import reserve.reservation.infrastructure.ReservationQueryRepository;
 import reserve.reservation.infrastructure.ReservationRepository;
 import reserve.store.infrastructure.StoreRepository;
 import reserve.user.infrastructure.UserRepository;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +33,8 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationQueryRepository reservationQueryRepository;
+    private final ReservationMenuRepository reservationMenuRepository;
+    private final MenuRepository menuRepository;
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
 
@@ -42,13 +52,40 @@ public class ReservationService {
                 reservationCreateRequest.getDate(),
                 reservationCreateRequest.getHour()
         ));
+        Map<Long, Menu> menuMap = getMenuMap(reservationCreateRequest);
+        List<ReservationMenu> reservationMenuList = reservationCreateRequest.getMenus().stream()
+                .map(req -> createReservationMenu(reservation, menuMap.get(req.getMenuId()), req.getQuantity()))
+                .toList();
+        reservationMenuRepository.saveAll(reservationMenuList);
         return reservation.getId();
+    }
+
+    private Map<Long, Menu> getMenuMap(ReservationCreateRequest reservationCreateRequest) {
+        List<Long> menuIdList =
+                reservationCreateRequest.getMenus().stream().map(ReservationMenuCreateRequest::getMenuId).toList();
+        return menuRepository.findAllById(menuIdList).stream().collect(Collectors.toMap(Menu::getId, m -> m));
+    }
+
+    private ReservationMenu createReservationMenu(Reservation reservation, Menu menu, int quantity) {
+        if (menu == null || !menu.getStore().getId().equals(reservation.getStore().getId())) {
+            throw new ResourceNotFoundException(ErrorCode.MENU_NOT_FOUND);
+        }
+        return new ReservationMenu(reservation, menu.getName(), menu.getPrice(), quantity);
     }
 
     @Transactional(readOnly = true)
     public ReservationInfoResponse getReservationInfo(Long userId, Long reservationId) {
         return reservationRepository.findResponseByIdAndUserId(reservationId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND));
+    }
+
+    @Transactional
+    public ReservationMenuListResponse getReservationMenus(Long userId, Long reservationId) {
+        if (!reservationQueryRepository.hasReadAccessToReservation(reservationId, userId)) {
+            throw new AuthenticationException(ErrorCode.ACCESS_DENIED);
+        }
+        List<ReservationMenuResponse> responses = reservationMenuRepository.findResponsesByReservationId(reservationId);
+        return ReservationMenuListResponse.from(responses);
     }
 
     @Transactional(readOnly = true)

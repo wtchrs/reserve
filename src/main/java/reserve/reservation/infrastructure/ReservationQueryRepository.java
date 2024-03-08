@@ -13,6 +13,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
+import reserve.global.exception.ErrorCode;
+import reserve.global.exception.ResourceNotFoundException;
 import reserve.reservation.dto.ReservationForNotifyDto;
 import reserve.reservation.dto.request.ReservationSearchRequest;
 import reserve.reservation.dto.response.ReservationInfoResponse;
@@ -45,6 +47,20 @@ public class ReservationQueryRepository {
                 .fetchFirst();
 
         return result != null && result == 1;
+    }
+
+    public boolean hasReadAccessToReservation(Long reservationId, Long userId) {
+        Boolean result = queryFactory
+                .select(reservation.store.user.id.eq(userId).or(reservation.user.id.eq(userId)))
+                .from(reservation)
+                .where(reservation.id.eq(reservationId))
+                .fetchOne();
+
+        if (result == null) {
+            throw new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND);
+        }
+
+        return result;
     }
 
     public Optional<ReservationForNotifyDto> findForNotifyById(Long reservationId) {

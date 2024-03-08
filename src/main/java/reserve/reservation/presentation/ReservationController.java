@@ -13,6 +13,7 @@ import reserve.reservation.dto.request.ReservationSearchRequest;
 import reserve.reservation.dto.request.ReservationUpdateRequest;
 import reserve.reservation.dto.response.ReservationInfoListResponse;
 import reserve.reservation.dto.response.ReservationInfoResponse;
+import reserve.reservation.dto.response.ReservationMenuListResponse;
 import reserve.reservation.service.ReservationService;
 
 import java.net.URI;
@@ -46,6 +47,14 @@ public class ReservationController {
             @PathVariable("reservationId") Long reservationId
     ) {
         return reservationService.getReservationInfo(authInfo.getUserId(), reservationId);
+    }
+
+    @GetMapping("/{reservationId}/menus")
+    public ReservationMenuListResponse getReservationMenus(
+            @Authentication AuthInfo authInfo,
+            @PathVariable("reservationId") Long reservationId
+    ) {
+        return reservationService.getReservationMenus(authInfo.getUserId(), reservationId);
     }
 
     @GetMapping

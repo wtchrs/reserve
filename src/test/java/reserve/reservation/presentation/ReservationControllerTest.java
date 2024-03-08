@@ -11,11 +11,16 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+import reserve.menu.domain.Menu;
+import reserve.menu.infrastructure.MenuRepository;
 import reserve.reservation.domain.Reservation;
+import reserve.reservation.domain.ReservationMenu;
 import reserve.reservation.domain.ReservationStatusType;
 import reserve.reservation.dto.request.ReservationCreateRequest;
+import reserve.reservation.dto.request.ReservationMenuCreateRequest;
 import reserve.reservation.dto.request.ReservationSearchRequest;
 import reserve.reservation.dto.request.ReservationUpdateRequest;
+import reserve.reservation.infrastructure.ReservationMenuRepository;
 import reserve.reservation.infrastructure.ReservationRepository;
 import reserve.signin.dto.SignInToken;
 import reserve.signin.infrastructure.JwtProvider;
@@ -25,6 +30,7 @@ import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
@@ -51,7 +57,13 @@ class ReservationControllerTest {
     StoreRepository storeRepository;
 
     @Autowired
+    MenuRepository menuRepository;
+
+    @Autowired
     ReservationRepository reservationRepository;
+
+    @Autowired
+    ReservationMenuRepository reservationMenuRepository;
 
     User user1, user2, user3;
     Store store1, store2;
@@ -69,10 +81,22 @@ class ReservationControllerTest {
     @Test
     @DisplayName("Testing POST /v1/reservations endpoint")
     void testCreateEndpoint() throws Exception {
+        Menu menu1 = menuRepository.save(new Menu(store2, "Gorgonzola", 10000, "Gorgonzola pizza"));
+        Menu menu2 = menuRepository.save(new Menu(store2, "Margherita", 8000, "Margherita pizza"));
+
         ReservationCreateRequest reservationCreateRequest = new ReservationCreateRequest();
         reservationCreateRequest.setStoreId(store2.getId());
         reservationCreateRequest.setDate(LocalDate.now().plusDays(7));
         reservationCreateRequest.setHour(12);
+
+        ReservationMenuCreateRequest reservationMenuCreateRequest1 = new ReservationMenuCreateRequest();
+        ReservationMenuCreateRequest reservationMenuCreateRequest2 = new ReservationMenuCreateRequest();
+        reservationMenuCreateRequest1.setMenuId(menu1.getId());
+        reservationMenuCreateRequest1.setQuantity(2);
+        reservationMenuCreateRequest2.setMenuId(menu2.getId());
+        reservationMenuCreateRequest2.setQuantity(1);
+
+        reservationCreateRequest.setMenus(List.of(reservationMenuCreateRequest1, reservationMenuCreateRequest2));
 
         SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user1.getId()));
 
@@ -86,6 +110,7 @@ class ReservationControllerTest {
                 .andExpect(header().string("Location", Matchers.startsWith("/v1/reservations/")));
 
         assertEquals(1, reservationRepository.count());
+        assertEquals(2, reservationMenuRepository.count());
     }
 
     @Test
@@ -130,6 +155,54 @@ class ReservationControllerTest {
                                 .header("Authorization", "Bearer " + signInToken3.getAccessToken())
                 )
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Testing GET /v1/reservations/{reservationId}/menus endpoint")
+    void testGetReservationMenusEndpoint() throws Exception {
+        Reservation reservation =
+                reservationRepository.save(new Reservation(user1, store2, LocalDate.now().plusDays(7), 12));
+        reservationMenuRepository.save(new ReservationMenu(reservation, "menuName1", 10000, 2));
+        reservationMenuRepository.save(new ReservationMenu(reservation, "menuName2", 5000, 1));
+        reservationMenuRepository.save(new ReservationMenu(reservation, "menuName3", 20000, 1));
+
+        SignInToken signInToken1 = jwtProvider.generateSignInToken(String.valueOf(user1.getId()));
+
+        mockMvc.perform(
+                get("/v1/reservations/{reservationId}/menus", reservation.getId())
+                        .header("Authorization", "Bearer " + signInToken1.getAccessToken())
+        ).andExpectAll(
+                status().isOk(),
+                content().contentType("application/json"),
+                jsonPath("$.count").value(3),
+                jsonPath("$.results[0].name").value("menuName1"),
+                jsonPath("$.results[0].price").value(10000),
+                jsonPath("$.results[0].quantity").value(2),
+                jsonPath("$.results[1].name").value("menuName2"),
+                jsonPath("$.results[1].price").value(5000),
+                jsonPath("$.results[1].quantity").value(1),
+                jsonPath("$.results[2].name").value("menuName3"),
+                jsonPath("$.results[2].price").value(20000),
+                jsonPath("$.results[2].quantity").value(1)
+        );
+
+        SignInToken signInToken2 = jwtProvider.generateSignInToken(String.valueOf(user2.getId()));
+
+        mockMvc.perform(
+                get("/v1/reservations/{reservationId}/menus", reservation.getId())
+                        .header("Authorization", "Bearer " + signInToken2.getAccessToken())
+        ).andExpectAll(
+                status().isOk(),
+                content().contentType("application/json"),
+                jsonPath("$.count").value(3)
+        );
+
+        SignInToken signInToken3 = jwtProvider.generateSignInToken(String.valueOf(user3.getId()));
+
+        mockMvc.perform(
+                get("/v1/reservations/{reservationId}/menus", reservation.getId())
+                        .header("Authorization", "Bearer " + signInToken3.getAccessToken())
+        ).andExpect(status().isForbidden());
     }
 
     @Nested
