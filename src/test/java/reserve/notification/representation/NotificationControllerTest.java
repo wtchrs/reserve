@@ -1,17 +1,12 @@
 package reserve.notification.representation;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import io.restassured.RestAssured;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
+import reserve.global.BaseRestAssuredTest;
 import reserve.notification.domain.Notification;
 import reserve.notification.domain.ResourceType;
 import reserve.notification.infrastructure.NotificationRepository;
@@ -26,23 +21,17 @@ import reserve.user.infrastructure.UserRepository;
 
 import java.time.LocalDate;
 
+import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 
-@SpringBootTest
-@Transactional
-class NotificationControllerTest {
-
-    @PersistenceContext
-    EntityManager em;
-
-    MockMvc mockMvc;
-
-    @Autowired
-    ObjectMapper objectMapper;
+class NotificationControllerTest extends BaseRestAssuredTest {
 
     @Autowired
     JwtProvider jwtProvider;
@@ -59,19 +48,15 @@ class NotificationControllerTest {
     @Autowired
     NotificationRepository notificationRepository;
 
-    User user, registrant;
-    Store store;
-    Reservation reservation;
+    User user;
     Notification notification1, notification2, notification3;
 
     @BeforeEach
-    void setUp(WebApplicationContext context) {
-        mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
-
+    void setUp() {
         user = userRepository.save(new User("user", "password", "nickname", "description"));
-        registrant = userRepository.save(new User("registrant", "password", "nickname", "description"));
-        store = storeRepository.save(new Store(registrant, "store", "address", "description"));
-        reservation = reservationRepository.save(new Reservation(user, store, LocalDate.now().plusDays(7), 12));
+        User registrant = userRepository.save(new User("registrant", "password", "nickname", "description"));
+        Store store = storeRepository.save(new Store(registrant, "store", "address", "description"));
+        Reservation reservation = reservationRepository.save(new Reservation(user, store, LocalDate.now().plusDays(7), 12));
 
         notification1 = notificationRepository.save(new Notification(
                 user,
@@ -93,34 +78,66 @@ class NotificationControllerTest {
         ));
     }
 
-    @Test
-    @DisplayName("Testing GET /v1/notifications endpoint")
-    void testGetUserNotificationsEndpoint() throws Exception {
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user.getId()));
-
-        mockMvc.perform(
-                get("/v1/notifications").header("Authorization", "Bearer " + signInToken.getAccessToken())
-        ).andExpectAll(
-                status().isOk(),
-                jsonPath("$.count").value(3),
-                jsonPath("$.results[2].message").value("message1"),
-                jsonPath("$.results[1].message").value("message2"),
-                jsonPath("$.results[0].message").value("message3")
-        );
+    @AfterEach
+    void tearDown() {
+        notificationRepository.deleteAll();
+        reservationRepository.deleteAll();
+        storeRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test
-    @DisplayName("Testing POST /v1/notifications/{notificationId}/read endpoint")
-    void testReadNotificationEndpoint() throws Exception {
+    @DisplayName("[Integration] Testing GET /v1/notifications endpoint")
+    void testGetUserNotificationsEndpoint() {
         SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user.getId()));
 
-        mockMvc.perform(
-                post("/v1/notifications/{notificationId}/read", notification1.getId())
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-        ).andExpect(status().isOk());
+        RestAssured
+                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .relaxedHTTPSValidation()
+                .filter(document(
+                        DEFAULT_RESTDOC_PATH,
+                        requestHeaders(headerWithName("Authorization").description("Access token in bearer scheme")),
+                        responseFields(
+                                fieldWithPath("count").description("The number of notifications"),
+                                fieldWithPath("pageSize").description("The number of notifications per page"),
+                                fieldWithPath("pageNumber").description("The current page number. It starts from 0"),
+                                fieldWithPath("hasNext").description("The existence of the next page"),
+                                fieldWithPath("results[].notificationId").description("The ID of the notification"),
+                                fieldWithPath("results[].resourceType").description("The type of the resource"),
+                                fieldWithPath("results[].resourceId").description("The ID of the resource"),
+                                fieldWithPath("results[].message").description("The message of the notification"),
+                                fieldWithPath("results[].status").description("The status of the notification"),
+                                fieldWithPath("results[].notifiedTime")
+                                        .description("The time when the notification was notified")
+                        )
+                ))
+                .when().get("/v1/notifications")
+                .then()
+                .statusCode(200)
+                .body(
+                        "count", equalTo(3),
+                        "results[2].message", equalTo("message1"),
+                        "results[1].message", equalTo("message2"),
+                        "results[0].message", equalTo("message3")
+                );
+    }
 
-        em.flush();
-        em.clear();
+    @Test
+    @DisplayName("[Integration] Testing POST /v1/notifications/{notificationId}/read endpoint")
+    void testReadNotificationEndpoint() {
+        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user.getId()));
+
+        RestAssured
+                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .relaxedHTTPSValidation()
+                .filter(document(
+                        DEFAULT_RESTDOC_PATH,
+                        requestHeaders(headerWithName("Authorization").description("Access token in bearer scheme")),
+                        pathParameters(parameterWithName("notificationId").description("The ID of the notification"))
+                ))
+                .when().post("/v1/notifications/{notificationId}/read", notification1.getId())
+                .then()
+                .statusCode(200);
 
         notificationRepository.findById(notification1.getId()).ifPresentOrElse(
                 notification -> assertTrue(notification.isStatusRead()),
@@ -137,17 +154,20 @@ class NotificationControllerTest {
     }
 
     @Test
-    @DisplayName("Testing POST /v1/notifications/read-all endpoint")
-    void testReadAllNotificationsEndpoint() throws Exception {
+    @DisplayName("[Integration] Testing POST /v1/notifications/read-all endpoint")
+    void testReadAllNotificationsEndpoint() {
         SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user.getId()));
 
-        mockMvc.perform(
-                post("/v1/notifications/read-all")
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-        ).andExpect(status().isOk());
-
-        em.flush();
-        em.clear();
+        RestAssured
+                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .relaxedHTTPSValidation()
+                .filter(document(
+                        DEFAULT_RESTDOC_PATH,
+                        requestHeaders(headerWithName("Authorization").description("Access token in bearer scheme"))
+                ))
+                .when().post("/v1/notifications/read-all")
+                .then()
+                .statusCode(200);
 
         notificationRepository.findById(notification1.getId()).ifPresentOrElse(
                 notification -> assertTrue(notification.isStatusRead()),

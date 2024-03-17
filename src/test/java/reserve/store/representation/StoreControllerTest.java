@@ -1,17 +1,16 @@
 package reserve.store.representation;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.restassured.RestAssured;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.Commit;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
+import reserve.global.BaseRestAssuredTest;
 import reserve.signin.dto.SignInToken;
 import reserve.signin.infrastructure.JwtProvider;
 import reserve.store.domain.Store;
@@ -21,17 +20,22 @@ import reserve.store.infrastructure.StoreRepository;
 import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
 
+import javax.sql.DataSource;
+
+import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.restdocs.headers.HeaderDocumentation.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 
-@SpringBootTest
-@Transactional
-class StoreControllerTest {
+class StoreControllerTest extends BaseRestAssuredTest {
 
-    MockMvc mockMvc;
+    @Autowired
+    DataSource dataSource;
 
-    ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Autowired
     JwtProvider jwtProvider;
@@ -45,113 +49,151 @@ class StoreControllerTest {
     User user;
 
     @BeforeEach
-    void setUp(WebApplicationContext context) {
-        mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
-        user = userRepository.save(new User("username", "password", "nickname", "description"));
+    void setUp() {
+        user = userRepository.save(new User(
+                "username",
+                "password",
+                "nickname",
+                "StoreControllerTest.setUp()"
+        ));
+    }
+
+    @AfterEach
+    void tearDown() {
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        jdbcTemplate.update("DELETE FROM stores");
+        jdbcTemplate.update("DELETE FROM users");
     }
 
     @Test
-    @DisplayName("Testing POST /v1/stores endpoint")
-    void testCreateEndpoint() throws Exception {
+    @DisplayName("[Integration] Testing POST /v1/stores endpoint")
+    void testCreateEndpoint() throws JsonProcessingException {
         StoreCreateRequest storeCreateRequest = new StoreCreateRequest();
         storeCreateRequest.setName("Store name");
         storeCreateRequest.setAddress("City, Street, Zipcode");
-        storeCreateRequest.setDescription("Store description");
+        storeCreateRequest.setDescription("StoreControllerTest.testCreateEndpoint()");
 
         SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user.getId()));
 
-        mockMvc.perform(
-                post("/v1/stores")
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(storeCreateRequest))
-        ).andExpectAll(
-                status().isCreated(),
-                header().string("Location", Matchers.startsWith("/v1/stores/")),
-                content().string("")
-        );
+        String payload = objectMapper.writeValueAsString(storeCreateRequest);
+
+        RestAssured
+                .given(spec)
+                .header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(payload)
+                .relaxedHTTPSValidation()
+                .filter(document(
+                        DEFAULT_RESTDOC_PATH,
+                        requestHeaders(
+                                headerWithName("Authorization").description("Access token in bearer scheme")
+                        ),
+                        requestFields(
+                                fieldWithPath("name").description("Store name"),
+                                fieldWithPath("address").description("Store address"),
+                                fieldWithPath("description").description("Store description")
+                        ),
+                        responseHeaders(headerWithName("Location").description("The url of the created store"))
+                ))
+                .when().post("/v1/stores")
+                .then()
+                .statusCode(201)
+                .header("Location", Matchers.startsWith("/v1/stores/"));
 
         assertEquals(1, storeRepository.count());
     }
 
     @Test
-    @DisplayName("Testing GET /v1/stores/{id} endpoint")
-    void testGetStoreInfoEndpoint() throws Exception {
+    @DisplayName("[Integration] Testing GET /v1/stores/{id} endpoint")
+    void testGetStoreInfoEndpoint() {
         Store store = storeRepository.save(new Store(
                 user,
                 "Store name",
                 "City, Street, Zipcode",
-                "Store description"
+                "StoreControllerTest.testGetStoreInfoEndpoint()"
         ));
 
-        mockMvc.perform(
-                get("/v1/stores/{id}", store.getId())
-        ).andExpectAll(
-                status().isOk(),
-                content().contentType("application/json"),
-                jsonPath("$.storeId").value(store.getId()),
-                jsonPath("$.registrant").value("username"),
-                jsonPath("$.name").value("Store name"),
-                jsonPath("$.address").value("City, Street, Zipcode"),
-                jsonPath("$.description").value("Store description")
-        );
-    }
-
-    @Nested
-    class StoreSearchTest {
-
-        @BeforeEach
-        @Transactional
-        @Commit
-        void registerStores() {
-            User user2 = userRepository.save(new User("user2", "password", "hello", "description"));
-            storeRepository.save(new Store(user, "Pasta", "address", "Pasta only"));
-            storeRepository.save(new Store(user, "Pizza", "address", "Pizza and Pasta"));
-            storeRepository.save(new Store(user, "Hamburger", "pasta street", "Hamburger"));
-            storeRepository.save(new Store(user, "Korean food", "address", "Kimchi and Bulgogi"));
-            storeRepository.save(new Store(user2, "Italian", "address", "Steak and Pasta"));
-            storeRepository.save(new Store(user2, "Ramen", "address", "Ramen and Gyoza"));
-        }
-
-        @AfterEach
-        @Transactional
-        @Commit
-        void tearDown() {
-            storeRepository.deleteAll();
-            userRepository.deleteAll();
-        }
-
-        @Test
-        @DisplayName("Testing GET /v1/stores endpoint")
-        @Transactional(propagation = Propagation.NOT_SUPPORTED)
-        void testSearchEndpoint() throws Exception {
-            mockMvc.perform(
-                    get("/v1/stores")
-                            .param("registrant", "username")
-                            .param("query", "pasta")
-            ).andExpectAll(
-                    status().isOk(),
-                    jsonPath("$.count").value(3),
-                    jsonPath("$.pageSize").value(20),
-                    jsonPath("$.pageNumber").value(0),
-                    jsonPath("$.hasNext").value(false),
-                    jsonPath("$.results.length()").value(3),
-                    jsonPath("$.results[0].name").value("Pasta"),
-                    jsonPath("$.results[1].name").value("Pizza"),
-                    jsonPath("$.results[2].name").value("Hamburger")
-            );
-        }
-
+        RestAssured
+                .given(spec)
+                .relaxedHTTPSValidation()
+                .filter(document(
+                        DEFAULT_RESTDOC_PATH,
+                        pathParameters(
+                                parameterWithName("id").description("The id of the store to retrieve the store info")
+                        ),
+                        responseFields(
+                                fieldWithPath("storeId").description("The id of the store"),
+                                fieldWithPath("registrant").description("The username of the registrant"),
+                                fieldWithPath("name").description("The name of the store"),
+                                fieldWithPath("address").description("The address of the store"),
+                                fieldWithPath("description").description("The description of the store")
+                        )
+                ))
+                .when().get("/v1/stores/{id}", store.getId())
+                .then()
+                .statusCode(200)
+                .body("storeId", equalTo(store.getId().intValue()))
+                .body("registrant", equalTo(user.getUsername()))
+                .body("name", equalTo(store.getName()))
+                .body("address", equalTo(store.getAddress()))
+                .body("description", equalTo(store.getDescription()));
     }
 
     @Test
-    @DisplayName("Testing PUT /v1/stores/{id} endpoint")
-    void testUpdateEndpoint() throws Exception {
+    @DisplayName("[Integration] Testing GET /v1/stores endpoint")
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    void testSearchEndpoint() {
+        User user2 = userRepository.save(new User("user2", "password", "hello", "description"));
+        storeRepository.save(new Store(user, "Pasta", "address", "Pasta only"));
+        storeRepository.save(new Store(user, "Pizza", "address", "Pizza and Pasta"));
+        storeRepository.save(new Store(user, "Hamburger", "pasta street", "Hamburger"));
+        storeRepository.save(new Store(user, "Korean food", "address", "Kimchi and Bulgogi"));
+        storeRepository.save(new Store(user2, "Italian", "address", "Steak and Pasta"));
+        storeRepository.save(new Store(user2, "Ramen", "address", "Ramen and Gyoza"));
+
+        RestAssured
+                .given(spec).param("registrant", "username").param("query", "pasta")
+                .relaxedHTTPSValidation()
+                .filter(document(
+                        DEFAULT_RESTDOC_PATH,
+                        queryParameters(
+                                parameterWithName("registrant").description("The username of the registrant"),
+                                parameterWithName("query").description("The query to search the stores")
+                        ),
+                        responseFields(
+                                fieldWithPath("count").description("The total count of the search results"),
+                                fieldWithPath("pageSize").description("The page size of the search results"),
+                                fieldWithPath("pageNumber").description("The page number of the search results"),
+                                fieldWithPath("hasNext").description("The existence of the next page"),
+                                fieldWithPath("results").description("The search results"),
+                                fieldWithPath("results[].storeId").description("The id of the store"),
+                                fieldWithPath("results[].registrant").description("The username of the registrant"),
+                                fieldWithPath("results[].name").description("The name of the store"),
+                                fieldWithPath("results[].address").description("The address of the store"),
+                                fieldWithPath("results[].description").description("The description of the store")
+                        )
+                ))
+                .when().get("/v1/stores")
+                .then()
+                .statusCode(200)
+                .body("count", equalTo(3))
+                .body("pageSize", equalTo(20))
+                .body("pageNumber", equalTo(0))
+                .body("hasNext", equalTo(false))
+                .body("results.size()", equalTo(3))
+                .body("results[0].name", equalTo("Pasta"))
+                .body("results[1].name", equalTo("Pizza"))
+                .body("results[2].name", equalTo("Hamburger"));
+    }
+
+    @Test
+    @DisplayName("[Integration] Testing PUT /v1/stores/{id} endpoint")
+    void testUpdateEndpoint() throws JsonProcessingException {
         Store store = storeRepository.save(new Store(
                 user,
                 "Store name",
                 "City, Street, Zipcode",
-                "Store description"
+                "StoreControllerTest.testUpdateEndpoint()"
         ));
 
         StoreUpdateRequest storeUpdateRequest = new StoreUpdateRequest();
@@ -161,12 +203,29 @@ class StoreControllerTest {
 
         SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user.getId()));
 
-        mockMvc.perform(
-                put("/v1/stores/{id}", store.getId())
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(storeUpdateRequest))
-        ).andExpect(status().isOk());
+        String payload = objectMapper.writeValueAsString(storeUpdateRequest);
+
+        RestAssured
+                .given(spec)
+                .header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(payload)
+                .relaxedHTTPSValidation()
+                .filter(document(
+                        DEFAULT_RESTDOC_PATH,
+                        requestHeaders(
+                                headerWithName("Authorization").description("Access token in bearer scheme")
+                        ),
+                        pathParameters(parameterWithName("id").description("The id of the store to update")),
+                        requestFields(
+                                fieldWithPath("name").description("Store name"),
+                                fieldWithPath("address").description("Store address"),
+                                fieldWithPath("description").description("Store description")
+                        )
+                ))
+                .when().put("/v1/stores/{id}", store.getId())
+                .then()
+                .statusCode(200);
 
         storeRepository.findById(store.getId()).ifPresentOrElse(
                 updatedStore -> {
@@ -179,22 +238,32 @@ class StoreControllerTest {
     }
 
     @Test
-    @DisplayName("Testing DELETE /v1/stores/{id} endpoint")
-    void testDeleteEndpoint() throws Exception {
+    @DisplayName("[Integration] Testing DELETE /v1/stores/{id} endpoint")
+    void testDeleteEndpoint() {
         Store store = storeRepository.save(new Store(
                 user,
                 "Store name",
                 "City, Street, Zipcode",
-                "Store description"
+                "StoreControllerTest.testDeleteEndpoint()"
         ));
 
         SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user.getId()));
 
-        mockMvc.perform(
-                delete("/v1/stores/{id}", store.getId())
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                        .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk());
+        RestAssured
+                .given(spec)
+                .header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .relaxedHTTPSValidation()
+                .filter(document(
+                        DEFAULT_RESTDOC_PATH,
+                        requestHeaders(
+                                headerWithName("Authorization").description("Access token in bearer scheme")
+                        ),
+                        pathParameters(parameterWithName("id").description("The id of the store to delete"))
+                ))
+                .when().delete("/v1/stores/{id}", store.getId())
+                .then()
+                .statusCode(200);
 
         assertFalse(storeRepository.existsById(store.getId()));
     }

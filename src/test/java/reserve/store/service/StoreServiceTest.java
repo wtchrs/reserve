@@ -45,7 +45,7 @@ class StoreServiceTest {
 
     @Test
     @DisplayName("Testing store creation")
-    void testStoreCreation() {
+    void testStoreCreation() throws Exception {
         StoreCreateRequest storeCreateRequest = Mockito.spy(new StoreCreateRequest());
         Mockito.when(storeCreateRequest.getName()).thenReturn("name");
         Mockito.when(storeCreateRequest.getAddress()).thenReturn("address");

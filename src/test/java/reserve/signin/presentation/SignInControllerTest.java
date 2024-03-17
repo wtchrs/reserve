@@ -1,19 +1,18 @@
 package reserve.signin.presentation;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.Cookie;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
+import reserve.global.BaseRestAssuredTest;
 import reserve.signin.dto.request.SignInRequest;
 import reserve.signin.infrastructure.JwtProvider;
 import reserve.signin.infrastructure.RefreshTokenRepository;
@@ -21,19 +20,20 @@ import reserve.signup.infrastructure.PasswordEncoder;
 import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
 
-import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
+import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.restdocs.cookies.CookieDocumentation.cookieWithName;
+import static org.springframework.restdocs.cookies.CookieDocumentation.responseCookies;
+import static org.springframework.restdocs.headers.HeaderDocumentation.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 
-@SpringBootTest
-@Transactional
-class SignInControllerTest {
+class SignInControllerTest extends BaseRestAssuredTest {
 
-    MockMvc mockMvc;
-
-    ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -50,8 +50,9 @@ class SignInControllerTest {
     User user;
 
     @BeforeEach
-    void setUp(WebApplicationContext context) {
-        mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
+    @Transactional
+    @Commit
+    void setUp() {
         user = userRepository.save(new User(
                 "username",
                 passwordEncoder.encode("password"),
@@ -60,104 +61,129 @@ class SignInControllerTest {
         ));
     }
 
-    @Test
-    @DisplayName("Testing POST /v1/sign-in endpoint")
-    void testSignInEndpoint() throws Exception {
-        SignInRequest signInRequest = new SignInRequest();
-        signInRequest.setUsername("username");
-        signInRequest.setPassword("password");
-
-        mockMvc.perform(
-                post("/v1/sign-in")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(signInRequest))
-        ).andExpectAll(
-                status().isOk(),
-                header().exists("Authorization"), // Access token
-                cookie().exists("refresh")
-        ).andDo(mvcResult -> {
-            String accessToken = mvcResult.getResponse().getHeader("Authorization");
-            assertFalse(jwtProvider.isAccessTokenExpired(accessToken));
-
-            String refresh = mvcResult.getResponse().getCookie("refresh").getValue();
-            refreshTokenRepository.findById(refresh).ifPresentOrElse(
-                    refreshToken -> assertEquals(user.getId(), refreshToken.getUserId()),
-                    () -> fail("Refresh token not found")
-            );
-        });
+    @AfterEach
+    @Transactional
+    @Commit
+    void tearDown() {
+        userRepository.deleteAll();
     }
 
     @Test
-    @DisplayName("Testing POST /v1/token-refresh endpoint")
-    void testRefreshAccessTokenEndpoint() throws Exception {
+    @DisplayName("[Integration] Testing POST /v1/sign-in endpoint")
+    void testSignInEndpoint() throws JsonProcessingException {
+        SignInRequest signInRequest = new SignInRequest();
+        signInRequest.setUsername(user.getUsername());
+        signInRequest.setPassword("password");
+
+        String payload = objectMapper.writeValueAsString(signInRequest);
+
+        Response response = RestAssured
+                .given(spec).contentType(MediaType.APPLICATION_JSON_VALUE).body(payload)
+                .filter(document(
+                        DEFAULT_RESTDOC_PATH,
+                        requestFields(
+                                fieldWithPath("username").description("The username of the user"),
+                                fieldWithPath("password").description("The password of the user")
+                        ),
+                        responseHeaders(headerWithName("Authorization").description("The access token")),
+                        responseCookies(cookieWithName("refresh").description("The refresh token"))
+                ))
+                .relaxedHTTPSValidation()
+                .when().post("/v1/sign-in");
+
+        assertEquals(200, response.getStatusCode());
+        assertFalse(jwtProvider.isAccessTokenExpired(response.getHeader("Authorization")));
+        assertFalse(jwtProvider.isRefreshTokenExpired(response.getCookie("refresh")));
+
+        refreshTokenRepository.findById(response.getCookie("refresh")).ifPresentOrElse(
+                refreshToken -> assertEquals(user.getId(), refreshToken.getUserId()),
+                () -> fail("Refresh token not found")
+        );
+    }
+
+    @Test
+    @DisplayName("[Integration] Testing POST /v1/token-refresh endpoint")
+    void testRefreshAccessTokenEndpoint() throws JsonProcessingException {
         SignInRequest signInRequest = new SignInRequest();
         signInRequest.setUsername("username");
         signInRequest.setPassword("password");
 
-        Cookie refreshCookie = mockMvc.perform(
-                post("/v1/sign-in")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(signInRequest))
-        ).andReturn().getResponse().getCookie("refresh");
+        String payload = objectMapper.writeValueAsString(signInRequest);
 
-        ResultActions resultActions;
+        String refreshToken = RestAssured
+                .given(spec).contentType(MediaType.APPLICATION_JSON_VALUE).body(payload)
+                .relaxedHTTPSValidation()
+                .when().post("/v1/sign-in")
+                .getCookie("refresh");
 
-        try (var ignored = Mockito.mockConstruction(
-                Date.class,
-                (mock, context) -> Mockito.when(mock.getTime()).thenReturn(new Date().getTime() + 600 * 1000)
-        )) {
-            resultActions = mockMvc.perform(post("/v1/token-refresh").cookie(refreshCookie));
+        Response response;
+
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
 
-        resultActions.andExpectAll(
-                status().isOk(),
-                header().exists("Authorization"), // Access token
-                cookie().exists("refresh")
-        ).andDo(mvcResult -> {
-            String accessToken = mvcResult.getResponse().getHeader("Authorization");
-            assertFalse(jwtProvider.isAccessTokenExpired(accessToken));
+        response = RestAssured
+                .given(spec).cookie("refresh", refreshToken)
+                .filter(document(
+                        DEFAULT_RESTDOC_PATH,
+                        responseHeaders(headerWithName("Authorization").description("The access token")),
+                        responseCookies(cookieWithName("refresh").description("The refresh token"))
+                ))
+                .relaxedHTTPSValidation()
+                .when().post("/v1/token-refresh");
 
-            String newRefresh = mvcResult.getResponse().getCookie("refresh").getValue();
-            assertNotEquals(refreshCookie.getValue(), newRefresh);
+        assertEquals(200, response.getStatusCode());
+        assertFalse(jwtProvider.isAccessTokenExpired(response.getHeader("Authorization")));
+        assertFalse(jwtProvider.isRefreshTokenExpired(response.getCookie("refresh")));
+        assertNotEquals(refreshToken, response.getCookie("refresh"));
 
-            refreshTokenRepository.findById(refreshCookie.getValue())
-                    .ifPresent(refreshToken -> fail("Old refresh token not deleted"));
-            refreshTokenRepository.findById(newRefresh).ifPresentOrElse(
-                    refreshToken -> assertEquals(user.getId(), refreshToken.getUserId()),
-                    () -> fail("New refresh token not found")
-            );
-        });
+        refreshTokenRepository.findById(refreshToken).ifPresent(ignored1 -> fail("Old refresh token not deleted"));
+        refreshTokenRepository.findById(response.getCookie("refresh")).ifPresentOrElse(
+                refreshToken1 -> assertEquals(user.getId(), refreshToken1.getUserId()),
+                () -> fail("New refresh token not found")
+        );
     }
 
     @Test
-    @DisplayName("Testing POST /v1/sign-out endpoint")
-    void testSignOutEndpoint() throws Exception {
+    @DisplayName("[Integration] Testing POST /v1/sign-out endpoint")
+    void testSignOutEndpoint() throws JsonProcessingException {
         SignInRequest signInRequest = new SignInRequest();
         signInRequest.setUsername("username");
         signInRequest.setPassword("password");
 
-        mockMvc.perform(
-                post("/v1/sign-in")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(signInRequest))
-        ).andExpect(
-                status().isOk()
-        ).andDo(mvcResult -> {
-            String accessToken = mvcResult.getResponse().getHeader("Authorization");
-            Cookie refresh = mvcResult.getResponse().getCookie("refresh");
+        String payload = objectMapper.writeValueAsString(signInRequest);
 
-            mockMvc.perform(
-                    post("/v1/sign-out")
-                            .header("Authorization", "Bearer " + accessToken)
-                            .cookie(refresh)
-            ).andExpectAll(
-                    status().isOk(),
-                    cookie().maxAge("refresh", 0)
-            );
+        Response response = RestAssured
+                .given(spec).contentType(MediaType.APPLICATION_JSON_VALUE).body(payload)
+                .relaxedHTTPSValidation()
+                .when().post("/v1/sign-in");
 
-            refreshTokenRepository.findById(refresh.getValue())
-                    .ifPresent(refreshToken -> fail("Refresh token not deleted"));
-        });
+        response.then().statusCode(200);
+
+        String accessToken = response.getHeader("Authorization");
+        String refreshToken = response.getCookie("refresh");
+
+        Response response1 = RestAssured
+                .given(spec).header("Authorization", "Bearer " + accessToken).cookie("refresh", refreshToken)
+                .filter(document(
+                        DEFAULT_RESTDOC_PATH,
+                        requestHeaders(
+                                headerWithName("Authorization").description("Access token in bearer scheme")
+                        ),
+                        responseCookies(
+                                cookieWithName("refresh")
+                                        .description("The refresh token cookie. It expires immediately.")
+                        )
+                ))
+                .relaxedHTTPSValidation()
+                .when().post("/v1/sign-out");
+
+        response1.then().statusCode(200).cookie("refresh", "");
+        assertEquals(0, response1.getDetailedCookie("refresh").getMaxAge());
+
+        refreshTokenRepository.findById(refreshToken).ifPresent(refreshToken1 -> fail("Refresh token not deleted"));
     }
 
 }

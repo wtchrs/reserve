@@ -1,15 +1,14 @@
 package reserve.reservation.presentation;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.restassured.RestAssured;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.jdbc.core.JdbcTemplate;
+import reserve.global.BaseRestAssuredTest;
+import reserve.notification.infrastructure.NotificationRepository;
 import reserve.reservation.domain.Reservation;
 import reserve.reservation.infrastructure.ReservationRepository;
 import reserve.signin.dto.SignInToken;
@@ -19,19 +18,19 @@ import reserve.store.infrastructure.StoreRepository;
 import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
 
+import javax.sql.DataSource;
 import java.time.LocalDate;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 
-@SpringBootTest
-@Transactional
-class ReservationManageControllerTest {
-
-    MockMvc mockMvc;
+class ReservationManageControllerTest extends BaseRestAssuredTest {
 
     @Autowired
-    ObjectMapper objectMapper;
+    DataSource dataSource;
 
     @Autowired
     JwtProvider jwtProvider;
@@ -45,110 +44,262 @@ class ReservationManageControllerTest {
     @Autowired
     ReservationRepository reservationRepository;
 
-    User user, registrant;
-    Store store;
+    @Autowired
+    NotificationRepository notificationRepository;
+
+    User registrant;
     Reservation ready, inService, completed, cancelled;
 
     @BeforeEach
-    void setUp(WebApplicationContext context) {
-        mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
+    void setUp() {
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 
-        user = userRepository.save(new User("username", "password", "nickname", "description"));
+        User user = userRepository.save(new User("username", "password", "nickname", "description"));
         registrant = userRepository.save(new User("registrant", "password", "nickname", "description"));
-        store = storeRepository.save(new Store(registrant, "store", "address", "description"));
-        ready = reservationRepository.save(new Reservation(user, store, LocalDate.now().plusDays(7), 12));
-        inService = reservationRepository.save(new Reservation(user, store, LocalDate.now().plusDays(7), 12));
-        completed = reservationRepository.save(new Reservation(user, store, LocalDate.now().plusDays(7), 12));
-        cancelled = reservationRepository.save(new Reservation(user, store, LocalDate.now().plusDays(7), 12));
+        Store store = storeRepository.save(new Store(registrant, "store", "address", "description"));
 
-        inService.start();
-        completed.start();
-        completed.complete();
-        cancelled.cancel();
+        ready = reservationRepository.save(new Reservation(user, store, LocalDate.now().plusDays(7), 12));
+
+        inService = reservationRepository.save(new Reservation(user, store, LocalDate.now().plusDays(7), 12));
+        jdbcTemplate.update("UPDATE reservations SET status = 'IN_SERVICE' WHERE reservation_id = ?", inService.getId());
+
+        completed = reservationRepository.save(new Reservation(user, store, LocalDate.now().plusDays(7), 12));
+        jdbcTemplate.update("UPDATE reservations SET status = 'COMPLETED' WHERE reservation_id = ?", completed.getId());
+
+        cancelled = reservationRepository.save(new Reservation(user, store, LocalDate.now().plusDays(7), 12));
+        jdbcTemplate.update("UPDATE reservations SET status = 'CANCELLED' WHERE reservation_id = ?", cancelled.getId());
+    }
+
+    @AfterEach
+    void tearDown() {
+        notificationRepository.deleteAll();
+        reservationRepository.deleteAll();
+        storeRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test
-    @DisplayName("Testing POST /v1/reservations/manage/{reservationId}/cancel endpoint")
-    void testCancelEndpoint() throws Exception {
+    @DisplayName("[Integration] Testing POST /v1/reservations/manage/{reservationId}/cancel endpoint")
+    void testCancelEndpoint() {
         final String urlTemplate = "/v1/reservations/manage/{reservationId}/cancel";
 
         SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
 
-        mockMvc.perform(
-                post(urlTemplate, ready.getId())
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-        ).andExpect(status().isOk());
+        // Cancel the ready reservation
+        RestAssured
+                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .relaxedHTTPSValidation()
+                .filter(document(
+                        DEFAULT_RESTDOC_PATH,
+                        requestHeaders(
+                                headerWithName("Authorization").description("The access token in bearer scheme")
+                        ),
+                        pathParameters(
+                                parameterWithName("reservationId").description("The reservation ID to cancel")
+                        )
+                ))
+                .when().post(urlTemplate, ready.getId())
+                .then().assertThat().statusCode(200);
 
-        mockMvc.perform(
-                post(urlTemplate, inService.getId())
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-        ).andExpect(status().isConflict());
+        // Cancel the in-service reservation
+        RestAssured
+                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .relaxedHTTPSValidation()
+                .filter(document(
+                        DEFAULT_RESTDOC_PATH,
+                        requestHeaders(
+                                headerWithName("Authorization").description("The access token in bearer scheme")
+                        ),
+                        pathParameters(
+                                parameterWithName("reservationId").description("The reservation ID to cancel")
+                        )
+                ))
+                .when().post(urlTemplate, inService.getId())
+                .then().assertThat().statusCode(409);
 
-        mockMvc.perform(
-                post(urlTemplate, completed.getId())
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-        ).andExpect(status().isConflict());
+        // Cancel the completed reservation
+        RestAssured
+                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .relaxedHTTPSValidation()
+                .filter(document(
+                        DEFAULT_RESTDOC_PATH,
+                        requestHeaders(
+                                headerWithName("Authorization").description("The access token in bearer scheme")
+                        ),
+                        pathParameters(
+                                parameterWithName("reservationId").description("The reservation ID to cancel")
+                        )
+                ))
+                .when().post(urlTemplate, completed.getId())
+                .then().assertThat().statusCode(409);
 
-        mockMvc.perform(
-                post(urlTemplate, cancelled.getId())
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-        ).andExpect(status().isOk());
+        // Cancel the cancelled reservation
+        RestAssured
+                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .relaxedHTTPSValidation()
+                .filter(document(
+                        DEFAULT_RESTDOC_PATH,
+                        requestHeaders(
+                                headerWithName("Authorization").description("The access token in bearer scheme")
+                        ),
+                        pathParameters(
+                                parameterWithName("reservationId").description("The reservation ID to cancel")
+                        )
+                ))
+                .when().post(urlTemplate, cancelled.getId())
+                .then().assertThat().statusCode(200);
     }
 
     @Test
-    @DisplayName("Testing POST /v1/reservations/manage/{reservationId}/start endpoint")
-    void testStartServiceEndpoint() throws Exception {
+    @DisplayName("[Integration] Testing POST /v1/reservations/manage/{reservationId}/start endpoint")
+    void testStartServiceEndpoint() {
         final String urlTemplate = "/v1/reservations/manage/{reservationId}/start";
 
         SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
 
-        mockMvc.perform(
-                post(urlTemplate, ready.getId())
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-        ).andExpect(status().isOk());
+        // Start the ready reservation
+        RestAssured
+                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .relaxedHTTPSValidation()
+                .filter(document(
+                        DEFAULT_RESTDOC_PATH,
+                        requestHeaders(
+                                headerWithName("Authorization").description("The access token in bearer scheme")
+                        ),
+                        pathParameters(
+                                parameterWithName("reservationId")
+                                        .description("The reservation ID to start the service")
+                        )
+                ))
+                .when().post(urlTemplate, ready.getId())
+                .then().assertThat().statusCode(200);
 
-        mockMvc.perform(
-                post(urlTemplate, inService.getId())
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-        ).andExpect(status().isOk());
+        // Start the in-service reservation
+        RestAssured
+                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .relaxedHTTPSValidation()
+                .filter(document(
+                        DEFAULT_RESTDOC_PATH,
+                        requestHeaders(
+                                headerWithName("Authorization").description("The access token in bearer scheme")
+                        ),
+                        pathParameters(
+                                parameterWithName("reservationId")
+                                        .description("The reservation ID to start the service")
+                        )
+                ))
+                .when().post(urlTemplate, inService.getId())
+                .then().assertThat().statusCode(200);
 
-        mockMvc.perform(
-                post(urlTemplate, completed.getId())
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-        ).andExpect(status().isConflict());
+        // Start the completed reservation
+        RestAssured
+                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .relaxedHTTPSValidation()
+                .filter(document(
+                        DEFAULT_RESTDOC_PATH,
+                        requestHeaders(
+                                headerWithName("Authorization").description("The access token in bearer scheme")
+                        ),
+                        pathParameters(
+                                parameterWithName("reservationId")
+                                        .description("The reservation ID to start the service")
+                        )
+                ))
+                .when().post(urlTemplate, completed.getId())
+                .then().assertThat().statusCode(409);
 
-        mockMvc.perform(
-                post(urlTemplate, cancelled.getId())
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-        ).andExpect(status().isConflict());
+        // Start the cancelled reservation
+        RestAssured
+                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .relaxedHTTPSValidation()
+                .filter(document(
+                        DEFAULT_RESTDOC_PATH,
+                        requestHeaders(
+                                headerWithName("Authorization").description("The access token in bearer scheme")
+                        ),
+                        pathParameters(
+                                parameterWithName("reservationId")
+                                        .description("The reservation ID to start the service")
+                        )
+                ))
+                .when().post(urlTemplate, cancelled.getId())
+                .then().assertThat().statusCode(409);
     }
 
     @Test
-    @DisplayName("Testing POST /v1/reservations/manage/{reservationId}/complete endpoint")
-    void testCompleteEndpoint() throws Exception {
+    @DisplayName("[Integration] Testing POST /v1/reservations/manage/{reservationId}/complete endpoint")
+    void testCompleteEndpoint() {
         final String urlTemplate = "/v1/reservations/manage/{reservationId}/complete";
 
         SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
 
-        mockMvc.perform(
-                post(urlTemplate, ready.getId())
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-        ).andExpect(status().isConflict());
+        // Complete the ready reservation
+        RestAssured
+                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .relaxedHTTPSValidation()
+                .filter(document(
+                        DEFAULT_RESTDOC_PATH,
+                        requestHeaders(
+                                headerWithName("Authorization").description("The access token in bearer scheme")
+                        ),
+                        pathParameters(
+                                parameterWithName("reservationId")
+                                        .description("The reservation ID to complete the service")
+                        )
+                ))
+                .when().post(urlTemplate, ready.getId())
+                .then().assertThat().statusCode(409);
 
-        mockMvc.perform(
-                post(urlTemplate, inService.getId())
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-        ).andExpect(status().isOk());
+        // Complete the in-service reservation
+        RestAssured
+                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .relaxedHTTPSValidation()
+                .filter(document(
+                        DEFAULT_RESTDOC_PATH,
+                        requestHeaders(
+                                headerWithName("Authorization").description("The access token in bearer scheme")
+                        ),
+                        pathParameters(
+                                parameterWithName("reservationId")
+                                        .description("The reservation ID to complete the service")
+                        )
+                ))
+                .when().post(urlTemplate, inService.getId())
+                .then().assertThat().statusCode(200);
 
-        mockMvc.perform(
-                post(urlTemplate, completed.getId())
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-        ).andExpect(status().isOk());
+        // Complete the completed reservation
+        RestAssured
+                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .relaxedHTTPSValidation()
+                .filter(document(
+                        DEFAULT_RESTDOC_PATH,
+                        requestHeaders(
+                                headerWithName("Authorization").description("The access token in bearer scheme")
+                        ),
+                        pathParameters(
+                                parameterWithName("reservationId")
+                                        .description("The reservation ID to complete the service")
+                        )
+                ))
+                .when().post(urlTemplate, completed.getId())
+                .then().assertThat().statusCode(200);
 
-        mockMvc.perform(
-                post(urlTemplate, cancelled.getId())
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-        ).andExpect(status().isConflict());
+        // Complete the cancelled reservation
+        RestAssured
+                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .relaxedHTTPSValidation()
+                .filter(document(
+                        DEFAULT_RESTDOC_PATH,
+                        requestHeaders(
+                                headerWithName("Authorization").description("The access token in bearer scheme")
+                        ),
+                        pathParameters(
+                                parameterWithName("reservationId")
+                                        .description("The reservation ID to complete the service")
+                        )
+                ))
+                .when().post(urlTemplate, cancelled.getId())
+                .then().assertThat().statusCode(409);
     }
 
 }

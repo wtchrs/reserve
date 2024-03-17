@@ -10,6 +10,7 @@ import reserve.signin.dto.SignInToken;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.time.Instant;
 import java.util.Date;
 
 @Component
@@ -57,13 +58,14 @@ public class JwtProvider {
     }
 
     private String generateToken(String subject, int expirationPeriod, Key signingKey) {
-        Date now = new Date();
-        Date expiration = new Date(now.getTime() + expirationPeriod * 1000L);
+        Instant now = Instant.now();
+        Date issued = Date.from(now);
+        Date expiration = Date.from(now.plusSeconds(expirationPeriod * 1000L));
         return Jwts.builder()
                 .setHeaderParam(JWT_TYPE_HEADER_NAME, JWT_TYPE_HEADER_VALUE)
                 .setSubject(subject)
                 .setExpiration(expiration)
-                .setIssuedAt(now)
+                .setIssuedAt(issued)
                 .signWith(signingKey)
                 .compact();
     }

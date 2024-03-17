@@ -2,6 +2,7 @@ package reserve.user.dto.response;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import reserve.user.domain.User;
 
 import java.time.LocalDate;

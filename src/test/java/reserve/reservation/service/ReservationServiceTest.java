@@ -61,7 +61,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("Testing reservation creation")
-    void testReservationCreation() {
+    void testReservationCreation() throws Exception {
         ReservationCreateRequest reservationCreateRequest = new ReservationCreateRequest();
         reservationCreateRequest.setStoreId(1L);
         reservationCreateRequest.setDate(LocalDate.now());

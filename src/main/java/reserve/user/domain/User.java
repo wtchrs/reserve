@@ -10,7 +10,7 @@ import reserve.global.entity.DeletableBaseEntity;
 
 @Entity
 @Table(name = "users")
-@SQLRestriction("status = 'available'")
+@SQLRestriction("status = 'AVAILABLE'")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class User extends DeletableBaseEntity {
@@ -43,4 +43,5 @@ public class User extends DeletableBaseEntity {
     public void changePassword(String newPasswordHash) {
         this.passwordHash = newPasswordHash;
     }
+
 }
