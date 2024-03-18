@@ -23,7 +23,7 @@ public enum ErrorCode {
     INVALID_REQUEST(200, "Request is invalid."),
     RESERVATION_CANNOT_CANCEL(211, "Failed to cancel the reservation as it is already in service or completed."),
     RESERVATION_CANNOT_START(212, "Failed to start the reservation as it is not ready state."),
-    RESERVATION_NOT_IN_SERVICE(213, "Failed to complete the reservation as it is not in service."),
+    RESERVATION_CANNOT_COMPLETE(213, "Failed to complete the reservation as it is not in service."),
 
     // 3xx: Not found errors.
     USER_NOT_FOUND(301, "User does not exist."),

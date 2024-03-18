@@ -7,7 +7,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.restdocs.request.PathParametersSnippet;
 import reserve.global.BaseRestAssuredTest;
+import reserve.global.exception.ErrorCode;
 import reserve.notification.infrastructure.NotificationRepository;
 import reserve.reservation.domain.Reservation;
 import reserve.reservation.infrastructure.ReservationRepository;
@@ -22,12 +24,16 @@ import javax.sql.DataSource;
 import java.time.LocalDate;
 
 import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
-import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
-import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
+import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static reserve.global.DocumentationSnippetUtils.*;
 
 class ReservationManageControllerTest extends BaseRestAssuredTest {
+
+    private static final String CANCEL_ENDPOINT_URL_TEMPLATE = "/v1/reservations/manage/{reservationId}/cancel";
+    private static final String START_ENDPOINT_URL_TEMPLATE = "/v1/reservations/manage/{reservationId}/start";
+    private static final String COMPLETE_ENDPOINT_URL_TEMPLATE = "/v1/reservations/manage/{reservationId}/complete";
 
     @Autowired
     DataSource dataSource;
@@ -61,7 +67,10 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         ready = reservationRepository.save(new Reservation(user, store, LocalDate.now().plusDays(7), 12));
 
         inService = reservationRepository.save(new Reservation(user, store, LocalDate.now().plusDays(7), 12));
-        jdbcTemplate.update("UPDATE reservations SET status = 'IN_SERVICE' WHERE reservation_id = ?", inService.getId());
+        jdbcTemplate.update(
+                "UPDATE reservations SET status = 'IN_SERVICE' WHERE reservation_id = ?",
+                inService.getId()
+        );
 
         completed = reservationRepository.save(new Reservation(user, store, LocalDate.now().plusDays(7), 12));
         jdbcTemplate.update("UPDATE reservations SET status = 'COMPLETED' WHERE reservation_id = ?", completed.getId());
@@ -79,10 +88,8 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
     }
 
     @Test
-    @DisplayName("[Integration] Testing POST /v1/reservations/manage/{reservationId}/cancel endpoint")
-    void testCancelEndpoint() {
-        final String urlTemplate = "/v1/reservations/manage/{reservationId}/cancel";
-
+    @DisplayName("[Integration] Testing POST " + CANCEL_ENDPOINT_URL_TEMPLATE + " endpoint for ready reservation")
+    void testCancelEndpointForReadyReservation() {
         SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
 
         // Cancel the ready reservation
@@ -91,15 +98,19 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
                 .relaxedHTTPSValidation()
                 .filter(document(
                         DEFAULT_RESTDOC_PATH,
-                        requestHeaders(
-                                headerWithName("Authorization").description("The access token in bearer scheme")
-                        ),
-                        pathParameters(
-                                parameterWithName("reservationId").description("The reservation ID to cancel")
-                        )
+                        bearerTokenAuthorizationSnippet(),
+                        reservationIdToCancelPathParametersSnippet()
                 ))
-                .when().post(urlTemplate, ready.getId())
+                .when().post(CANCEL_ENDPOINT_URL_TEMPLATE, ready.getId())
                 .then().assertThat().statusCode(200);
+    }
+
+    @Test
+    @DisplayName(
+            "[Integration][Fail] Testing POST " + CANCEL_ENDPOINT_URL_TEMPLATE + " endpoint for in-service reservation"
+    )
+    void testCancelEndpointForInServiceReservation() {
+        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
 
         // Cancel the in-service reservation
         RestAssured
@@ -107,15 +118,23 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
                 .relaxedHTTPSValidation()
                 .filter(document(
                         DEFAULT_RESTDOC_PATH,
-                        requestHeaders(
-                                headerWithName("Authorization").description("The access token in bearer scheme")
-                        ),
-                        pathParameters(
-                                parameterWithName("reservationId").description("The reservation ID to cancel")
-                        )
+                        bearerTokenAuthorizationSnippet(),
+                        reservationIdToCancelPathParametersSnippet(),
+                        errorResponseFieldsSnippet()
                 ))
-                .when().post(urlTemplate, inService.getId())
-                .then().assertThat().statusCode(409);
+                .when().post(CANCEL_ENDPOINT_URL_TEMPLATE, inService.getId())
+                .then()
+                .statusCode(409)
+                .body("errorCode", equalTo(ErrorCode.RESERVATION_CANNOT_CANCEL.getCode()))
+                .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_CANCEL.getMessage()));
+    }
+
+    @Test
+    @DisplayName(
+            "[Integration][Fail] Testing POST " + CANCEL_ENDPOINT_URL_TEMPLATE + " endpoint for completed reservation"
+    )
+    void testCancelEndpointForCompletedReservation() {
+        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
 
         // Cancel the completed reservation
         RestAssured
@@ -123,15 +142,21 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
                 .relaxedHTTPSValidation()
                 .filter(document(
                         DEFAULT_RESTDOC_PATH,
-                        requestHeaders(
-                                headerWithName("Authorization").description("The access token in bearer scheme")
-                        ),
-                        pathParameters(
-                                parameterWithName("reservationId").description("The reservation ID to cancel")
-                        )
+                        bearerTokenAuthorizationSnippet(),
+                        reservationIdToCancelPathParametersSnippet(),
+                        errorResponseFieldsSnippet()
                 ))
-                .when().post(urlTemplate, completed.getId())
-                .then().assertThat().statusCode(409);
+                .when().post(CANCEL_ENDPOINT_URL_TEMPLATE, completed.getId())
+                .then()
+                .statusCode(409)
+                .body("errorCode", equalTo(ErrorCode.RESERVATION_CANNOT_CANCEL.getCode()))
+                .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_CANCEL.getMessage()));
+    }
+
+    @Test
+    @DisplayName("[Integration] Testing POST " + CANCEL_ENDPOINT_URL_TEMPLATE + " endpoint for cancelled reservation")
+    void testCancelEndpointForCancelledReservation() {
+        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
 
         // Cancel the cancelled reservation
         RestAssured
@@ -139,22 +164,16 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
                 .relaxedHTTPSValidation()
                 .filter(document(
                         DEFAULT_RESTDOC_PATH,
-                        requestHeaders(
-                                headerWithName("Authorization").description("The access token in bearer scheme")
-                        ),
-                        pathParameters(
-                                parameterWithName("reservationId").description("The reservation ID to cancel")
-                        )
+                        bearerTokenAuthorizationSnippet(),
+                        reservationIdToCancelPathParametersSnippet()
                 ))
-                .when().post(urlTemplate, cancelled.getId())
+                .when().post(CANCEL_ENDPOINT_URL_TEMPLATE, cancelled.getId())
                 .then().assertThat().statusCode(200);
     }
 
     @Test
-    @DisplayName("[Integration] Testing POST /v1/reservations/manage/{reservationId}/start endpoint")
-    void testStartServiceEndpoint() {
-        final String urlTemplate = "/v1/reservations/manage/{reservationId}/start";
-
+    @DisplayName("[Integration] Testing POST " + START_ENDPOINT_URL_TEMPLATE + " endpoint for ready reservation")
+    void testStartServiceEndpointForReadyReservation() {
         SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
 
         // Start the ready reservation
@@ -163,16 +182,17 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
                 .relaxedHTTPSValidation()
                 .filter(document(
                         DEFAULT_RESTDOC_PATH,
-                        requestHeaders(
-                                headerWithName("Authorization").description("The access token in bearer scheme")
-                        ),
-                        pathParameters(
-                                parameterWithName("reservationId")
-                                        .description("The reservation ID to start the service")
-                        )
+                        bearerTokenAuthorizationSnippet(),
+                        reservationIdToStartPathParametersSnippet()
                 ))
-                .when().post(urlTemplate, ready.getId())
+                .when().post(START_ENDPOINT_URL_TEMPLATE, ready.getId())
                 .then().assertThat().statusCode(200);
+    }
+
+    @Test
+    @DisplayName("[Integration] Testing POST " + START_ENDPOINT_URL_TEMPLATE + " endpoint for in-service reservation")
+    void testStartServiceEndpointForInServiceReservation() {
+        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
 
         // Start the in-service reservation
         RestAssured
@@ -180,16 +200,19 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
                 .relaxedHTTPSValidation()
                 .filter(document(
                         DEFAULT_RESTDOC_PATH,
-                        requestHeaders(
-                                headerWithName("Authorization").description("The access token in bearer scheme")
-                        ),
-                        pathParameters(
-                                parameterWithName("reservationId")
-                                        .description("The reservation ID to start the service")
-                        )
+                        bearerTokenAuthorizationSnippet(),
+                        reservationIdToStartPathParametersSnippet()
                 ))
-                .when().post(urlTemplate, inService.getId())
+                .when().post(START_ENDPOINT_URL_TEMPLATE, inService.getId())
                 .then().assertThat().statusCode(200);
+    }
+
+    @Test
+    @DisplayName(
+            "[Integration][Fail] Testing POST " + START_ENDPOINT_URL_TEMPLATE + " endpoint for completed reservation"
+    )
+    void testStartServiceEndpointForCompletedReservation() {
+        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
 
         // Start the completed reservation
         RestAssured
@@ -197,16 +220,23 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
                 .relaxedHTTPSValidation()
                 .filter(document(
                         DEFAULT_RESTDOC_PATH,
-                        requestHeaders(
-                                headerWithName("Authorization").description("The access token in bearer scheme")
-                        ),
-                        pathParameters(
-                                parameterWithName("reservationId")
-                                        .description("The reservation ID to start the service")
-                        )
+                        bearerTokenAuthorizationSnippet(),
+                        reservationIdToStartPathParametersSnippet(),
+                        errorResponseFieldsSnippet()
                 ))
-                .when().post(urlTemplate, completed.getId())
-                .then().assertThat().statusCode(409);
+                .when().post(START_ENDPOINT_URL_TEMPLATE, completed.getId())
+                .then()
+                .statusCode(409)
+                .body("errorCode", equalTo(ErrorCode.RESERVATION_CANNOT_START.getCode()))
+                .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_START.getMessage()));
+    }
+
+    @Test
+    @DisplayName(
+            "[Integration][Fail] Testing POST " + START_ENDPOINT_URL_TEMPLATE + " endpoint for cancelled reservation"
+    )
+    void testStartServiceEndpointForCancelledReservation() {
+        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
 
         // Start the cancelled reservation
         RestAssured
@@ -214,23 +244,22 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
                 .relaxedHTTPSValidation()
                 .filter(document(
                         DEFAULT_RESTDOC_PATH,
-                        requestHeaders(
-                                headerWithName("Authorization").description("The access token in bearer scheme")
-                        ),
-                        pathParameters(
-                                parameterWithName("reservationId")
-                                        .description("The reservation ID to start the service")
-                        )
+                        bearerTokenAuthorizationSnippet(),
+                        reservationIdToStartPathParametersSnippet(),
+                        errorResponseFieldsSnippet()
                 ))
-                .when().post(urlTemplate, cancelled.getId())
-                .then().assertThat().statusCode(409);
+                .when().post(START_ENDPOINT_URL_TEMPLATE, cancelled.getId())
+                .then()
+                .statusCode(409)
+                .body("errorCode", equalTo(ErrorCode.RESERVATION_CANNOT_START.getCode()))
+                .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_START.getMessage()));
     }
 
     @Test
-    @DisplayName("[Integration] Testing POST /v1/reservations/manage/{reservationId}/complete endpoint")
-    void testCompleteEndpoint() {
-        final String urlTemplate = "/v1/reservations/manage/{reservationId}/complete";
-
+    @DisplayName(
+            "[Integration][Fail] Testing POST " + COMPLETE_ENDPOINT_URL_TEMPLATE + " endpoint for ready reservation"
+    )
+    void testCompleteEndpointForReadyReservation() {
         SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
 
         // Complete the ready reservation
@@ -239,16 +268,23 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
                 .relaxedHTTPSValidation()
                 .filter(document(
                         DEFAULT_RESTDOC_PATH,
-                        requestHeaders(
-                                headerWithName("Authorization").description("The access token in bearer scheme")
-                        ),
-                        pathParameters(
-                                parameterWithName("reservationId")
-                                        .description("The reservation ID to complete the service")
-                        )
+                        bearerTokenAuthorizationSnippet(),
+                        reservationIdToCompletePathParametersSnippet(),
+                        errorResponseFieldsSnippet()
                 ))
-                .when().post(urlTemplate, ready.getId())
-                .then().assertThat().statusCode(409);
+                .when().post(COMPLETE_ENDPOINT_URL_TEMPLATE, ready.getId())
+                .then()
+                .statusCode(409)
+                .body("errorCode", equalTo(ErrorCode.RESERVATION_CANNOT_COMPLETE.getCode()))
+                .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_COMPLETE.getMessage()));
+    }
+
+    @Test
+    @DisplayName(
+            "[Integration] Testing POST " + COMPLETE_ENDPOINT_URL_TEMPLATE + " endpoint for in-service reservation"
+    )
+    void testCompleteEndpointForInServiceReservation() {
+        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
 
         // Complete the in-service reservation
         RestAssured
@@ -256,16 +292,17 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
                 .relaxedHTTPSValidation()
                 .filter(document(
                         DEFAULT_RESTDOC_PATH,
-                        requestHeaders(
-                                headerWithName("Authorization").description("The access token in bearer scheme")
-                        ),
-                        pathParameters(
-                                parameterWithName("reservationId")
-                                        .description("The reservation ID to complete the service")
-                        )
+                        bearerTokenAuthorizationSnippet(),
+                        reservationIdToCompletePathParametersSnippet()
                 ))
-                .when().post(urlTemplate, inService.getId())
+                .when().post(COMPLETE_ENDPOINT_URL_TEMPLATE, inService.getId())
                 .then().assertThat().statusCode(200);
+    }
+
+    @Test
+    @DisplayName("[Integration] Testing POST " + COMPLETE_ENDPOINT_URL_TEMPLATE + " endpoint for completed reservation")
+    void testCompleteEndpointForCompletedReservation() {
+        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
 
         // Complete the completed reservation
         RestAssured
@@ -273,16 +310,19 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
                 .relaxedHTTPSValidation()
                 .filter(document(
                         DEFAULT_RESTDOC_PATH,
-                        requestHeaders(
-                                headerWithName("Authorization").description("The access token in bearer scheme")
-                        ),
-                        pathParameters(
-                                parameterWithName("reservationId")
-                                        .description("The reservation ID to complete the service")
-                        )
+                        bearerTokenAuthorizationSnippet(),
+                        reservationIdToCompletePathParametersSnippet()
                 ))
-                .when().post(urlTemplate, completed.getId())
+                .when().post(COMPLETE_ENDPOINT_URL_TEMPLATE, completed.getId())
                 .then().assertThat().statusCode(200);
+    }
+
+    @Test
+    @DisplayName(
+            "[Integration][Fail] Testing POST " + COMPLETE_ENDPOINT_URL_TEMPLATE + " endpoint for cancelled reservation"
+    )
+    void testCompleteEndpointForCancelledReservation() {
+        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
 
         // Complete the cancelled reservation
         RestAssured
@@ -290,16 +330,27 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
                 .relaxedHTTPSValidation()
                 .filter(document(
                         DEFAULT_RESTDOC_PATH,
-                        requestHeaders(
-                                headerWithName("Authorization").description("The access token in bearer scheme")
-                        ),
-                        pathParameters(
-                                parameterWithName("reservationId")
-                                        .description("The reservation ID to complete the service")
-                        )
+                        bearerTokenAuthorizationSnippet(),
+                        reservationIdToCompletePathParametersSnippet(),
+                        errorResponseFieldsSnippet()
                 ))
-                .when().post(urlTemplate, cancelled.getId())
-                .then().assertThat().statusCode(409);
+                .when().post(COMPLETE_ENDPOINT_URL_TEMPLATE, cancelled.getId())
+                .then()
+                .statusCode(409)
+                .body("errorCode", equalTo(ErrorCode.RESERVATION_CANNOT_COMPLETE.getCode()))
+                .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_COMPLETE.getMessage()));
+    }
+
+    private static PathParametersSnippet reservationIdToCancelPathParametersSnippet() {
+        return pathParameters(parameterWithName("reservationId").description("The reservation ID to cancel"));
+    }
+
+    private static PathParametersSnippet reservationIdToStartPathParametersSnippet() {
+        return pathParameters(parameterWithName("reservationId").description("The reservation ID to start"));
+    }
+
+    private static PathParametersSnippet reservationIdToCompletePathParametersSnippet() {
+        return pathParameters(parameterWithName("reservationId").description("The reservation ID to complete"));
     }
 
 }

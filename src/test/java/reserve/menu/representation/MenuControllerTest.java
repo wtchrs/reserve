@@ -1,5 +1,7 @@
 package reserve.menu.representation;
 
+import com.epages.restdocs.apispec.ResourceSnippetParameters;
+import com.epages.restdocs.apispec.Schema;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
@@ -11,6 +13,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.restdocs.payload.RequestFieldsSnippet;
+import org.springframework.restdocs.payload.ResponseFieldsSnippet;
+import org.springframework.restdocs.request.PathParametersSnippet;
 import reserve.global.BaseRestAssuredTest;
 import reserve.menu.domain.Menu;
 import reserve.menu.dto.request.MenuCreateRequest;
@@ -29,9 +34,11 @@ import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.do
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.restdocs.headers.HeaderDocumentation.*;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static reserve.global.DocumentationSnippetUtils.*;
 
 class MenuControllerTest extends BaseRestAssuredTest {
 
@@ -64,10 +71,6 @@ class MenuControllerTest extends BaseRestAssuredTest {
 
     @AfterEach
     void tearDown() {
-//        menuRepository.deleteAll();
-//        storeRepository.deleteAll();
-//        userRepository.deleteAll();
-
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         jdbcTemplate.update("DELETE FROM menus");
         jdbcTemplate.update("DELETE FROM stores");
@@ -94,13 +97,9 @@ class MenuControllerTest extends BaseRestAssuredTest {
                 .relaxedHTTPSValidation()
                 .filter(document(
                         DEFAULT_RESTDOC_PATH,
-                        requestHeaders(headerWithName("Authorization").description("Access token in bearer scheme")),
-                        pathParameters(parameterWithName("storeId").description("The ID of the store")),
-                        requestFields(
-                                fieldWithPath("name").description("The name of the menu"),
-                                fieldWithPath("price").description("The price of the menu"),
-                                fieldWithPath("description").description("The description of the menu")
-                        ),
+                        bearerTokenAuthorizationSnippet(),
+                        storeIdPathParametersSnippet(),
+                        menuCreateRequestFieldsSnippet(),
                         responseHeaders(headerWithName("Location").description("The location of the created menu"))
                 ))
                 .when()
@@ -131,25 +130,17 @@ class MenuControllerTest extends BaseRestAssuredTest {
                 .relaxedHTTPSValidation()
                 .filter(document(
                         DEFAULT_RESTDOC_PATH,
-                        pathParameters(parameterWithName("menuId").description("The ID of the menu")),
-                        responseFields(
-                                fieldWithPath("menuId").description("The ID of the menu"),
-                                fieldWithPath("storeId").description("The ID of the store"),
-                                fieldWithPath("name").description("The name of the menu"),
-                                fieldWithPath("price").description("The price of the menu"),
-                                fieldWithPath("description").description("The description of the menu")
-                        )
+                        menuIdPathParametersSnippet(),
+                        menuInfoResponseFieldsSnippet()
                 ))
                 .when().get("/v1/menus/{menuId}", menu.getId())
                 .then()
                 .statusCode(200)
-                .body(
-                        "menuId", equalTo(menu.getId().intValue()),
-                        "storeId", equalTo(store.getId().intValue()),
-                        "name", equalTo(menu.getName()),
-                        "price", equalTo(menu.getPrice()),
-                        "description", equalTo(menu.getDescription())
-                );
+                .body("menuId", equalTo(menu.getId().intValue()))
+                .body("storeId", equalTo(store.getId().intValue()))
+                .body("name", equalTo(menu.getName()))
+                .body("price", equalTo(menu.getPrice()))
+                .body("description", equalTo(menu.getDescription()));
     }
 
     @Test
@@ -164,38 +155,26 @@ class MenuControllerTest extends BaseRestAssuredTest {
                 .relaxedHTTPSValidation()
                 .filter(document(
                         DEFAULT_RESTDOC_PATH,
-                        pathParameters(parameterWithName("storeId").description("The ID of the store")),
-                        responseFields(
-                                fieldWithPath("count").description("The number of menus"),
-                                fieldWithPath("results[].menuId").description("The ID of the menu"),
-                                fieldWithPath("results[].storeId").description("The ID of the store"),
-                                fieldWithPath("results[].name").description("The name of the menu"),
-                                fieldWithPath("results[].price").description("The price of the menu"),
-                                fieldWithPath("results[].description").description("The description of the menu")
-                        )
+                        storeIdPathParametersSnippet(),
+                        menuInfoListResponseFieldsSnippet()
                 ))
                 .when().get("/v1/stores/{storeId}/menus", store.getId())
                 .then()
                 .statusCode(200)
+                .body("count", equalTo(3))
                 .body(
-                        "count", equalTo(3),
-                        "results.menuId", contains(
-                                menu1.getId().intValue(),
-                                menu2.getId().intValue(),
-                                menu3.getId().intValue()
-                        ),
-                        "results.storeId", contains(
-                                store.getId().intValue(),
-                                store.getId().intValue(),
-                                store.getId().intValue()
-                        ),
-                        "results.name", contains(menu1.getName(), menu2.getName(), menu3.getName()),
-                        "results.price", contains(menu1.getPrice(), menu2.getPrice(), menu3.getPrice()),
-                        "results.description", contains(
-                                menu1.getDescription(),
-                                menu2.getDescription(),
-                                menu3.getDescription()
-                        )
+                        "results.menuId",
+                        contains(menu1.getId().intValue(), menu2.getId().intValue(), menu3.getId().intValue())
+                )
+                .body(
+                        "results.storeId",
+                        contains(store.getId().intValue(), store.getId().intValue(), store.getId().intValue())
+                )
+                .body("results.name", contains(menu1.getName(), menu2.getName(), menu3.getName()))
+                .body("results.price", contains(menu1.getPrice(), menu2.getPrice(), menu3.getPrice()))
+                .body(
+                        "results.description",
+                        contains(menu1.getDescription(), menu2.getDescription(), menu3.getDescription())
                 );
     }
 
@@ -220,13 +199,9 @@ class MenuControllerTest extends BaseRestAssuredTest {
                 .relaxedHTTPSValidation()
                 .filter(document(
                         DEFAULT_RESTDOC_PATH,
-                        requestHeaders(headerWithName("Authorization").description("Access token in bearer scheme")),
-                        pathParameters(parameterWithName("menuId").description("The ID of the menu")),
-                        requestFields(
-                                fieldWithPath("name").description("The name of the menu").optional(),
-                                fieldWithPath("price").description("The price of the menu").optional(),
-                                fieldWithPath("description").description("The description of the menu").optional()
-                        )
+                        bearerTokenAuthorizationSnippet(),
+                        menuIdPathParametersSnippet(),
+                        menuUpdateRequestFieldsSnippet()
                 ))
                 .when().put("/v1/menus/{menuId}", menu1.getId())
                 .then().statusCode(200);
@@ -254,13 +229,74 @@ class MenuControllerTest extends BaseRestAssuredTest {
                 .relaxedHTTPSValidation()
                 .filter(document(
                         DEFAULT_RESTDOC_PATH,
-                        requestHeaders(headerWithName("Authorization").description("Access token in bearer scheme")),
-                        pathParameters(parameterWithName("menuId").description("The ID of the menu"))
+                        bearerTokenAuthorizationSnippet(),
+                        menuIdPathParametersSnippet()
                 ))
                 .when().delete("/v1/menus/{menuId}", menu1.getId())
                 .then().statusCode(200);
 
         assertFalse(menuRepository.existsById(menu1.getId()));
+    }
+
+    private static PathParametersSnippet storeIdPathParametersSnippet() {
+        return pathParameters(parameterWithName("storeId").description("The ID of the store"));
+    }
+
+    private static PathParametersSnippet menuIdPathParametersSnippet() {
+        return pathParameters(parameterWithName("menuId").description("The ID of the menu"));
+    }
+
+    /**
+     * @return the request fields snippet
+     * @see MenuCreateRequest
+     */
+    private static RequestFieldsSnippet menuCreateRequestFieldsSnippet() {
+        return requestFields(
+                fieldWithPath("name").description("The name of the menu"),
+                fieldWithPath("price").description("The price of the menu"),
+                fieldWithPath("description").description("The description of the menu")
+        );
+    }
+
+    /**
+     * @return the request fields snippet
+     * @see MenuUpdateRequest
+     */
+    private static RequestFieldsSnippet menuUpdateRequestFieldsSnippet() {
+        return requestFields(
+                fieldWithPath("name").description("The name of the menu").optional(),
+                fieldWithPath("price").description("The price of the menu").optional(),
+                fieldWithPath("description").description("The description of the menu").optional()
+        );
+    }
+
+    /**
+     * @return the response fields snippet
+     * @see reserve.menu.dto.response.MenuInfoResponse
+     */
+    private static ResponseFieldsSnippet menuInfoResponseFieldsSnippet() {
+        return responseFields(
+                fieldWithPath("menuId").description("The ID of the menu"),
+                fieldWithPath("storeId").description("The ID of the store"),
+                fieldWithPath("name").description("The name of the menu"),
+                fieldWithPath("price").description("The price of the menu"),
+                fieldWithPath("description").description("The description of the menu")
+        );
+    }
+
+    /**
+     * @return the response fields snippet
+     * @see reserve.menu.dto.response.MenuInfoListResponse
+     */
+    private static ResponseFieldsSnippet menuInfoListResponseFieldsSnippet() {
+        return responseFields(
+                fieldWithPath("count").description("The number of menus"),
+                fieldWithPath("results[].menuId").description("The ID of the menu"),
+                fieldWithPath("results[].storeId").description("The ID of the store"),
+                fieldWithPath("results[].name").description("The name of the menu"),
+                fieldWithPath("results[].price").description("The price of the menu"),
+                fieldWithPath("results[].description").description("The description of the menu")
+        );
     }
 
 }

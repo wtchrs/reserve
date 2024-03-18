@@ -8,6 +8,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.restdocs.payload.RequestFieldsSnippet;
 import org.springframework.test.annotation.Commit;
 import reserve.global.BaseRestAssuredTest;
 import reserve.signup.dto.request.SignUpRequest;
@@ -54,13 +55,7 @@ class SignUpControllerTest extends BaseRestAssuredTest {
                 .given(spec).body(payload).contentType("application/json")
                 .filter(document(
                         DEFAULT_RESTDOC_PATH,
-                        requestFields(
-                                fieldWithPath("username").description("The username of the user"),
-                                fieldWithPath("password").description("The password of the user"),
-                                fieldWithPath("passwordConfirmation").description(
-                                        "The password confirmation of the user"),
-                                fieldWithPath("nickname").description("The nickname of the user")
-                        ),
+                        signUpRequestFieldsSnippet(),
                         responseHeaders(headerWithName("Location").description("The url of the created user"))
                 ))
                 .relaxedHTTPSValidation()
@@ -74,6 +69,19 @@ class SignUpControllerTest extends BaseRestAssuredTest {
                     assertEquals("nickname", user.getNickname());
                 },
                 () -> fail("User not found")
+        );
+    }
+
+    /**
+     * @return The request fields snippet
+     * @see SignUpRequest
+     */
+    private static RequestFieldsSnippet signUpRequestFieldsSnippet() {
+        return requestFields(
+                fieldWithPath("username").description("The username of the user"),
+                fieldWithPath("password").description("The password of the user"),
+                fieldWithPath("passwordConfirmation").description("The password confirmation of the user"),
+                fieldWithPath("nickname").description("The nickname of the user")
         );
     }
 

@@ -67,7 +67,7 @@ public class Reservation extends BaseEntity {
 
     public void complete() {
         if (!status.equals(ReservationStatusType.IN_SERVICE) && !status.equals(ReservationStatusType.COMPLETED)) {
-            throw new ReservationStatusException(ErrorCode.RESERVATION_NOT_IN_SERVICE);
+            throw new ReservationStatusException(ErrorCode.RESERVATION_CANNOT_COMPLETE);
         }
         status = ReservationStatusType.COMPLETED;
     }

@@ -8,8 +8,10 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.restdocs.payload.RequestFieldsSnippet;
+import org.springframework.restdocs.payload.ResponseFieldsSnippet;
+import org.springframework.restdocs.request.PathParametersSnippet;
+import org.springframework.restdocs.request.QueryParametersSnippet;
 import reserve.global.BaseRestAssuredTest;
 import reserve.signin.dto.SignInToken;
 import reserve.signin.infrastructure.JwtProvider;
@@ -28,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.restdocs.headers.HeaderDocumentation.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
+import static reserve.global.DocumentationSnippetUtils.bearerTokenAuthorizationSnippet;
 
 class StoreControllerTest extends BaseRestAssuredTest {
 
@@ -85,14 +88,8 @@ class StoreControllerTest extends BaseRestAssuredTest {
                 .relaxedHTTPSValidation()
                 .filter(document(
                         DEFAULT_RESTDOC_PATH,
-                        requestHeaders(
-                                headerWithName("Authorization").description("Access token in bearer scheme")
-                        ),
-                        requestFields(
-                                fieldWithPath("name").description("Store name"),
-                                fieldWithPath("address").description("Store address"),
-                                fieldWithPath("description").description("Store description")
-                        ),
+                        bearerTokenAuthorizationSnippet(),
+                        storeCreateRequestFieldsSnippet(),
                         responseHeaders(headerWithName("Location").description("The url of the created store"))
                 ))
                 .when().post("/v1/stores")
@@ -118,18 +115,10 @@ class StoreControllerTest extends BaseRestAssuredTest {
                 .relaxedHTTPSValidation()
                 .filter(document(
                         DEFAULT_RESTDOC_PATH,
-                        pathParameters(
-                                parameterWithName("id").description("The id of the store to retrieve the store info")
-                        ),
-                        responseFields(
-                                fieldWithPath("storeId").description("The id of the store"),
-                                fieldWithPath("registrant").description("The username of the registrant"),
-                                fieldWithPath("name").description("The name of the store"),
-                                fieldWithPath("address").description("The address of the store"),
-                                fieldWithPath("description").description("The description of the store")
-                        )
+                        storeIdToRetrievePathParametersSnippet(),
+                        storeInfoResponseFieldsSnippet()
                 ))
-                .when().get("/v1/stores/{id}", store.getId())
+                .when().get("/v1/stores/{storeId}", store.getId())
                 .then()
                 .statusCode(200)
                 .body("storeId", equalTo(store.getId().intValue()))
@@ -141,7 +130,6 @@ class StoreControllerTest extends BaseRestAssuredTest {
 
     @Test
     @DisplayName("[Integration] Testing GET /v1/stores endpoint")
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     void testSearchEndpoint() {
         User user2 = userRepository.save(new User("user2", "password", "hello", "description"));
         storeRepository.save(new Store(user, "Pasta", "address", "Pasta only"));
@@ -156,22 +144,8 @@ class StoreControllerTest extends BaseRestAssuredTest {
                 .relaxedHTTPSValidation()
                 .filter(document(
                         DEFAULT_RESTDOC_PATH,
-                        queryParameters(
-                                parameterWithName("registrant").description("The username of the registrant"),
-                                parameterWithName("query").description("The query to search the stores")
-                        ),
-                        responseFields(
-                                fieldWithPath("count").description("The total count of the search results"),
-                                fieldWithPath("pageSize").description("The page size of the search results"),
-                                fieldWithPath("pageNumber").description("The page number of the search results"),
-                                fieldWithPath("hasNext").description("The existence of the next page"),
-                                fieldWithPath("results").description("The search results"),
-                                fieldWithPath("results[].storeId").description("The id of the store"),
-                                fieldWithPath("results[].registrant").description("The username of the registrant"),
-                                fieldWithPath("results[].name").description("The name of the store"),
-                                fieldWithPath("results[].address").description("The address of the store"),
-                                fieldWithPath("results[].description").description("The description of the store")
-                        )
+                        storeSearchResponseQueryParametersSnippet(),
+                        storeInfoListResponseFieldsSnippet()
                 ))
                 .when().get("/v1/stores")
                 .then()
@@ -213,17 +187,11 @@ class StoreControllerTest extends BaseRestAssuredTest {
                 .relaxedHTTPSValidation()
                 .filter(document(
                         DEFAULT_RESTDOC_PATH,
-                        requestHeaders(
-                                headerWithName("Authorization").description("Access token in bearer scheme")
-                        ),
-                        pathParameters(parameterWithName("id").description("The id of the store to update")),
-                        requestFields(
-                                fieldWithPath("name").description("Store name"),
-                                fieldWithPath("address").description("Store address"),
-                                fieldWithPath("description").description("Store description")
-                        )
+                        bearerTokenAuthorizationSnippet(),
+                        storeIdToUpdatePathParametersSnippet(),
+                        storeUpdateRequestFieldsSnippet()
                 ))
-                .when().put("/v1/stores/{id}", store.getId())
+                .when().put("/v1/stores/{storeId}", store.getId())
                 .then()
                 .statusCode(200);
 
@@ -256,16 +224,96 @@ class StoreControllerTest extends BaseRestAssuredTest {
                 .relaxedHTTPSValidation()
                 .filter(document(
                         DEFAULT_RESTDOC_PATH,
-                        requestHeaders(
-                                headerWithName("Authorization").description("Access token in bearer scheme")
-                        ),
-                        pathParameters(parameterWithName("id").description("The id of the store to delete"))
+                        bearerTokenAuthorizationSnippet(),
+                        storeIdToDeletePathParametersSnippet()
                 ))
-                .when().delete("/v1/stores/{id}", store.getId())
+                .when().delete("/v1/stores/{storeId}", store.getId())
                 .then()
                 .statusCode(200);
 
         assertFalse(storeRepository.existsById(store.getId()));
+    }
+
+    private static PathParametersSnippet storeIdToRetrievePathParametersSnippet() {
+        return pathParameters(
+                parameterWithName("storeId").description("The id of the store to retrieve the store info")
+        );
+    }
+
+    private static PathParametersSnippet storeIdToUpdatePathParametersSnippet() {
+        return pathParameters(parameterWithName("storeId").description("The ID of the store to update"));
+    }
+
+    private static PathParametersSnippet storeIdToDeletePathParametersSnippet() {
+        return pathParameters(parameterWithName("storeId").description("The ID of the store to delete"));
+    }
+
+    /**
+     * @return The request fields snippet
+     * @see StoreCreateRequest
+     */
+    private static RequestFieldsSnippet storeCreateRequestFieldsSnippet() {
+        return requestFields(
+                fieldWithPath("name").description("Store name"),
+                fieldWithPath("address").description("Store address"),
+                fieldWithPath("description").description("Store description")
+        );
+    }
+
+    /**
+     * @return The request fields snippet
+     * @see StoreUpdateRequest
+     */
+    private static RequestFieldsSnippet storeUpdateRequestFieldsSnippet() {
+        return requestFields(
+                fieldWithPath("name").description("Store name"),
+                fieldWithPath("address").description("Store address"),
+                fieldWithPath("description").description("Store description")
+        );
+    }
+
+    /**
+     * @return The query parameters snippet
+     * @see reserve.store.dto.request.StoreSearchRequest
+     */
+    private static QueryParametersSnippet storeSearchResponseQueryParametersSnippet() {
+        return queryParameters(
+                parameterWithName("registrant").description("The username of the registrant"),
+                parameterWithName("query").description("The query to search the stores")
+        );
+    }
+
+    /**
+     * @return The request fields snippet
+     * @see reserve.store.dto.response.StoreInfoResponse
+     */
+    private static ResponseFieldsSnippet storeInfoResponseFieldsSnippet() {
+        return responseFields(
+                fieldWithPath("storeId").description("The id of the store"),
+                fieldWithPath("registrant").description("The username of the registrant"),
+                fieldWithPath("name").description("The name of the store"),
+                fieldWithPath("address").description("The address of the store"),
+                fieldWithPath("description").description("The description of the store")
+        );
+    }
+
+    /**
+     * @return The response fields snippet
+     * @see reserve.store.dto.response.StoreInfoListResponse
+     */
+    private static ResponseFieldsSnippet storeInfoListResponseFieldsSnippet() {
+        return responseFields(
+                fieldWithPath("count").description("The total count of the search results"),
+                fieldWithPath("pageSize").description("The page size of the search results"),
+                fieldWithPath("pageNumber").description("The page number of the search results"),
+                fieldWithPath("hasNext").description("The existence of the next page"),
+                fieldWithPath("results").description("The search results"),
+                fieldWithPath("results[].storeId").description("The id of the store"),
+                fieldWithPath("results[].registrant").description("The username of the registrant"),
+                fieldWithPath("results[].name").description("The name of the store"),
+                fieldWithPath("results[].address").description("The address of the store"),
+                fieldWithPath("results[].description").description("The description of the store")
+        );
     }
 
 }
