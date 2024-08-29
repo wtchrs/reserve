@@ -43,6 +43,9 @@ src/*/resources/application*.yml
 docker/*
 !docker/docker-compose.yml
 
+### Certbot docker volume ###
+certbot/
+
 ### SSL Certificate ###
 **/*.p12
 
