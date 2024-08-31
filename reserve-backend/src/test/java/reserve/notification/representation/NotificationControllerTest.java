@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.restdocs.payload.ResponseFieldsSnippet;
 import org.springframework.restdocs.request.PathParametersSnippet;
 import reserve.global.BaseRestAssuredTest;
+import reserve.global.TestUtils;
 import reserve.notification.domain.Notification;
 import reserve.notification.domain.ResourceType;
 import reserve.notification.infrastructure.NotificationRepository;
@@ -90,7 +91,7 @@ class NotificationControllerTest extends BaseRestAssuredTest {
     @Test
     @DisplayName("[Integration] Testing GET /v1/notifications endpoint")
     void testGetUserNotificationsEndpoint() {
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user));
 
         RestAssured
                 .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
@@ -118,7 +119,7 @@ class NotificationControllerTest extends BaseRestAssuredTest {
     @Test
     @DisplayName("[Integration] Testing POST /v1/notifications/{notificationId}/read endpoint")
     void testReadNotificationEndpoint() {
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user));
 
         RestAssured
                 .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
@@ -149,7 +150,7 @@ class NotificationControllerTest extends BaseRestAssuredTest {
     @Test
     @DisplayName("[Integration] Testing POST /v1/notifications/read-all endpoint")
     void testReadAllNotificationsEndpoint() {
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user));
 
         RestAssured
                 .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())

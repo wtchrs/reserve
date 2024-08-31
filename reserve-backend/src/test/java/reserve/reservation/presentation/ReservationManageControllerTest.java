@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.restdocs.request.PathParametersSnippet;
 import reserve.global.BaseRestAssuredTest;
+import reserve.global.TestUtils;
 import reserve.global.exception.ErrorCode;
 import reserve.notification.infrastructure.NotificationRepository;
 import reserve.reservation.domain.Reservation;
@@ -90,7 +91,7 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
     @Test
     @DisplayName("[Integration] Testing POST " + CANCEL_ENDPOINT_URL_TEMPLATE + " endpoint for ready reservation")
     void testCancelEndpointForReadyReservation() {
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(registrant));
 
         // Cancel the ready reservation
         RestAssured
@@ -110,7 +111,7 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
             "[Integration][Fail] Testing POST " + CANCEL_ENDPOINT_URL_TEMPLATE + " endpoint for in-service reservation"
     )
     void testCancelEndpointForInServiceReservation() {
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(registrant));
 
         // Cancel the in-service reservation
         RestAssured
@@ -134,7 +135,7 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
             "[Integration][Fail] Testing POST " + CANCEL_ENDPOINT_URL_TEMPLATE + " endpoint for completed reservation"
     )
     void testCancelEndpointForCompletedReservation() {
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(registrant));
 
         // Cancel the completed reservation
         RestAssured
@@ -156,7 +157,7 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
     @Test
     @DisplayName("[Integration] Testing POST " + CANCEL_ENDPOINT_URL_TEMPLATE + " endpoint for cancelled reservation")
     void testCancelEndpointForCancelledReservation() {
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(registrant));
 
         // Cancel the cancelled reservation
         RestAssured
@@ -174,7 +175,7 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
     @Test
     @DisplayName("[Integration] Testing POST " + START_ENDPOINT_URL_TEMPLATE + " endpoint for ready reservation")
     void testStartServiceEndpointForReadyReservation() {
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(registrant));
 
         // Start the ready reservation
         RestAssured
@@ -192,7 +193,7 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
     @Test
     @DisplayName("[Integration] Testing POST " + START_ENDPOINT_URL_TEMPLATE + " endpoint for in-service reservation")
     void testStartServiceEndpointForInServiceReservation() {
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(registrant));
 
         // Start the in-service reservation
         RestAssured
@@ -212,7 +213,7 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
             "[Integration][Fail] Testing POST " + START_ENDPOINT_URL_TEMPLATE + " endpoint for completed reservation"
     )
     void testStartServiceEndpointForCompletedReservation() {
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(registrant));
 
         // Start the completed reservation
         RestAssured
@@ -236,7 +237,7 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
             "[Integration][Fail] Testing POST " + START_ENDPOINT_URL_TEMPLATE + " endpoint for cancelled reservation"
     )
     void testStartServiceEndpointForCancelledReservation() {
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(registrant));
 
         // Start the cancelled reservation
         RestAssured
@@ -260,7 +261,7 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
             "[Integration][Fail] Testing POST " + COMPLETE_ENDPOINT_URL_TEMPLATE + " endpoint for ready reservation"
     )
     void testCompleteEndpointForReadyReservation() {
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(registrant));
 
         // Complete the ready reservation
         RestAssured
@@ -284,7 +285,7 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
             "[Integration] Testing POST " + COMPLETE_ENDPOINT_URL_TEMPLATE + " endpoint for in-service reservation"
     )
     void testCompleteEndpointForInServiceReservation() {
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(registrant));
 
         // Complete the in-service reservation
         RestAssured
@@ -302,7 +303,7 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
     @Test
     @DisplayName("[Integration] Testing POST " + COMPLETE_ENDPOINT_URL_TEMPLATE + " endpoint for completed reservation")
     void testCompleteEndpointForCompletedReservation() {
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(registrant));
 
         // Complete the completed reservation
         RestAssured
@@ -322,7 +323,7 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
             "[Integration][Fail] Testing POST " + COMPLETE_ENDPOINT_URL_TEMPLATE + " endpoint for cancelled reservation"
     )
     void testCompleteEndpointForCancelledReservation() {
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(registrant.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(registrant));
 
         // Complete the cancelled reservation
         RestAssured

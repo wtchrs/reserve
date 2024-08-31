@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.MockMvc;
+import reserve.global.TestUtils;
 import reserve.notification.domain.NotificationStatus;
 import reserve.notification.domain.ResourceType;
 import reserve.notification.dto.response.NotificationInfo;
@@ -50,7 +51,7 @@ class NotificationControllerWebMvcTest {
         Long userId = 1L;
         long resourceId = 100L;
 
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(userId));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(userId));
 
         NotificationInfo notification1 = new NotificationInfo(
                 userId,
@@ -103,7 +104,7 @@ class NotificationControllerWebMvcTest {
         Long userId = 1L;
         Long notificationId = 1000L;
 
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(userId));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(userId));
 
         mockMvc.perform(
                 post("/v1/notifications/{notificationId}/read", notificationId)
@@ -118,7 +119,7 @@ class NotificationControllerWebMvcTest {
     void testReadAllNotificationsEndpoint() throws Exception {
         Long userId = 1L;
 
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(userId));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(userId));
 
         mockMvc.perform(
                 post("/v1/notifications/read-all")

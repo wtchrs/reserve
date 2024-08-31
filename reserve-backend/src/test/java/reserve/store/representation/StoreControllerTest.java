@@ -13,6 +13,7 @@ import org.springframework.restdocs.payload.ResponseFieldsSnippet;
 import org.springframework.restdocs.request.PathParametersSnippet;
 import org.springframework.restdocs.request.QueryParametersSnippet;
 import reserve.global.BaseRestAssuredTest;
+import reserve.global.TestUtils;
 import reserve.signin.dto.SignInToken;
 import reserve.signin.infrastructure.JwtProvider;
 import reserve.store.domain.Store;
@@ -76,7 +77,7 @@ class StoreControllerTest extends BaseRestAssuredTest {
         storeCreateRequest.setAddress("City, Street, Zipcode");
         storeCreateRequest.setDescription("StoreControllerTest.testCreateEndpoint()");
 
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user));
 
         String payload = objectMapper.writeValueAsString(storeCreateRequest);
 
@@ -175,7 +176,7 @@ class StoreControllerTest extends BaseRestAssuredTest {
         storeUpdateRequest.setAddress("New address");
         storeUpdateRequest.setDescription("New description");
 
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user));
 
         String payload = objectMapper.writeValueAsString(storeUpdateRequest);
 
@@ -215,7 +216,7 @@ class StoreControllerTest extends BaseRestAssuredTest {
                 "StoreControllerTest.testDeleteEndpoint()"
         ));
 
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user));
 
         RestAssured
                 .given(spec)

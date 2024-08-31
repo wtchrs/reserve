@@ -11,6 +11,7 @@ import org.springframework.restdocs.payload.ResponseFieldsSnippet;
 import org.springframework.restdocs.request.PathParametersSnippet;
 import org.springframework.restdocs.request.QueryParametersSnippet;
 import reserve.global.BaseRestAssuredTest;
+import reserve.global.TestUtils;
 import reserve.global.exception.ErrorCode;
 import reserve.menu.infrastructure.MenuRepository;
 import reserve.notification.infrastructure.NotificationRepository;
@@ -94,7 +95,7 @@ class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
         ));
 
         // When called by person that made the reservation
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user1.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user1));
         RestAssured
                 .given(spec)
                 .header("Authorization", "Bearer " + signInToken.getAccessToken())
@@ -124,7 +125,7 @@ class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
         ));
 
         // When called by store registrant
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user2.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user2));
         RestAssured
                 .given(spec)
                 .header("Authorization", "Bearer " + signInToken.getAccessToken())
@@ -151,7 +152,7 @@ class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
         ));
 
         // When called by other users
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user3.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user3));
         RestAssured
                 .given(spec)
                 .header("Authorization", "Bearer " + signInToken.getAccessToken())
@@ -179,7 +180,7 @@ class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
         reservationMenuRepository.save(new ReservationMenu(reservation, "menuName3", 20000, 1));
 
         // When called by person that made the reservation
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user1.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user1));
         RestAssured
                 .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
                 .relaxedHTTPSValidation()
@@ -214,7 +215,7 @@ class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
         reservationMenuRepository.save(new ReservationMenu(reservation, "menuName3", 20000, 1));
 
         // When called by store registrant
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user2.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user2));
         RestAssured
                 .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
                 .relaxedHTTPSValidation()
@@ -240,7 +241,7 @@ class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
         reservationMenuRepository.save(new ReservationMenu(reservation, "menuName3", 20000, 1));
 
         // When called by other users
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user3.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user3));
         RestAssured
                 .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
                 .relaxedHTTPSValidation()
@@ -270,7 +271,7 @@ class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
         reservationRepository.save(new Reservation(user2, store1, LocalDate.now().plusDays(7), 12));
         reservationRepository.save(new Reservation(user2, store2, LocalDate.now().plusDays(7), 13));
 
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user1.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user1));
 
         RestAssured
                 .given(spec)

@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
+import reserve.global.TestUtils;
 import reserve.notification.service.NotificationService;
 import reserve.reservation.service.ReservationManageService;
 import reserve.signin.dto.SignInToken;
@@ -40,7 +41,7 @@ class ReservationManageControllerWebMvcTest {
         Long userId = 1L;
         Long reservationId = 100L;
 
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(userId));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(userId));
 
         mockMvc.perform(
                 post(urlTemplate, reservationId)
@@ -63,7 +64,7 @@ class ReservationManageControllerWebMvcTest {
         Long userId = 1L;
         Long reservationId = 100L;
 
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(userId));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(userId));
 
         mockMvc.perform(
                 post(urlTemplate, reservationId)
@@ -83,7 +84,7 @@ class ReservationManageControllerWebMvcTest {
         Long userId = 1L;
         Long reservationId = 100L;
 
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(userId));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(userId));
 
         mockMvc.perform(
                 post(urlTemplate, reservationId)

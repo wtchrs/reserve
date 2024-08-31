@@ -6,4 +6,8 @@ public class AccessTokenException extends ErrorCodeException {
         super(errorCode);
     }
 
+    public AccessTokenException(ErrorCode errorCode, Throwable e) {
+        super(errorCode, e);
+    }
+
 }

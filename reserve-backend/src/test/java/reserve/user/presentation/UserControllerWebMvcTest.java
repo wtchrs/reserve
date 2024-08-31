@@ -10,6 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import reserve.global.TestUtils;
 import reserve.signin.infrastructure.JwtProvider;
 import reserve.user.dto.request.PasswordUpdateRequest;
 import reserve.user.dto.request.UserDeleteRequest;
@@ -62,7 +63,7 @@ class UserControllerWebMvcTest {
         userUpdateRequest.setNickname("newNickname");
         userUpdateRequest.setDescription("newDescription");
 
-        String accessToken = jwtProvider.generateSignInToken("1").getAccessToken();
+        String accessToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(1L)).getAccessToken();
 
         mockMvc.perform(
                 MockMvcRequestBuilders.put("/v1/users")
@@ -85,7 +86,7 @@ class UserControllerWebMvcTest {
         passwordUpdateRequest.setNewPassword("newPassword");
         passwordUpdateRequest.setConfirmation("newPassword");
 
-        String accessToken = jwtProvider.generateSignInToken("1").getAccessToken();
+        String accessToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(1L)).getAccessToken();
 
         mockMvc.perform(
                 MockMvcRequestBuilders.put("/v1/users/password")
@@ -107,7 +108,7 @@ class UserControllerWebMvcTest {
         UserDeleteRequest userDeleteRequest = new UserDeleteRequest();
         userDeleteRequest.setPassword("password");
 
-        String accessToken = jwtProvider.generateSignInToken("1").getAccessToken();
+        String accessToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(1L)).getAccessToken();
 
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/v1/users")

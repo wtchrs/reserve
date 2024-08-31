@@ -3,8 +3,11 @@ package reserve.signin.infrastructure;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import reserve.global.exception.AccessTokenException;
 import reserve.global.exception.ErrorCode;
 import reserve.global.exception.InvalidAuthorizationException;
+import reserve.global.exception.RefreshTokenException;
+import reserve.signin.domain.TokenDetails;
 import reserve.signin.dto.SignInToken;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -12,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Map;
 
 @Component
 public class JwtProvider {
@@ -43,26 +47,29 @@ public class JwtProvider {
         this.refreshTokenExpPeriod = refreshTokenExpPeriod;
     }
 
-    public SignInToken generateSignInToken(String subject) {
-        String accessToken = generateAccessToken(subject);
-        String refreshToken = generateRefreshToken(subject);
+    public SignInToken generateSignInToken(TokenDetails tokenDetails) {
+        Map<String, String> claims =
+                Map.of("username", tokenDetails.getUsername(), "nickname", tokenDetails.getNickname());
+        String accessToken = generateAccessToken(tokenDetails.getUserId(), claims);
+        String refreshToken = generateRefreshToken(tokenDetails.getUserId(), claims);
         return new SignInToken(accessToken, refreshToken);
     }
 
-    private String generateAccessToken(String subject) {
-        return generateToken(subject, accessTokenExpPeriod, accessTokenSigningKey);
+    private String generateAccessToken(String subject, Map<String, String> claims) {
+        return generateToken(subject, claims, accessTokenExpPeriod, accessTokenSigningKey);
     }
 
-    private String generateRefreshToken(String subject) {
-        return generateToken(subject, refreshTokenExpPeriod, refreshTokenSigningKey);
+    private String generateRefreshToken(String subject, Map<String, String> claims) {
+        return generateToken(subject, claims, refreshTokenExpPeriod, refreshTokenSigningKey);
     }
 
-    private String generateToken(String subject, int expirationPeriod, Key signingKey) {
+    private String generateToken(String subject, Map<String, String> claims, int expirationPeriod, Key signingKey) {
         Instant now = Instant.now();
         Date issued = Date.from(now);
         Date expiration = Date.from(now.plusSeconds(expirationPeriod * 1000L));
         return Jwts.builder()
                 .setHeaderParam(JWT_TYPE_HEADER_NAME, JWT_TYPE_HEADER_VALUE)
+                .setClaims(claims)
                 .setSubject(subject)
                 .setExpiration(expiration)
                 .setIssuedAt(issued)
@@ -92,16 +99,33 @@ public class JwtProvider {
         return false;
     }
 
-    public String extractAccessTokenSubject(String jwt) {
-        return extractSubject(jwt, accessTokenSigningKey);
+    public TokenDetails extractAccessTokenDetails(String jwt) {
+        try {
+            return extractToken(jwt, accessTokenSigningKey);
+        } catch (ExpiredJwtException e) {
+            throw new AccessTokenException(ErrorCode.EXPIRED_ACCESS_TOKEN, e);
+        } catch (JwtException e) {
+            throw new InvalidAuthorizationException(ErrorCode.INVALID_ACCESS_TOKEN_FORMAT, e);
+        }
     }
 
-    public String extractRefreshTokenSubject(String jwt) {
-        return extractSubject(jwt, refreshTokenSigningKey);
+    public TokenDetails extractRefreshTokenDetails(String jwt) {
+        try {
+            return extractToken(jwt, refreshTokenSigningKey);
+        } catch (ExpiredJwtException e) {
+            throw new RefreshTokenException(ErrorCode.EXPIRED_REFRESH_TOKEN);
+        } catch (JwtException e) {
+            throw new InvalidAuthorizationException(ErrorCode.INVALID_REFRESH_TOKEN_FORMAT, e);
+        }
     }
 
-    private String extractSubject(String jwt, Key signingKey) {
-        return parseToken(jwt, signingKey).getBody().getSubject();
+    private TokenDetails extractToken(String jwt, Key signingKey) {
+        Claims body = parseToken(jwt, signingKey).getBody();
+        return new TokenDetails(
+                body.getSubject(),
+                body.get("username", String.class),
+                body.get("nickname", String.class)
+        );
     }
 
     private static Jws<Claims> parseToken(String jwt, Key signingKey) {

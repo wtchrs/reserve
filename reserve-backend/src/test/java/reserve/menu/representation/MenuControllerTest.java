@@ -1,7 +1,5 @@
 package reserve.menu.representation;
 
-import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import com.epages.restdocs.apispec.Schema;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
@@ -17,6 +15,7 @@ import org.springframework.restdocs.payload.RequestFieldsSnippet;
 import org.springframework.restdocs.payload.ResponseFieldsSnippet;
 import org.springframework.restdocs.request.PathParametersSnippet;
 import reserve.global.BaseRestAssuredTest;
+import reserve.global.TestUtils;
 import reserve.menu.domain.Menu;
 import reserve.menu.dto.request.MenuCreateRequest;
 import reserve.menu.dto.request.MenuUpdateRequest;
@@ -34,7 +33,6 @@ import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.do
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.restdocs.headers.HeaderDocumentation.*;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
@@ -85,7 +83,7 @@ class MenuControllerTest extends BaseRestAssuredTest {
         menuCreateRequest.setPrice(10000);
         menuCreateRequest.setDescription("Spaghetti with garlic and olive oil");
 
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user));
 
         String payload = objectMapper.writeValueAsString(menuCreateRequest);
 
@@ -187,7 +185,7 @@ class MenuControllerTest extends BaseRestAssuredTest {
         menuUpdateRequest.setName("Spaghetti Aglio e Olio");
         menuUpdateRequest.setPrice(12000);
 
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user));
 
         String payload = objectMapper.writeValueAsString(menuUpdateRequest);
 
@@ -221,7 +219,7 @@ class MenuControllerTest extends BaseRestAssuredTest {
     void testDeleteMenuEndpoint() {
         Menu menu1 = menuRepository.save(new Menu(store, "Aglio e Olio", 10000, "Spaghetti with garlic and olive oil"));
 
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(user.getId()));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user));
 
         RestAssured
                 .given(spec)

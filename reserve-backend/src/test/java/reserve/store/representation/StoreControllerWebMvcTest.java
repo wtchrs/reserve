@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import reserve.global.TestUtils;
 import reserve.signin.dto.SignInToken;
 import reserve.signin.infrastructure.JwtProvider;
 import reserve.store.dto.request.StoreCreateRequest;
@@ -48,7 +49,7 @@ class StoreControllerWebMvcTest {
         storeCreateRequest.setAddress("City, Street, Zipcode");
         storeCreateRequest.setDescription("Store description");
 
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(1L));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(1L));
 
         Mockito.when(storeService.create(
                 Mockito.eq(1L),
@@ -133,7 +134,7 @@ class StoreControllerWebMvcTest {
         storeUpdateRequest.setAddress("New address");
         storeUpdateRequest.setDescription("New description");
 
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(1L));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(1L));
 
         mockMvc.perform(
                 put("/v1/stores/{id}", 10L)
@@ -156,7 +157,7 @@ class StoreControllerWebMvcTest {
     @Test
     @DisplayName("Testing DELETE /v1/stores/{id} endpoint")
     void testDeleteEndpoint() throws Exception {
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(1L));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(1L));
 
         mockMvc.perform(
                 delete("/v1/stores/{id}", 10L)

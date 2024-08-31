@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.web.servlet.MockMvc;
+import reserve.global.TestUtils;
 import reserve.notification.service.NotificationService;
 import reserve.reservation.dto.request.ReservationCreateRequest;
 import reserve.reservation.dto.request.ReservationSearchRequest;
@@ -19,6 +20,7 @@ import reserve.reservation.dto.response.ReservationInfoResponse;
 import reserve.reservation.dto.response.ReservationMenuListResponse;
 import reserve.reservation.dto.response.ReservationMenuResponse;
 import reserve.reservation.service.ReservationService;
+import reserve.signin.domain.TokenDetails;
 import reserve.signin.dto.SignInToken;
 import reserve.signin.infrastructure.JwtProvider;
 
@@ -67,7 +69,7 @@ class ReservationControllerWebMvcTest {
                 )
         )).thenReturn(expectedReservationId);
 
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(userId));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(userId));
 
         mockMvc.perform(
                 post("/v1/reservations")
@@ -112,7 +114,7 @@ class ReservationControllerWebMvcTest {
 
         Mockito.when(reservationService.getReservationInfo(userId, reservationId)).thenReturn(expectedResponse);
 
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(userId));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(userId));
 
         mockMvc.perform(
                 get("/v1/reservations/{reservationId}", reservationId)
@@ -142,7 +144,7 @@ class ReservationControllerWebMvcTest {
 
         Mockito.when(reservationService.getReservationMenus(userId, reservationId)).thenReturn(expectedResponse);
 
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(userId));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(userId));
 
         mockMvc.perform(
                 get("/v1/reservations/{reservationId}/menus", reservationId)
@@ -211,7 +213,7 @@ class ReservationControllerWebMvcTest {
                         new PageImpl<>(expectedResponse, PageRequest.of(0, 20), 3))
                 );
 
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(userId));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(userId));
 
         mockMvc.perform(
                 get("/v1/reservations")
@@ -245,7 +247,7 @@ class ReservationControllerWebMvcTest {
         reservationUpdateRequest.setDate(LocalDate.now().plusDays(14));
         reservationUpdateRequest.setHour(14);
 
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(userId));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(userId));
 
         mockMvc.perform(
                 put("/v1/reservations/{reservationId}", reservationId)
@@ -272,7 +274,7 @@ class ReservationControllerWebMvcTest {
         Long userId = 1L;
         Long reservationId = 100L;
 
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(userId));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(userId));
 
         mockMvc.perform(
                 post("/v1/reservations/{reservationId}/cancel", reservationId)

@@ -1,8 +1,6 @@
 package reserve.menu.representation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.JsonPath;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -11,7 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
-import reserve.menu.domain.Menu;
+import reserve.global.TestUtils;
 import reserve.menu.dto.request.MenuCreateRequest;
 import reserve.menu.dto.request.MenuUpdateRequest;
 import reserve.menu.dto.response.MenuInfoListResponse;
@@ -23,7 +21,6 @@ import reserve.signin.infrastructure.JwtProvider;
 import java.util.List;
 
 import static org.hamcrest.Matchers.contains;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -54,7 +51,7 @@ class MenuControllerWebMvcTest {
         menuCreateRequest.setPrice(10000);
         menuCreateRequest.setDescription("Spaghetti with garlic and olive oil");
 
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(userId));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(userId));
 
         Mockito.when(menuService.create(
                 Mockito.eq(userId),
@@ -152,7 +149,7 @@ class MenuControllerWebMvcTest {
         menuUpdateRequest.setName("Spaghetti Aglio e Olio");
         menuUpdateRequest.setPrice(12000);
 
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(userId));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(userId));
 
         mockMvc.perform(put("/v1/menus/{menuId}", menuId)
                                 .header("Authorization", "Bearer " + signInToken.getAccessToken())
@@ -176,7 +173,7 @@ class MenuControllerWebMvcTest {
         Long userId = 1L;
         Long menuId = 100L;
 
-        SignInToken signInToken = jwtProvider.generateSignInToken(String.valueOf(userId));
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(userId));
 
         mockMvc.perform(
                 delete("/v1/menus/{menuId}", menuId)

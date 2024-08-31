@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reserve.global.TestUtils;
 import reserve.signin.domain.RefreshToken;
 import reserve.signin.dto.SignInToken;
 import reserve.signin.dto.request.SignInRequest;
@@ -71,11 +72,11 @@ class SignInServiceTest {
     @Test
     @DisplayName("Testing access token refresh functionality")
     void testRefreshAccessToken() {
-        RefreshToken refreshToken = new RefreshToken("refreshToken", 1L, 604800);
-        Mockito.when(refreshTokenRepository.findById("refreshToken")).thenReturn(Optional.of(refreshToken));
-        Mockito.doReturn(false).when(jwtProvider).isRefreshTokenExpired("refreshToken");
+        String refreshTokenString = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(1L)).getRefreshToken();
+        RefreshToken refreshToken = new RefreshToken(refreshTokenString, 1L, 604800);
+        Mockito.when(refreshTokenRepository.findById(refreshTokenString)).thenReturn(Optional.of(refreshToken));
 
-        SignInToken signInToken = signInService.refreshAccessToken("refreshToken");
+        SignInToken signInToken = signInService.refreshAccessToken(refreshTokenString);
 
         assertNotNull(signInToken.getAccessToken());
     }

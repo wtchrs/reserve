@@ -13,6 +13,7 @@ import reserve.global.exception.AccessTokenException;
 import reserve.global.exception.AuthenticationException;
 import reserve.global.exception.ErrorCode;
 import reserve.global.exception.InvalidAuthorizationException;
+import reserve.signin.domain.TokenDetails;
 import reserve.signin.infrastructure.JwtProvider;
 
 @Component
@@ -47,7 +48,8 @@ public class AuthInfoArgumentResolver implements HandlerMethodArgumentResolver {
         if (token == null) {
             return AuthInfo.guest(true);
         }
-        Long userId = Long.valueOf(jwtProvider.extractAccessTokenSubject(token));
+        TokenDetails tokenDetails = jwtProvider.extractAccessTokenDetails(token);
+        Long userId = Long.valueOf(tokenDetails.getUserId());
         return AuthInfo.user(userId);
     }
 

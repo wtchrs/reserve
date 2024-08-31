@@ -7,6 +7,7 @@ import reserve.global.exception.ErrorCode;
 import reserve.global.exception.RefreshTokenException;
 import reserve.global.exception.WrongCredentialException;
 import reserve.signin.domain.RefreshToken;
+import reserve.signin.domain.TokenDetails;
 import reserve.signin.infrastructure.RefreshTokenRepository;
 import reserve.signin.dto.SignInToken;
 import reserve.signin.dto.request.SignInRequest;
@@ -48,19 +49,18 @@ public class SignInService {
             throw new WrongCredentialException(ErrorCode.WRONG_CREDENTIAL);
         }
         Long userId = user.getId();
-        SignInToken signInToken = jwtProvider.generateSignInToken(userId.toString());
+        TokenDetails tokenDetails = new TokenDetails(userId.toString(), user.getUsername(), user.getNickname());
+        SignInToken signInToken = jwtProvider.generateSignInToken(tokenDetails);
         refreshTokenRepository.save(new RefreshToken(signInToken.getRefreshToken(), userId, refreshTokenExpiration));
         return signInToken;
     }
 
     public SignInToken refreshAccessToken(String refreshTokenValue) {
-        if (jwtProvider.isRefreshTokenExpired(refreshTokenValue)) {
-            throw new RefreshTokenException(ErrorCode.EXPIRED_REFRESH_TOKEN);
-        }
+        TokenDetails tokenDetails = jwtProvider.extractRefreshTokenDetails(refreshTokenValue);
         RefreshToken refreshToken = refreshTokenRepository.findById(refreshTokenValue)
                 .orElseThrow(() -> new RefreshTokenException(ErrorCode.EXPIRED_REFRESH_TOKEN));
         Long userId = refreshToken.getUserId();
-        SignInToken signInToken = jwtProvider.generateSignInToken(userId.toString());
+        SignInToken signInToken = jwtProvider.generateSignInToken(tokenDetails);
         // Refresh token rotation.
         refreshTokenRepository.save(new RefreshToken(signInToken.getRefreshToken(), userId, refreshTokenExpiration));
         refreshTokenRepository.delete(refreshToken);
