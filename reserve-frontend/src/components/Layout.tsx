@@ -2,6 +2,7 @@ import {Button, Container, CssBaseline, Tabs, Tab, Toolbar, Typography, Box, SxP
 import {Link as RouterLink, Outlet} from 'react-router-dom'
 import Link from '@mui/material/Link'
 import useRouteMatch from '../hooks/useRouteMatch'
+import UserInfo from './UserInfo.tsx'
 
 function Copyright(props: { sx: SxProps }) {
     return (
@@ -35,10 +36,7 @@ function Layout() {
                         <Tabs value={currentTab} sx={{flexGrow: 1}}>
                             <Tab label="Home" value="/" to="/" component={RouterLink}/>
                         </Tabs>
-                        <Box sx={{display: 'flex', gap: 2}}>
-                            <Button href="/sign-up" variant="outlined">Sign up</Button>
-                            <Button href="/sign-in" variant="contained">Sign in</Button>
-                        </Box>
+                        <UserInfo/>
                     </Toolbar>
                 </Box>
                 <Container component="main">

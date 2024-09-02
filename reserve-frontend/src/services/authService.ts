@@ -1,45 +1,34 @@
 import client from './api-client'
 import {jwtDecode} from 'jwt-decode'
-import {isAxiosError} from 'axios'
 import {SignInRequest, SignUpRequest} from '../schema'
-import {Auth, UserId} from '../type'
+import {Auth, User} from '../type'
+
+type TokenDecoded = { sub: string, username: string, nickname: string }
 
 abstract class AuthService {
-    static async signIn(request: SignInRequest, setError: (error: string) => void) {
-        try {
-            console.log('AuthService.signIn')
-            const res = await client.post('sign-in', request)
-            const accessToken = res.headers['authorization']
-            const decoded = jwtDecode(accessToken)
-            const user = decoded.sub as UserId
-            setError('')
-            return {user, accessToken} as Auth
-        } catch (err) {
-            console.log('err', err)
-            if (isAxiosError(err)) {
-                if (err.response && err.response.status === 401) {
-                    setError('Invalid username or password.')
-                } else {
-                    setError('Something went wrong. Please try again later.')
-                }
-            }
-        }
+    static async signIn(request: SignInRequest) {
+        const res = await client.post('/sign-in', request)
+        const accessToken = res.headers['authorization']
+        const decoded = jwtDecode<TokenDecoded>(accessToken)
+        const user: User = {userId: decoded.sub, username: decoded.username, nickname: decoded.nickname}
+        return {user, accessToken} as Auth
     }
 
-    static async signUp(request: SignUpRequest, setError: (error: string) => void) {
-        try {
-            await client.post('/sign-up', request)
-            return true
-        } catch (err) {
-            console.log(err)
-            if (isAxiosError(err)) {
-                if (err.response && err.response.status === 409) {
-                    setError('Username is already taken.')
-                } else {
-                    setError('Something went wrong. Please try again later.')
-                }
-            }
-        }
+    static async signOut() {
+        await client.post('/sign-out')
+    }
+
+    static async signUp(request: SignUpRequest) {
+        await client.post('/sign-up', request)
+        return true
+    }
+
+    static async refreshToken() {
+        const res = await client.post('/token-refresh')
+        const accessToken = res.headers['authorization']
+        const decoded = jwtDecode<TokenDecoded>(accessToken)
+        const user: User = {userId: decoded.sub, username: decoded.username, nickname: decoded.nickname}
+        return {user, accessToken} as Auth
     }
 }
 

@@ -15,7 +15,6 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
 import {SubmitHandler, useForm} from 'react-hook-form'
 import {zodResolver} from '@hookform/resolvers/zod'
 import {signInSchema as schema, SignInRequest} from '../schema.ts'
-import authService from '../services/authService.ts'
 import {useAuth} from '../hooks/useAuth.tsx'
 import {useNavigate} from 'react-router-dom'
 import ErrorMessages from './ErrorMessages.tsx'
@@ -23,7 +22,7 @@ import ErrorMessages from './ErrorMessages.tsx'
 function SignIn() {
     const navigate = useNavigate()
 
-    const {auth, setAuth} = useAuth()
+    const {auth, signIn} = useAuth()
     const [error, setError] = useState<string>('')
 
     const {
@@ -35,13 +34,8 @@ function SignIn() {
     if (auth) navigate('/')
 
     const onSubmit: SubmitHandler<SignInRequest> = async data => {
-        console.log('SignIn - onSubmit')
-        const auth = await authService.signIn(data, setError)
-        if (auth) {
-            // Successful sign in
-            setAuth(auth)
-            navigate('/')
-        }
+        await signIn(data, setError)
+        navigate('/')
     }
 
     return (

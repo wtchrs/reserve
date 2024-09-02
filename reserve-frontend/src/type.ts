@@ -1,6 +1,4 @@
-export type UserId = string
-
-export type User = UserId | {
+export type User = {
     userId: string
     username: string
     nickname: string

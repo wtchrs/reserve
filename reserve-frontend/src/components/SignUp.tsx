@@ -7,6 +7,7 @@ import {zodResolver} from '@hookform/resolvers/zod'
 import {signUpSchema as schema, SignUpRequest} from '../schema'
 import authService from '../services/authService'
 import ErrorMessages from './ErrorMessages'
+import {isAxiosError} from 'axios'
 
 function SignUp() {
     const navigate = useNavigate()
@@ -22,8 +23,16 @@ function SignUp() {
     const hasFieldError = (field: string) => field in fieldErrors
 
     const onSubmit: SubmitHandler<SignUpRequest> = async data => {
-        if (await authService.signUp(data, setError)) {
-            navigate('/sign-in')
+        try {
+            if (await authService.signUp(data)) {
+                navigate('/sign-in')
+            }
+        } catch (err) {
+            if (isAxiosError(err) && err.response && err.response.status === 409) {
+                setError('Username is already taken.')
+            } else {
+                setError('Something went wrong. Please try again later.')
+            }
         }
     }
 
