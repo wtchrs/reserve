@@ -11,6 +11,7 @@ public enum ErrorCode {
     INVALID_ACCESS_TOKEN_FORMAT(101, "The Access token format is invalid."),
     INVALID_REFRESH_TOKEN_FORMAT(102, "The refresh token format is invalid."),
     INVALID_SIGN_IN_INFO(103, "Sign-in information is invalid."),
+    INVALID_REFRESH_TOKEN(104, "The refresh token is invalid."),
 
     WRONG_CREDENTIAL(110, "Username or password is incorrect."),
     WRONG_PASSWORD(111, "Password is incorrect."),

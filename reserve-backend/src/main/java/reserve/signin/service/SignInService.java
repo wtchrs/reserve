@@ -56,10 +56,12 @@ public class SignInService {
     }
 
     public SignInToken refreshAccessToken(String refreshTokenValue) {
-        TokenDetails tokenDetails = jwtProvider.extractRefreshTokenDetails(refreshTokenValue);
         RefreshToken refreshToken = refreshTokenRepository.findById(refreshTokenValue)
                 .orElseThrow(() -> new RefreshTokenException(ErrorCode.EXPIRED_REFRESH_TOKEN));
         Long userId = refreshToken.getUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RefreshTokenException(ErrorCode.INVALID_REFRESH_TOKEN));
+        TokenDetails tokenDetails = new TokenDetails(user.getId().toString(), user.getUsername(), user.getNickname());
         SignInToken signInToken = jwtProvider.generateSignInToken(tokenDetails);
         // Refresh token rotation.
         refreshTokenRepository.save(new RefreshToken(signInToken.getRefreshToken(), userId, refreshTokenExpiration));

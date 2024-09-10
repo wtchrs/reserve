@@ -76,6 +76,12 @@ class SignInServiceTest {
         RefreshToken refreshToken = new RefreshToken(refreshTokenString, 1L, 604800);
         Mockito.when(refreshTokenRepository.findById(refreshTokenString)).thenReturn(Optional.of(refreshToken));
 
+        User user = Mockito.mock(User.class);
+        Mockito.when(user.getId()).thenReturn(1L);
+        Mockito.when(user.getUsername()).thenReturn("username");
+        Mockito.when(user.getNickname()).thenReturn("nickname");
+        Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
         SignInToken signInToken = signInService.refreshAccessToken(refreshTokenString);
 
         assertNotNull(signInToken.getAccessToken());

@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 import reserve.global.exception.AccessTokenException;
 import reserve.global.exception.ErrorCode;
 import reserve.global.exception.InvalidAuthorizationException;
-import reserve.global.exception.RefreshTokenException;
 import reserve.signin.domain.TokenDetails;
 import reserve.signin.dto.SignInToken;
 
@@ -51,7 +50,7 @@ public class JwtProvider {
         Map<String, String> claims =
                 Map.of("username", tokenDetails.getUsername(), "nickname", tokenDetails.getNickname());
         String accessToken = generateAccessToken(tokenDetails.getUserId(), claims);
-        String refreshToken = generateRefreshToken(tokenDetails.getUserId(), claims);
+        String refreshToken = generateRefreshToken(tokenDetails.getUserId(), Map.of());
         return new SignInToken(accessToken, refreshToken);
     }
 
@@ -101,31 +100,17 @@ public class JwtProvider {
 
     public TokenDetails extractAccessTokenDetails(String jwt) {
         try {
-            return extractToken(jwt, accessTokenSigningKey);
+            Claims body = parseToken(jwt, accessTokenSigningKey).getBody();
+            return new TokenDetails(
+                    body.getSubject(),
+                    body.get("username", String.class),
+                    body.get("nickname", String.class)
+            );
         } catch (ExpiredJwtException e) {
             throw new AccessTokenException(ErrorCode.EXPIRED_ACCESS_TOKEN, e);
         } catch (JwtException e) {
             throw new InvalidAuthorizationException(ErrorCode.INVALID_ACCESS_TOKEN_FORMAT, e);
         }
-    }
-
-    public TokenDetails extractRefreshTokenDetails(String jwt) {
-        try {
-            return extractToken(jwt, refreshTokenSigningKey);
-        } catch (ExpiredJwtException e) {
-            throw new RefreshTokenException(ErrorCode.EXPIRED_REFRESH_TOKEN);
-        } catch (JwtException e) {
-            throw new InvalidAuthorizationException(ErrorCode.INVALID_REFRESH_TOKEN_FORMAT, e);
-        }
-    }
-
-    private TokenDetails extractToken(String jwt, Key signingKey) {
-        Claims body = parseToken(jwt, signingKey).getBody();
-        return new TokenDetails(
-                body.getSubject(),
-                body.get("username", String.class),
-                body.get("nickname", String.class)
-        );
     }
 
     private static Jws<Claims> parseToken(String jwt, Key signingKey) {
