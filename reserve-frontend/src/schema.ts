@@ -24,5 +24,27 @@ export const signUpSchema = z
         path: ['passwordConfirmation'],
     })
 
+export const updateUserSchema = z.object({
+    nickname: z.string()
+        .min(2, 'Nickname must be at least 2 characters.')
+        .max(30, 'Nickname must be at most 30 characters.'),
+    description: z.string(),
+})
+
+export const updatePasswordSchema = z
+    .object({
+        oldPassword: z.string(),
+        newPassword: z.string()
+            .min(8, 'Password must be at least 8 characters.')
+            .max(50, 'Password must be at most 50 characters.'),
+        confirmation: z.string(),
+    })
+    .refine(data => data.newPassword === data.confirmation, {
+        message: 'Passwords do not match.',
+        path: ['passwordConfirmation'],
+    })
+
 export type SignInRequest = z.infer<typeof signInSchema>
 export type SignUpRequest = z.infer<typeof signUpSchema>
+export type UpdateUserRequest = z.infer<typeof updateUserSchema>
+export type UpdatePasswordRequest = z.infer<typeof updatePasswordSchema>

@@ -1,7 +1,7 @@
 import client from './api-client'
 import {jwtDecode} from 'jwt-decode'
 import {SignInRequest, SignUpRequest} from '../schema'
-import {Auth, User} from '../type'
+import {Auth, AuthUser} from '../type'
 
 type TokenDecoded = { sub: string, username: string, nickname: string }
 
@@ -10,7 +10,7 @@ abstract class AuthService {
         const res = await client.post('/sign-in', request)
         const accessToken = res.headers['authorization']
         const decoded = jwtDecode<TokenDecoded>(accessToken)
-        const user: User = {userId: decoded.sub, username: decoded.username, nickname: decoded.nickname}
+        const user: AuthUser = {userId: decoded.sub, username: decoded.username, nickname: decoded.nickname}
         return {user, accessToken} as Auth
     }
 
@@ -27,7 +27,7 @@ abstract class AuthService {
         const res = await client.post('/token-refresh')
         const accessToken = res.headers['authorization']
         const decoded = jwtDecode<TokenDecoded>(accessToken)
-        const user: User = {userId: decoded.sub, username: decoded.username, nickname: decoded.nickname}
+        const user: AuthUser = {userId: decoded.sub, username: decoded.username, nickname: decoded.nickname}
         return {user, accessToken} as Auth
     }
 }

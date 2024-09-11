@@ -7,6 +7,7 @@ import Home from './components/Home'
 import SignIn from './components/SignIn'
 import SignUp from './components/SignUp'
 import {AuthProvider} from './hooks/useAuth'
+import UserDetailPage from './components/UserDetailPage'
 
 const LinkBehavior = React.forwardRef<
     HTMLAnchorElement,
@@ -35,6 +36,7 @@ const router = createBrowserRouter([
     {
         path: '/',
         element: <Layout/>,
+        errorElement: <Layout showError/>,
         children: [
             {
                 index: true,
@@ -48,6 +50,10 @@ const router = createBrowserRouter([
                 path: 'sign-up',
                 element: <SignUp/>,
             },
+            {
+                path: 'users/:username',
+                element: <UserDetailPage/>,
+            }
         ],
     },
 ])

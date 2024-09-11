@@ -2,7 +2,7 @@ import {Box, Button, Link} from '@mui/material'
 import {useAuth} from '../hooks/useAuth'
 import {useCallback} from 'react'
 
-function UserInfo() {
+function AuthInfo() {
     const {auth, signOut} = useAuth()
     const onSignOut = useCallback(async () => await signOut(), [signOut])
 
@@ -23,4 +23,4 @@ function UserInfo() {
     )
 }
 
-export default UserInfo
+export default AuthInfo
