@@ -14,12 +14,12 @@ import {
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
 import {SubmitHandler, useForm} from 'react-hook-form'
 import {zodResolver} from '@hookform/resolvers/zod'
-import {signInSchema as schema, SignInRequest} from '../schema.ts'
-import {useAuth} from '../hooks/useAuth.tsx'
+import {signInSchema as schema, SignInRequest} from '../../schema.ts'
+import {useAuth} from '../../hooks/useAuth.tsx'
 import {useNavigate} from 'react-router-dom'
-import ErrorMessages from './ErrorMessages.tsx'
+import ErrorMessages from '../ErrorMessages.tsx'
 
-function SignIn() {
+function SignInPage() {
     const navigate = useNavigate()
 
     const {auth, signIn} = useAuth()
@@ -79,4 +79,4 @@ function SignIn() {
     )
 }
 
-export default SignIn
+export default SignInPage

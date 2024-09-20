@@ -2,7 +2,7 @@ import {Button, Container, CssBaseline, Tabs, Tab, Toolbar, Typography, Box, SxP
 import {Link as RouterLink, Outlet} from 'react-router-dom'
 import Link from '@mui/material/Link'
 import useRouteMatch from '../hooks/useRouteMatch'
-import AuthInfo from './AuthInfo'
+import AuthInfo from './auth/AuthInfo.tsx'
 import ErrorPage from './ErrorPage'
 
 function Copyright(props: { sx: SxProps }) {
@@ -24,8 +24,9 @@ type Props = {
 }
 
 function Layout({showError}: Props) {
-    const routeMatch = useRouteMatch(['/'])
-    const currentTab = routeMatch?.pattern?.path || false
+    const routeMatch = useRouteMatch(['/', '/users', '/users/:username'])
+    let currentTab = routeMatch?.pattern?.path || false
+    currentTab = currentTab && /^\/users/.test(currentTab) ? '/users' : currentTab
 
     return (
         <>
@@ -39,6 +40,7 @@ function Layout({showError}: Props) {
                         <Box px="1rem"></Box>
                         <Tabs value={currentTab} sx={{flexGrow: 1}}>
                             <Tab label="Home" value="/" to="/" component={RouterLink}/>
+                            <Tab label="Users" value="/users" to="/users" component={RouterLink}/>
                         </Tabs>
                         <AuthInfo/>
                     </Toolbar>

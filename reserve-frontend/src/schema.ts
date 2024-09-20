@@ -41,10 +41,15 @@ export const updatePasswordSchema = z
     })
     .refine(data => data.newPassword === data.confirmation, {
         message: 'Passwords do not match.',
-        path: ['passwordConfirmation'],
+        path: ['confirmation'],
     })
+
+export const deleteUserSchema = z.object({
+    password: z.string(),
+})
 
 export type SignInRequest = z.infer<typeof signInSchema>
 export type SignUpRequest = z.infer<typeof signUpSchema>
 export type UpdateUserRequest = z.infer<typeof updateUserSchema>
 export type UpdatePasswordRequest = z.infer<typeof updatePasswordSchema>
+export type DeleteUserRequest = z.infer<typeof deleteUserSchema>

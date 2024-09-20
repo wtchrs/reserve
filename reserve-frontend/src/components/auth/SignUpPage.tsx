@@ -4,12 +4,12 @@ import {LockOutlined} from '@mui/icons-material'
 import {useNavigate} from 'react-router-dom'
 import {SubmitHandler, useForm} from 'react-hook-form'
 import {zodResolver} from '@hookform/resolvers/zod'
-import {signUpSchema as schema, SignUpRequest} from '../schema'
-import authService from '../services/authService'
-import ErrorMessages from './ErrorMessages'
+import {signUpSchema as schema, SignUpRequest} from '../../schema.ts'
+import authService from '../../services/authService.ts'
+import ErrorMessages from '../ErrorMessages.tsx'
 import {isAxiosError} from 'axios'
 
-function SignUp() {
+function SignUpPage() {
     const navigate = useNavigate()
     const {
         handleSubmit,
@@ -88,4 +88,4 @@ function SignUp() {
     )
 }
 
-export default SignUp
+export default SignUpPage

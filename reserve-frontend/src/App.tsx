@@ -4,10 +4,13 @@ import {ThemeProvider, createTheme} from '@mui/material'
 import {LinkProps} from '@mui/material/Link'
 import Layout from './components/Layout'
 import Home from './components/Home'
-import SignIn from './components/SignIn'
-import SignUp from './components/SignUp'
+import SignInPage from './components/auth/SignInPage'
+import SignUpPage from './components/auth/SignUpPage'
 import {AuthProvider} from './hooks/useAuth'
-import UserDetailPage from './components/UserDetailPage'
+import UserDetailPage from './components/user/UserDetailPage'
+import UserUpdatePage from './components/user/UserUpdatePage'
+import MyPage from './components/user/MyPage'
+import PasswordUpdatePage from './components/user/PasswordUpdatePage'
 
 const LinkBehavior = React.forwardRef<
     HTMLAnchorElement,
@@ -44,16 +47,28 @@ const router = createBrowserRouter([
             },
             {
                 path: 'sign-in',
-                element: <SignIn/>,
+                element: <SignInPage/>,
             },
             {
                 path: 'sign-up',
-                element: <SignUp/>,
+                element: <SignUpPage/>,
+            },
+            {
+                path: 'mypage',
+                element: <MyPage/>,
             },
             {
                 path: 'users/:username',
                 element: <UserDetailPage/>,
-            }
+            },
+            {
+                path: 'users/edit',
+                element: <UserUpdatePage/>,
+            },
+            {
+                path: 'users/password',
+                element: <PasswordUpdatePage/>,
+            },
         ],
     },
 ])

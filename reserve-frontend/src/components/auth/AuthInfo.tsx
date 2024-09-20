@@ -1,5 +1,5 @@
 import {Box, Button, Link} from '@mui/material'
-import {useAuth} from '../hooks/useAuth'
+import {useAuth} from '../../hooks/useAuth.tsx'
 import {useCallback} from 'react'
 
 function AuthInfo() {
@@ -10,7 +10,7 @@ function AuthInfo() {
         <Box sx={{display: 'flex', gap: 2, alignItems: 'center'}}>
             {auth ? (
                 <>
-                    <Link href={'/users/' + auth.user.username}>{auth.user.nickname}</Link>
+                    <Link href={'/mypage'}>{auth.user.nickname}</Link>
                     <Button onClick={onSignOut} variant="outlined">Sign out</Button>
                 </>
             ) : (
