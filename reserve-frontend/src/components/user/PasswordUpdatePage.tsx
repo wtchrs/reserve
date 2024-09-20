@@ -2,7 +2,6 @@ import {Avatar, Box, Button, Container, Grid, TextField, Typography} from '@mui/
 import {LockOutlined} from '@mui/icons-material'
 import {SubmitHandler, useForm} from 'react-hook-form'
 import {zodResolver} from '@hookform/resolvers/zod'
-import {useState} from 'react'
 import {isAxiosError} from 'axios'
 import {useNavigate} from 'react-router-dom'
 import ErrorMessages from '../ErrorMessages'
@@ -17,10 +16,9 @@ function PasswordUpdatePage() {
     const {
         handleSubmit,
         register,
+        setError,
         formState: {errors: fieldErrors, isValid},
     } = useForm<UpdatePasswordRequest>({resolver: zodResolver(schema), mode: 'onChange'})
-
-    const [error, setError] = useState<string>()
 
     const hasFieldError = (field: string) => field in fieldErrors
 
@@ -34,9 +32,9 @@ function PasswordUpdatePage() {
             navigate('/')
         } catch (err) {
             if (isAxiosError(err) && err.response && err.response.status === 403) {
-                setError('Password is incorrect.')
+                setError('oldPassword', {message:'Password is incorrect.'})
             } else {
-                setError('Something went wrong. Please try again later.')
+                setError('root', {message:'Something went wrong. Please try again later.'})
             }
         }
     }
@@ -55,8 +53,7 @@ function PasswordUpdatePage() {
                     Sign up
                 </Typography>
                 <Box component="form" noValidate onSubmit={handleSubmit(onSubmit)} sx={{mt: 3}}>
-                    {error && <ErrorMessages errors={error}/>}
-                    {Object.keys(fieldErrors).length > 0 && <ErrorMessages errors={fieldErrors}/>}
+                    <ErrorMessages errors={fieldErrors}/>
 
                     <Grid container spacing={2}>
                         <Grid item xs={12}>

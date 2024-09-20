@@ -3,13 +3,17 @@ import {ErrorOutlined} from '@mui/icons-material'
 import {FieldErrors} from 'react-hook-form'
 
 type Error = { key: string, message: string }
-type Props = { errors: string | Error[] | FieldErrors }
+type Props = { errors?: string | Error[] | FieldErrors }
 
 function isFieldErrors(errors: string | Error[] | FieldErrors): errors is FieldErrors {
     return typeof errors === 'object' && !Array.isArray(errors)
 }
 
 function ErrorMessages({errors}: Props) {
+    if (!errors) {
+        return null
+    }
+
     if (typeof errors === 'string') {
         errors = [{key: 'error', message: errors}]
     }
@@ -18,6 +22,10 @@ function ErrorMessages({errors}: Props) {
         errors = Object.entries(errors)
             .filter(([_, value]) => !!value?.message)
             .map(([field, value]) => ({key: field, message: value?.message as string}))
+    }
+
+    if (errors.length === 0) {
+        return null
     }
 
     return (

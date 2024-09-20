@@ -18,6 +18,7 @@ function UserUpdatePage() {
         handleSubmit,
         register,
         reset,
+        setError: setFieldError,
         formState: {errors: fieldErrors, isValid},
     } = useForm<UpdateUserRequest>({resolver: zodResolver(updateUserSchema)})
     const [error, setError] = useState<any>()
@@ -45,8 +46,8 @@ function UserUpdatePage() {
         try {
             await userService.updateUser(auth, data)
             navigate(`/users/${auth.user.username}`)
-        } catch (err) {
-            setError(err)
+        } catch (_err) {
+            setFieldError('root', {message: 'Something went wrong. Please try again later.'})
         }
     }
 
@@ -63,8 +64,7 @@ function UserUpdatePage() {
                 </Typography>
                 <Box sx={{padding: 4, mt: 3}}>
                     <Box component="form" noValidate onSubmit={handleSubmit(onSubmit)}>
-                        {error && <ErrorMessages errors={error}/>}
-                        {Object.keys(fieldErrors).length > 0 && <ErrorMessages errors={fieldErrors}/>}
+                        <ErrorMessages errors={fieldErrors}/>
 
                         <Grid container spacing={2}>
                             <Grid item xs={12}>

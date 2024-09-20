@@ -1,4 +1,3 @@
-import {useState} from 'react'
 import {Avatar, Button, TextField, Link, Grid, Box, Typography, Container} from '@mui/material'
 import {LockOutlined} from '@mui/icons-material'
 import {useNavigate} from 'react-router-dom'
@@ -14,11 +13,9 @@ function SignUpPage() {
     const {
         handleSubmit,
         register,
+        setError,
         formState: {errors: fieldErrors, isValid},
     } = useForm<SignUpRequest>({resolver: zodResolver(schema), mode: 'onChange'})
-
-    // Server error or communication error
-    const [error, setError] = useState<string>()
 
     const hasFieldError = (field: string) => field in fieldErrors
 
@@ -29,9 +26,9 @@ function SignUpPage() {
             }
         } catch (err) {
             if (isAxiosError(err) && err.response && err.response.status === 409) {
-                setError('Username is already taken.')
+                setError('root', {message:'Username is already taken.'})
             } else {
-                setError('Something went wrong. Please try again later.')
+                setError('root', {message:'Something went wrong. Please try again later.'})
             }
         }
     }
@@ -46,8 +43,7 @@ function SignUpPage() {
                     Sign up
                 </Typography>
                 <Box component="form" noValidate onSubmit={handleSubmit(onSubmit)} sx={{mt: 3}}>
-                    {error && <ErrorMessages errors={error}/>}
-                    {Object.keys(fieldErrors).length > 0 && <ErrorMessages errors={fieldErrors}/>}
+                    <ErrorMessages errors={fieldErrors}/>
 
                     <Grid container spacing={2}>
                         <Grid item xs={12}>

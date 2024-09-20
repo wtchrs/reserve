@@ -1,4 +1,3 @@
-import {useState} from 'react'
 import {
     Avatar,
     Box,
@@ -18,24 +17,33 @@ import {signInSchema as schema, SignInRequest} from '../../schema.ts'
 import {useAuth} from '../../hooks/useAuth.tsx'
 import {useNavigate} from 'react-router-dom'
 import ErrorMessages from '../ErrorMessages.tsx'
+import {isAxiosError} from 'axios'
 
 function SignInPage() {
-    const navigate = useNavigate()
-
     const {auth, signIn} = useAuth()
-    const [error, setError] = useState<string>('')
+    const navigate = useNavigate()
 
     const {
         handleSubmit,
         register,
+        setError,
+        formState: {errors: error},
     } = useForm<SignInRequest>({resolver: zodResolver(schema)})
 
     // Already signed in
     if (auth) navigate('/')
 
     const onSubmit: SubmitHandler<SignInRequest> = async data => {
-        await signIn(data, setError)
-        navigate('/')
+        try {
+            await signIn(data)
+            navigate('/')
+        } catch (err) {
+            if (isAxiosError(err) && err.response?.status === 401) {
+                setError('root', {message: 'Invalid username or password.'})
+            } else {
+                setError('root', {message: 'Something went wrong. Please try again later.'})
+            }
+        }
     }
 
     return (
@@ -48,7 +56,7 @@ function SignInPage() {
                     Sign in
                 </Typography>
                 <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{mt: 1}}>
-                    {error && <ErrorMessages  errors={error}/>}
+                    <ErrorMessages errors={error}/>
 
                     <TextField margin="normal" required fullWidth id="username" label="Username"
                                autoComplete="username" autoFocus {...register('username')}/>

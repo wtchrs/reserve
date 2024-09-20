@@ -4,7 +4,13 @@ import {useCallback} from 'react'
 
 function AuthInfo() {
     const {auth, signOut} = useAuth()
-    const onSignOut = useCallback(async () => await signOut(), [signOut])
+    const onSignOut = useCallback(async () => {
+        try {
+            await signOut()
+        } catch (_err) {
+            alert('Something went wrong. Please try again later.')
+        }
+    }, [signOut])
 
     return (
         <Box sx={{display: 'flex', gap: 2, alignItems: 'center'}}>
