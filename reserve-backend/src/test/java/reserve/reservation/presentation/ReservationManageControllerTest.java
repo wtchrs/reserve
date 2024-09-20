@@ -7,7 +7,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.restdocs.request.PathParametersSnippet;
 import reserve.global.BaseRestAssuredTest;
 import reserve.global.TestUtils;
 import reserve.global.exception.ErrorCode;
@@ -24,11 +23,7 @@ import reserve.user.infrastructure.UserRepository;
 import javax.sql.DataSource;
 import java.time.LocalDate;
 
-import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
 import static org.hamcrest.Matchers.equalTo;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static reserve.global.DocumentationSnippetUtils.*;
 
 class ReservationManageControllerTest extends BaseRestAssuredTest {
 
@@ -97,11 +92,6 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         RestAssured
                 .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
                 .relaxedHTTPSValidation()
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        reservationIdToCancelPathParametersSnippet()
-                ))
                 .when().post(CANCEL_ENDPOINT_URL_TEMPLATE, ready.getId())
                 .then().assertThat().statusCode(200);
     }
@@ -117,12 +107,6 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         RestAssured
                 .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
                 .relaxedHTTPSValidation()
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        reservationIdToCancelPathParametersSnippet(),
-                        errorResponseFieldsSnippet()
-                ))
                 .when().post(CANCEL_ENDPOINT_URL_TEMPLATE, inService.getId())
                 .then()
                 .statusCode(409)
@@ -141,12 +125,6 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         RestAssured
                 .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
                 .relaxedHTTPSValidation()
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        reservationIdToCancelPathParametersSnippet(),
-                        errorResponseFieldsSnippet()
-                ))
                 .when().post(CANCEL_ENDPOINT_URL_TEMPLATE, completed.getId())
                 .then()
                 .statusCode(409)
@@ -163,11 +141,6 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         RestAssured
                 .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
                 .relaxedHTTPSValidation()
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        reservationIdToCancelPathParametersSnippet()
-                ))
                 .when().post(CANCEL_ENDPOINT_URL_TEMPLATE, cancelled.getId())
                 .then().assertThat().statusCode(200);
     }
@@ -181,11 +154,6 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         RestAssured
                 .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
                 .relaxedHTTPSValidation()
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        reservationIdToStartPathParametersSnippet()
-                ))
                 .when().post(START_ENDPOINT_URL_TEMPLATE, ready.getId())
                 .then().assertThat().statusCode(200);
     }
@@ -199,11 +167,6 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         RestAssured
                 .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
                 .relaxedHTTPSValidation()
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        reservationIdToStartPathParametersSnippet()
-                ))
                 .when().post(START_ENDPOINT_URL_TEMPLATE, inService.getId())
                 .then().assertThat().statusCode(200);
     }
@@ -219,12 +182,6 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         RestAssured
                 .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
                 .relaxedHTTPSValidation()
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        reservationIdToStartPathParametersSnippet(),
-                        errorResponseFieldsSnippet()
-                ))
                 .when().post(START_ENDPOINT_URL_TEMPLATE, completed.getId())
                 .then()
                 .statusCode(409)
@@ -243,12 +200,6 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         RestAssured
                 .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
                 .relaxedHTTPSValidation()
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        reservationIdToStartPathParametersSnippet(),
-                        errorResponseFieldsSnippet()
-                ))
                 .when().post(START_ENDPOINT_URL_TEMPLATE, cancelled.getId())
                 .then()
                 .statusCode(409)
@@ -267,12 +218,6 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         RestAssured
                 .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
                 .relaxedHTTPSValidation()
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        reservationIdToCompletePathParametersSnippet(),
-                        errorResponseFieldsSnippet()
-                ))
                 .when().post(COMPLETE_ENDPOINT_URL_TEMPLATE, ready.getId())
                 .then()
                 .statusCode(409)
@@ -291,11 +236,6 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         RestAssured
                 .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
                 .relaxedHTTPSValidation()
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        reservationIdToCompletePathParametersSnippet()
-                ))
                 .when().post(COMPLETE_ENDPOINT_URL_TEMPLATE, inService.getId())
                 .then().assertThat().statusCode(200);
     }
@@ -309,11 +249,6 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         RestAssured
                 .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
                 .relaxedHTTPSValidation()
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        reservationIdToCompletePathParametersSnippet()
-                ))
                 .when().post(COMPLETE_ENDPOINT_URL_TEMPLATE, completed.getId())
                 .then().assertThat().statusCode(200);
     }
@@ -329,29 +264,11 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         RestAssured
                 .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
                 .relaxedHTTPSValidation()
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        reservationIdToCompletePathParametersSnippet(),
-                        errorResponseFieldsSnippet()
-                ))
                 .when().post(COMPLETE_ENDPOINT_URL_TEMPLATE, cancelled.getId())
                 .then()
                 .statusCode(409)
                 .body("errorCode", equalTo(ErrorCode.RESERVATION_CANNOT_COMPLETE.getCode()))
                 .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_COMPLETE.getMessage()));
-    }
-
-    private static PathParametersSnippet reservationIdToCancelPathParametersSnippet() {
-        return pathParameters(parameterWithName("reservationId").description("The reservation ID to cancel"));
-    }
-
-    private static PathParametersSnippet reservationIdToStartPathParametersSnippet() {
-        return pathParameters(parameterWithName("reservationId").description("The reservation ID to start"));
-    }
-
-    private static PathParametersSnippet reservationIdToCompletePathParametersSnippet() {
-        return pathParameters(parameterWithName("reservationId").description("The reservation ID to complete"));
     }
 
 }

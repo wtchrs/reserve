@@ -20,7 +20,6 @@ import reserve.reservation.dto.response.ReservationInfoResponse;
 import reserve.reservation.dto.response.ReservationMenuListResponse;
 import reserve.reservation.dto.response.ReservationMenuResponse;
 import reserve.reservation.service.ReservationService;
-import reserve.signin.domain.TokenDetails;
 import reserve.signin.dto.SignInToken;
 import reserve.signin.infrastructure.JwtProvider;
 
