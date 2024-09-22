@@ -59,7 +59,19 @@ application:
       refreshTokenExpire: 604800
   cors:
     allowedOrigins: https://example-domain1.com, https://example-domain2.com
+
+# OpenAPI
+springdoc:
+  swagger-ui:
+    groups-order: asc
+    tags-sorter: alpha
+    operations-sorter: alpha
+  paths-to-match:
+    - /v1/**
+  override-with-generic-response: off
 ```
+
+See [springdoc.org](https://springdoc.org/#properties) for more information about Springdoc OpenAPI configuration.
 
 ## Create a PKCS #12 certificate using Certbot
 

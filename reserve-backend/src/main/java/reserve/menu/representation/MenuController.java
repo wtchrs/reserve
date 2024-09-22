@@ -16,10 +16,11 @@ import java.net.URI;
 
 @RestController
 @RequiredArgsConstructor
-public class MenuController {
+public class MenuController implements MenuOperations {
 
     private final MenuService menuService;
 
+    @Override
     @PostMapping("/v1/stores/{storeId}/menus")
     public ResponseEntity<Void> createMenu(
             @Authentication AuthInfo authInfo,
@@ -30,16 +31,19 @@ public class MenuController {
         return ResponseEntity.created(URI.create("/v1/menus/" + id)).build();
     }
 
+    @Override
     @GetMapping("/v1/menus/{menuId}")
     public MenuInfoResponse getMenuInfo(@PathVariable("menuId") Long menuId) {
         return menuService.getMenuInfo(menuId);
     }
 
+    @Override
     @GetMapping("/v1/stores/{storeId}/menus")
     public MenuInfoListResponse getStoreMenus(@PathVariable("storeId") Long storeId) {
         return menuService.getStoreMenus(storeId);
     }
 
+    @Override
     @PutMapping("/v1/menus/{menuId}")
     public void updateMenu(
             @Authentication AuthInfo authInfo,
@@ -49,6 +53,7 @@ public class MenuController {
         menuService.update(authInfo.getUserId(), menuId, menuUpdateRequest);
     }
 
+    @Override
     @DeleteMapping("/v1/menus/{menuId}")
     public void deleteMenu(@Authentication AuthInfo authInfo, @PathVariable("menuId") Long menuId) {
         menuService.delete(authInfo.getUserId(), menuId);

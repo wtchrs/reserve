@@ -11,7 +11,7 @@ import reserve.signin.service.SignInService;
 
 @RestController
 @RequestMapping("/v1")
-public class SignInController {
+public class SignInController implements SignInOperations {
 
     private final int refreshTokenExpire;
 
@@ -26,6 +26,7 @@ public class SignInController {
     }
 
     @PostMapping("/sign-in")
+    @Override
     public void signIn(@RequestBody @Validated SignInRequest signInRequest, HttpServletResponse response) {
         SignInToken signInToken = signInService.signIn(signInRequest);
         response.setHeader("Authorization", signInToken.getAccessToken());
@@ -33,6 +34,7 @@ public class SignInController {
     }
 
     @PostMapping("/token-refresh")
+    @Override
     public void refreshAccessToken(
             @CookieValue("refresh") Cookie refreshCookie,
             HttpServletResponse response
@@ -53,6 +55,7 @@ public class SignInController {
     }
 
     @PostMapping("/sign-out")
+    @Override
     public void signOut(@CookieValue("refresh") Cookie refreshCookie, HttpServletResponse response) {
         signInService.signOut(refreshCookie.getValue());
         // delete cookie

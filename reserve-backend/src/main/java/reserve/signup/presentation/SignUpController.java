@@ -15,10 +15,11 @@ import java.net.URI;
 @RestController
 @RequestMapping("/v1/sign-up")
 @RequiredArgsConstructor
-public class SignUpController {
+public class SignUpController implements SignUpOperations {
 
     private final SignUpService signUpService;
 
+    @Override
     @PostMapping
     public ResponseEntity<Void> signUp(@RequestBody @Validated SignUpRequest signUpRequest) {
         signUpService.signUp(signUpRequest);
