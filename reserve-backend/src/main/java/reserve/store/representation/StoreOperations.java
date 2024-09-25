@@ -10,6 +10,9 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import reserve.auth.domain.AuthInfo;
+import reserve.global.exception.ErrorCode;
+import reserve.global.swagger.annotation.ApiErrorCodeResponse;
+import reserve.global.swagger.annotation.ApiErrorCodeResponses;
 import reserve.store.dto.request.StoreCreateRequest;
 import reserve.store.dto.request.StoreSearchRequest;
 import reserve.store.dto.request.StoreUpdateRequest;
@@ -25,6 +28,7 @@ public interface StoreOperations {
             operationId = "1_createStore"
     )
     @ApiResponses(@ApiResponse(responseCode = "201", description = "Created"))
+    @ApiErrorCodeResponses(@ApiErrorCodeResponse(responseCode = "403", errorCode = ErrorCode.INVALID_SIGN_IN_INFO))
     @SuppressWarnings("unused")
     ResponseEntity<Void> create(AuthInfo authInfo, StoreCreateRequest storeCreateRequest);
 
@@ -41,6 +45,7 @@ public interface StoreOperations {
                     schema = @Schema(implementation = StoreInfoResponse.class)
             )
     ))
+    @ApiErrorCodeResponses(@ApiErrorCodeResponse(responseCode = "404", errorCode = ErrorCode.STORE_NOT_FOUND))
     @SuppressWarnings("unused")
     StoreInfoResponse getStoreInfo(
             @Schema(description = "Store ID", example = "1") Long storeId
@@ -72,6 +77,7 @@ public interface StoreOperations {
             operationId = "4_updateStore"
     )
     @ApiResponses(@ApiResponse(responseCode = "200", description = "Successfully updated"))
+    @ApiErrorCodeResponses(@ApiErrorCodeResponse(responseCode = "404", errorCode = ErrorCode.STORE_NOT_FOUND))
     @SuppressWarnings("unused")
     void update(
             AuthInfo authInfo,
@@ -86,6 +92,7 @@ public interface StoreOperations {
             operationId = "5_deleteStore"
     )
     @ApiResponses(@ApiResponse(responseCode = "200", description = "Successfully deleted"))
+    @ApiErrorCodeResponses(@ApiErrorCodeResponse(responseCode = "404", errorCode = ErrorCode.STORE_NOT_FOUND))
     @SuppressWarnings("unused")
     void delete(
             AuthInfo authInfo,

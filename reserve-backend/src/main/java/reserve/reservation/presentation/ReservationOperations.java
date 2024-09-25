@@ -10,6 +10,9 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import reserve.auth.domain.AuthInfo;
+import reserve.global.exception.ErrorCode;
+import reserve.global.swagger.annotation.ApiErrorCodeResponse;
+import reserve.global.swagger.annotation.ApiErrorCodeResponses;
 import reserve.reservation.dto.request.ReservationCreateRequest;
 import reserve.reservation.dto.request.ReservationSearchRequest;
 import reserve.reservation.dto.request.ReservationUpdateRequest;
@@ -26,6 +29,10 @@ public interface ReservationOperations {
             operationId = "1_create"
     )
     @ApiResponses(@ApiResponse(responseCode = "201", description = "Successfully reserved"))
+    @ApiErrorCodeResponses({
+            @ApiErrorCodeResponse(responseCode = "403", errorCode = ErrorCode.INVALID_SIGN_IN_INFO),
+            @ApiErrorCodeResponse(responseCode = "404", errorCode = ErrorCode.STORE_NOT_FOUND)
+    })
     @SuppressWarnings("unused")
     ResponseEntity<Void> create(AuthInfo authInfo, ReservationCreateRequest reservationCreateRequest);
 
@@ -42,6 +49,7 @@ public interface ReservationOperations {
                     schema = @Schema(implementation = ReservationInfoResponse.class)
             )
     ))
+    @ApiErrorCodeResponses(@ApiErrorCodeResponse(responseCode = "404", errorCode = ErrorCode.RESERVATION_NOT_FOUND))
     @SuppressWarnings("unused")
     ReservationInfoResponse getReservationInfo(
             AuthInfo authInfo,
@@ -61,6 +69,7 @@ public interface ReservationOperations {
                     schema = @Schema(implementation = ReservationMenuListResponse.class)
             )
     ))
+    @ApiErrorCodeResponses(@ApiErrorCodeResponse(responseCode = "403", errorCode = ErrorCode.ACCESS_DENIED))
     @SuppressWarnings("unused")
     ReservationMenuListResponse getReservationMenus(
             AuthInfo authInfo,
@@ -80,6 +89,7 @@ public interface ReservationOperations {
                     schema = @Schema(implementation = ReservationInfoListResponse.class)
             )
     ))
+    @ApiErrorCodeResponses(@ApiErrorCodeResponse(responseCode = "403", errorCode = ErrorCode.INVALID_SIGN_IN_INFO))
     @SuppressWarnings("unused")
     ReservationInfoListResponse search(
             AuthInfo authInfo,
@@ -94,6 +104,7 @@ public interface ReservationOperations {
             operationId = "5_update"
     )
     @ApiResponses(@ApiResponse(responseCode = "200", description = "Successfully updated"))
+    @ApiErrorCodeResponses(@ApiErrorCodeResponse(responseCode = "404", errorCode = ErrorCode.RESERVATION_NOT_FOUND))
     @SuppressWarnings("unused")
     void update(
             AuthInfo authInfo,
@@ -108,6 +119,7 @@ public interface ReservationOperations {
             operationId = "6_cancel"
     )
     @ApiResponses(@ApiResponse(responseCode = "200", description = "Successfully canceled"))
+    @ApiErrorCodeResponses(@ApiErrorCodeResponse(responseCode = "404", errorCode = ErrorCode.RESERVATION_NOT_FOUND))
     @SuppressWarnings("unused")
     void cancel(
             AuthInfo authInfo,

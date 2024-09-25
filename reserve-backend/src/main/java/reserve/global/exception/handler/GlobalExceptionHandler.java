@@ -13,7 +13,6 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import reserve.global.exception.*;
-import reserve.global.exception.dto.ErrorResponse;
 import reserve.global.exception.dto.ParameterError;
 import reserve.global.exception.dto.ValidationErrorResponse;
 
@@ -43,78 +42,75 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleTypeMismatch(MethodArgumentTypeMismatchException e, HttpServletRequest request) {
+    public ErrorCode handleTypeMismatch(MethodArgumentTypeMismatchException e, HttpServletRequest request) {
         log.warn("Request URL: {}, Error message: {}", request.getRequestURL(), e.getMessage(), e);
-        return new ErrorResponse(ErrorCode.INVALID_REQUEST.getCode(), ErrorCode.INVALID_REQUEST.getMessage());
+        return ErrorCode.INVALID_REQUEST;
     }
 
     @ExceptionHandler(WrongCredentialException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ErrorResponse handleWrongCredential(WrongCredentialException e, HttpServletRequest request) {
+    public ErrorCode handleWrongCredential(WrongCredentialException e, HttpServletRequest request) {
         return handleErrorCodeException(e, request);
     }
 
     @ExceptionHandler(InvalidAuthorizationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleInvalidAuthorization(InvalidAuthorizationException e, HttpServletRequest request) {
+    public ErrorCode handleInvalidAuthorization(InvalidAuthorizationException e, HttpServletRequest request) {
         return handleErrorCodeException(e, request);
     }
 
     @ExceptionHandler(AuthenticationException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorResponse handleAuthentication(AuthenticationException e, HttpServletRequest request) {
+    public ErrorCode handleAuthentication(AuthenticationException e, HttpServletRequest request) {
         return handleErrorCodeException(e, request);
     }
 
     @ExceptionHandler(AccessTokenException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ErrorResponse handleAccessToken(AccessTokenException e, HttpServletRequest request) {
+    public ErrorCode handleAccessToken(AccessTokenException e, HttpServletRequest request) {
         return handleErrorCodeException(e, request);
     }
 
     @ExceptionHandler(RefreshTokenException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ErrorResponse handleRefreshToken(RefreshTokenException e, HttpServletRequest request) {
+    public ErrorCode handleRefreshToken(RefreshTokenException e, HttpServletRequest request) {
         return handleErrorCodeException(e, request);
     }
 
     @ExceptionHandler(ReservationStatusException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleReservationStatus(ReservationStatusException e, HttpServletRequest request) {
+    public ErrorCode handleReservationStatus(ReservationStatusException e, HttpServletRequest request) {
         return handleErrorCodeException(e, request);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleResourceNotFound(ResourceNotFoundException e, HttpServletRequest request) {
+    public ErrorCode handleResourceNotFound(ResourceNotFoundException e, HttpServletRequest request) {
         return handleErrorCodeException(e, request);
     }
 
     @ExceptionHandler(InvalidAccessException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorResponse handleAccessDenied(InvalidAccessException e, HttpServletRequest request) {
+    public ErrorCode handleAccessDenied(InvalidAccessException e, HttpServletRequest request) {
         return handleErrorCodeException(e, request);
     }
 
     @ExceptionHandler(UsernameDuplicateException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleUsernameDuplicate(UsernameDuplicateException e, HttpServletRequest request) {
+    public ErrorCode handleUsernameDuplicate(UsernameDuplicateException e, HttpServletRequest request) {
         return handleErrorCodeException(e, request);
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleException(Exception e, HttpServletRequest request) {
+    public ErrorCode handleException(Exception e, HttpServletRequest request) {
         log.warn("Request URL: {}, Error message: {}", request.getRequestURL(), e.getMessage(), e);
-        return new ErrorResponse(
-                ErrorCode.INTERNAL_SERVER_ERROR.getCode(),
-                ErrorCode.INTERNAL_SERVER_ERROR.getMessage()
-        );
+        return ErrorCode.INTERNAL_SERVER_ERROR;
     }
 
-    private static ErrorResponse handleErrorCodeException(ErrorCodeException e, HttpServletRequest request) {
+    private static ErrorCode handleErrorCodeException(ErrorCodeException e, HttpServletRequest request) {
         log.warn("Request URL: {}, Error message: {}", request.getRequestURL(), e.getMessage(), e);
-        return new ErrorResponse(e.getErrorCode().getCode(), e.getErrorCode().getMessage());
+        return e.getErrorCode();
     }
 
 }

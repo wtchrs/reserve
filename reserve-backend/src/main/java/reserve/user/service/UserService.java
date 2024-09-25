@@ -47,7 +47,7 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AuthenticationException(ErrorCode.INVALID_SIGN_IN_INFO));
         if (!passwordEncoder.matches(passwordUpdateRequest.getOldPassword(), user.getPasswordHash())) {
-            throw new AuthenticationException(ErrorCode.WRONG_CREDENTIAL);
+            throw new AuthenticationException(ErrorCode.WRONG_PASSWORD);
         }
         String newPassword = passwordUpdateRequest.getNewPassword();
         String newPasswordHash = passwordEncoder.encode(newPassword);

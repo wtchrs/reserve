@@ -8,6 +8,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import reserve.auth.domain.AuthInfo;
+import reserve.global.exception.ErrorCode;
+import reserve.global.swagger.annotation.ApiErrorCodeResponse;
+import reserve.global.swagger.annotation.ApiErrorCodeResponses;
 import reserve.menu.dto.request.MenuCreateRequest;
 import reserve.menu.dto.request.MenuUpdateRequest;
 import reserve.menu.dto.response.MenuInfoListResponse;
@@ -22,6 +25,7 @@ public interface MenuOperations {
             operationId = "1_createMenu"
     )
     @ApiResponses(@ApiResponse(responseCode = "201", description = "Menu created"))
+    @ApiErrorCodeResponses(@ApiErrorCodeResponse(responseCode = "404", errorCode = ErrorCode.STORE_NOT_FOUND))
     @SuppressWarnings("unused")
     ResponseEntity<Void> createMenu(
             AuthInfo authInfo,
@@ -42,6 +46,7 @@ public interface MenuOperations {
                     schema = @Schema(implementation = MenuInfoResponse.class)
             )
     ))
+    @ApiErrorCodeResponses(@ApiErrorCodeResponse(responseCode = "404", errorCode = ErrorCode.MENU_NOT_FOUND))
     @SuppressWarnings("unused")
     MenuInfoResponse getMenuInfo(@Schema(description = "Menu ID", example = "1") Long menuId);
 
@@ -68,6 +73,10 @@ public interface MenuOperations {
             operationId = "4_updateMenu"
     )
     @ApiResponses(@ApiResponse(responseCode = "200", description = "Menu updated"))
+    @ApiErrorCodeResponses({
+            @ApiErrorCodeResponse(responseCode = "404", errorCode = ErrorCode.MENU_NOT_FOUND),
+            @ApiErrorCodeResponse(responseCode = "403", errorCode = ErrorCode.ACCESS_DENIED)
+    })
     @SuppressWarnings("unused")
     void updateMenu(
             AuthInfo authInfo,
@@ -82,6 +91,7 @@ public interface MenuOperations {
             operationId = "5_deleteMenu"
     )
     @ApiResponses(@ApiResponse(responseCode = "200", description = "Menu deleted"))
+    @ApiErrorCodeResponses(@ApiErrorCodeResponse(responseCode = "403", errorCode = ErrorCode.ACCESS_DENIED))
     @SuppressWarnings("unused")
     void deleteMenu(AuthInfo authInfo, @Schema(description = "Menu ID", example = "1") Long menuId);
 
