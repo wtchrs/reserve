@@ -10,9 +10,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.restdocs.cookies.ResponseCookiesSnippet;
-import org.springframework.restdocs.headers.ResponseHeadersSnippet;
-import org.springframework.restdocs.payload.RequestFieldsSnippet;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 import reserve.global.BaseRestAssuredTest;
@@ -25,14 +22,7 @@ import reserve.user.infrastructure.UserRepository;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.restdocs.cookies.CookieDocumentation.cookieWithName;
-import static org.springframework.restdocs.cookies.CookieDocumentation.responseCookies;
-import static org.springframework.restdocs.headers.HeaderDocumentation.*;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
-import static reserve.global.DocumentationSnippetUtils.bearerTokenAuthorizationSnippet;
 
 class SignInControllerTest extends BaseRestAssuredTest {
 
@@ -83,12 +73,6 @@ class SignInControllerTest extends BaseRestAssuredTest {
 
         Response response = RestAssured
                 .given(spec).contentType(MediaType.APPLICATION_JSON_VALUE).body(payload)
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        signInRequestFieldsSnippet(),
-                        accessTokenResponseHeadersSnippet(),
-                        refreshTokenResponseCookiesSnippet()
-                ))
                 .relaxedHTTPSValidation()
                 .when().post("/v1/sign-in");
 
@@ -126,11 +110,6 @@ class SignInControllerTest extends BaseRestAssuredTest {
 
         Response response = RestAssured
                 .given(spec).cookie("refresh", refreshToken)
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        accessTokenResponseHeadersSnippet(),
-                        refreshTokenResponseCookiesSnippet()
-                ))
                 .relaxedHTTPSValidation()
                 .when().post("/v1/token-refresh");
 
@@ -168,11 +147,6 @@ class SignInControllerTest extends BaseRestAssuredTest {
 
         Response response1 = RestAssured
                 .given(spec).header("Authorization", "Bearer " + accessToken).cookie("refresh", refreshToken)
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        expiringRefreshTokenResponseCookiesSnippet()
-                ))
                 .relaxedHTTPSValidation()
                 .when().post("/v1/sign-out");
 
@@ -180,31 +154,6 @@ class SignInControllerTest extends BaseRestAssuredTest {
         assertEquals(0, response1.getDetailedCookie("refresh").getMaxAge());
 
         refreshTokenRepository.findById(refreshToken).ifPresent(refreshToken1 -> fail("Refresh token not deleted"));
-    }
-
-    /**
-     * @return The request fields snippet
-     * @see SignInRequest
-     */
-    private static RequestFieldsSnippet signInRequestFieldsSnippet() {
-        return requestFields(
-                fieldWithPath("username").description("The username of the user"),
-                fieldWithPath("password").description("The password of the user")
-        );
-    }
-
-    private static ResponseHeadersSnippet accessTokenResponseHeadersSnippet() {
-        return responseHeaders(headerWithName("Authorization").description("The access token"));
-    }
-
-    private static ResponseCookiesSnippet refreshTokenResponseCookiesSnippet() {
-        return responseCookies(cookieWithName("refresh").description("The refresh token"));
-    }
-
-    private static ResponseCookiesSnippet expiringRefreshTokenResponseCookiesSnippet() {
-        return responseCookies(
-                cookieWithName("refresh").description("The refresh token cookie. It is expired immediately.")
-        );
     }
 
 }

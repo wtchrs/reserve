@@ -8,19 +8,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.restdocs.payload.RequestFieldsSnippet;
 import org.springframework.test.annotation.Commit;
 import reserve.global.BaseRestAssuredTest;
 import reserve.signup.dto.request.SignUpRequest;
 import reserve.signup.infrastructure.PasswordEncoder;
 import reserve.user.infrastructure.UserRepository;
 
-import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
-import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 
 class SignUpControllerTest extends BaseRestAssuredTest {
 
@@ -53,11 +47,6 @@ class SignUpControllerTest extends BaseRestAssuredTest {
 
         RestAssured
                 .given(spec).body(payload).contentType("application/json")
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        signUpRequestFieldsSnippet(),
-                        responseHeaders(headerWithName("Location").description("The url of the created user"))
-                ))
                 .relaxedHTTPSValidation()
                 .when().post("/v1/sign-up")
                 .then().statusCode(201).header("Location", "/v1/users/username");
@@ -69,19 +58,6 @@ class SignUpControllerTest extends BaseRestAssuredTest {
                     assertEquals("nickname", user.getNickname());
                 },
                 () -> fail("User not found")
-        );
-    }
-
-    /**
-     * @return The request fields snippet
-     * @see SignUpRequest
-     */
-    private static RequestFieldsSnippet signUpRequestFieldsSnippet() {
-        return requestFields(
-                fieldWithPath("username").description("The username of the user"),
-                fieldWithPath("password").description("The password of the user"),
-                fieldWithPath("passwordConfirmation").description("The password confirmation of the user"),
-                fieldWithPath("nickname").description("The nickname of the user")
         );
     }
 

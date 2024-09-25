@@ -19,10 +19,11 @@ import java.net.URI;
 @RestController
 @RequestMapping("/v1/stores")
 @RequiredArgsConstructor
-public class StoreController {
+public class StoreController implements StoreOperations {
 
     private final StoreService storeService;
 
+    @Override
     @PostMapping
     public ResponseEntity<Void> create(
             @Authentication AuthInfo authInfo,
@@ -32,11 +33,13 @@ public class StoreController {
         return ResponseEntity.created(URI.create("/v1/stores/" + storeId)).build();
     }
 
+    @Override
     @GetMapping("/{storeId}")
     public StoreInfoResponse getStoreInfo(@PathVariable("storeId") Long storeId) {
         return storeService.getStoreInfo(storeId);
     }
 
+    @Override
     @GetMapping
     public StoreInfoListResponse search(
             @ModelAttribute @Validated StoreSearchRequest storeSearchRequest,
@@ -45,6 +48,7 @@ public class StoreController {
         return storeService.search(storeSearchRequest, pageable);
     }
 
+    @Override
     @PutMapping("/{storeId}")
     public void update(
             @Authentication AuthInfo authInfo,
@@ -54,6 +58,7 @@ public class StoreController {
         storeService.update(authInfo.getUserId(), storeId, storeUpdateRequest);
     }
 
+    @Override
     @DeleteMapping("/{storeId}")
     public void delete(@Authentication AuthInfo authInfo, @PathVariable("storeId") Long storeId) {
         storeService.delete(authInfo.getUserId(), storeId);

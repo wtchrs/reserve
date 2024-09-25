@@ -7,9 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.restdocs.payload.ResponseFieldsSnippet;
-import org.springframework.restdocs.request.PathParametersSnippet;
-import org.springframework.restdocs.request.QueryParametersSnippet;
 import reserve.global.BaseRestAssuredTest;
 import reserve.global.TestUtils;
 import reserve.global.exception.ErrorCode;
@@ -29,12 +26,8 @@ import reserve.user.infrastructure.UserRepository;
 
 import java.time.LocalDate;
 
-import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
-import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.*;
-import static reserve.global.DocumentationSnippetUtils.*;
 
 class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
 
@@ -100,12 +93,6 @@ class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
                 .given(spec)
                 .header("Authorization", "Bearer " + signInToken.getAccessToken())
                 .relaxedHTTPSValidation()
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        reservationIdPathParametersSnippet(),
-                        reservationInfoResponseFieldsSnippet()
-                ))
                 .when().get("/v1/reservations/{reservationId}", reservation.getId())
                 .then()
                 .statusCode(200)
@@ -130,12 +117,6 @@ class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
                 .given(spec)
                 .header("Authorization", "Bearer " + signInToken.getAccessToken())
                 .relaxedHTTPSValidation()
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        reservationIdPathParametersSnippet(),
-                        reservationInfoResponseFieldsSnippet()
-                ))
                 .when().get("/v1/reservations/{reservationId}", reservation.getId())
                 .then()
                 .statusCode(200);
@@ -157,12 +138,6 @@ class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
                 .given(spec)
                 .header("Authorization", "Bearer " + signInToken.getAccessToken())
                 .relaxedHTTPSValidation()
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        reservationIdPathParametersSnippet(),
-                        errorResponseFieldsSnippet()
-                ))
                 .when().get("/v1/reservations/{reservationId}", reservation.getId())
                 .then()
                 .statusCode(404)
@@ -184,12 +159,6 @@ class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
         RestAssured
                 .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
                 .relaxedHTTPSValidation()
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        reservationIdPathParametersSnippet(),
-                        reservationMenuListResponseFieldsSnippet()
-                ))
                 .when().get("/v1/reservations/{reservationId}/menus", reservation.getId())
                 .then()
                 .statusCode(200)
@@ -219,12 +188,6 @@ class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
         RestAssured
                 .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
                 .relaxedHTTPSValidation()
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        reservationIdPathParametersSnippet(),
-                        reservationMenuListResponseFieldsSnippet()
-                ))
                 .when().get("/v1/reservations/{reservationId}/menus", reservation.getId())
                 .then()
                 .statusCode(200)
@@ -245,12 +208,6 @@ class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
         RestAssured
                 .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
                 .relaxedHTTPSValidation()
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        reservationIdPathParametersSnippet(),
-                        errorResponseFieldsSnippet()
-                ))
                 .when().get("/v1/reservations/{reservationId}/menus", reservation.getId())
                 .then()
                 .statusCode(403)
@@ -280,12 +237,6 @@ class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
                 .param("query", "pasta")
                 .param("date", LocalDate.now().plusDays(7).toString())
                 .relaxedHTTPSValidation()
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        reservationSearchRequestQueryParametersSnippet(),
-                        reservationInfoListResponseFieldsSnippet()
-                ))
                 .when().get("/v1/reservations")
                 .then()
                 .statusCode(200)
@@ -295,73 +246,6 @@ class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
                 .body("results[0].hour", equalTo(12))
                 .body("results[1].hour", equalTo(13))
                 .body("results[2].hour", equalTo(20));
-    }
-
-    private static PathParametersSnippet reservationIdPathParametersSnippet() {
-        return pathParameters(parameterWithName("reservationId").description("The ID of the reservation to retrieve"));
-    }
-
-    /**
-     * @return the query parameters snippet
-     * @see reserve.reservation.dto.request.ReservationSearchRequest
-     */
-    private static QueryParametersSnippet reservationSearchRequestQueryParametersSnippet() {
-        return queryParameters(
-                parameterWithName("type").description("The type of the search").optional(),
-                parameterWithName("query").description("The query to search").optional(),
-                parameterWithName("date").description("The date to search").optional()
-        );
-    }
-
-    /**
-     * @return the response fields snippet
-     * @see reserve.reservation.dto.response.ReservationInfoResponse
-     */
-    private static ResponseFieldsSnippet reservationInfoResponseFieldsSnippet() {
-        return responseFields(
-                fieldWithPath("reservationId").description("The id of the reservation"),
-                fieldWithPath("storeId").description("The store id of the reservation"),
-                fieldWithPath("registrant").description("The registrant of the reservation"),
-                fieldWithPath("reservationName").description("The username of the person that made the reservation"),
-                fieldWithPath("date").description("The date of the reservation"),
-                fieldWithPath("hour").description("The hour of the reservation")
-        );
-    }
-
-    /**
-     * @return the response fields snippet
-     * @see reserve.reservation.dto.response.ReservationMenuListResponse
-     */
-    private static ResponseFieldsSnippet reservationMenuListResponseFieldsSnippet() {
-        return responseFields(
-                fieldWithPath("count").description("The number of menus"),
-                fieldWithPath("results[].reservationMenuId").description("The id of the reservation menu"),
-                fieldWithPath("results[].name").description("The name of the menu"),
-                fieldWithPath("results[].price").description("The price of the menu"),
-                fieldWithPath("results[].quantity").description("The quantity of the menu")
-        );
-    }
-
-    /**
-     * @return the response fields snippet
-     * @see reserve.reservation.dto.response.ReservationInfoListResponse
-     */
-    private static ResponseFieldsSnippet reservationInfoListResponseFieldsSnippet() {
-        return responseFields(
-                fieldWithPath("count").description("The number of reservations"),
-                fieldWithPath("pageNumber")
-                        .description("The page number of the search. The page number starts with 0."),
-                fieldWithPath("pageSize").description("The page size of the search"),
-                fieldWithPath("hasNext").description("Whether there is a next page"),
-                fieldWithPath("results").description("The list of reservations"),
-                fieldWithPath("results[].reservationId").description("The id of the reservation"),
-                fieldWithPath("results[].storeId").description("The store id of the reservation"),
-                fieldWithPath("results[].registrant").description("The registrant of the reservation"),
-                fieldWithPath("results[].reservationName")
-                        .description("The username of the person that made the reservation"),
-                fieldWithPath("results[].date").description("The date of the reservation"),
-                fieldWithPath("results[].hour").description("The hour of the reservation")
-        );
     }
 
 }

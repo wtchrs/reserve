@@ -7,7 +7,6 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.restdocs.payload.RequestFieldsSnippet;
 import reserve.global.BaseRestAssuredTest;
 import reserve.global.TestUtils;
 import reserve.menu.domain.Menu;
@@ -20,7 +19,6 @@ import reserve.reservation.dto.request.ReservationMenuCreateRequest;
 import reserve.reservation.dto.request.ReservationUpdateRequest;
 import reserve.reservation.infrastructure.ReservationMenuRepository;
 import reserve.reservation.infrastructure.ReservationRepository;
-import reserve.signin.domain.TokenDetails;
 import reserve.signin.dto.SignInToken;
 import reserve.signin.infrastructure.JwtProvider;
 import reserve.store.domain.Store;
@@ -31,13 +29,8 @@ import reserve.user.infrastructure.UserRepository;
 import java.time.LocalDate;
 import java.util.List;
 
-import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.springframework.restdocs.headers.HeaderDocumentation.*;
-import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.*;
-import static reserve.global.DocumentationSnippetUtils.*;
 
 class ReservationControllerTest extends BaseRestAssuredTest {
 
@@ -117,12 +110,6 @@ class ReservationControllerTest extends BaseRestAssuredTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(payload)
                 .relaxedHTTPSValidation()
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        reservationCreateRequestFieldsSnippet(),
-                        responseHeaders(headerWithName("Location").description("The url of the created reservation"))
-                ))
                 .when().post("/v1/reservations")
                 .then()
                 .statusCode(201)
@@ -156,14 +143,6 @@ class ReservationControllerTest extends BaseRestAssuredTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(payload)
                 .relaxedHTTPSValidation()
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        pathParameters(
-                                parameterWithName("reservationId").description("The ID of the reservation to update")
-                        ),
-                        reservationUpdateRequestFieldsSnippet()
-                ))
                 .when().put("/v1/reservations/{reservationId}", reservation.getId())
                 .then()
                 .statusCode(200);
@@ -193,13 +172,6 @@ class ReservationControllerTest extends BaseRestAssuredTest {
                 .given(spec)
                 .header("Authorization", "Bearer " + signInToken.getAccessToken())
                 .relaxedHTTPSValidation()
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        pathParameters(
-                                parameterWithName("reservationId").description("The id of the reservation to cancel")
-                        )
-                ))
                 .when().post("/v1/reservations/{reservationId}/cancel", reservation.getId())
                 .then()
                 .statusCode(200);
@@ -207,31 +179,6 @@ class ReservationControllerTest extends BaseRestAssuredTest {
         reservationRepository.findById(reservation.getId()).ifPresentOrElse(
                 updatedReservation -> assertEquals(ReservationStatusType.CANCELLED, updatedReservation.getStatus()),
                 () -> fail("Reservation not found")
-        );
-    }
-
-    /**
-     * @return The request fields snippet
-     * @see ReservationCreateRequest
-     */
-    private static RequestFieldsSnippet reservationCreateRequestFieldsSnippet() {
-        return requestFields(
-                fieldWithPath("storeId").description("The store id to make a reservation"),
-                fieldWithPath("date").description("The date to make a reservation"),
-                fieldWithPath("hour").description("The hour to make a reservation"),
-                fieldWithPath("menus[].menuId").description("The menu id to make a reservation"),
-                fieldWithPath("menus[].quantity").description("The quantity of the menu to make a reservation")
-        );
-    }
-
-    /**
-     * @return The request fields snippet
-     * @see ReservationUpdateRequest
-     */
-    private static RequestFieldsSnippet reservationUpdateRequestFieldsSnippet() {
-        return requestFields(
-                fieldWithPath("date").description("The new date of the reservation"),
-                fieldWithPath("hour").description("The new hour of the reservation")
         );
     }
 

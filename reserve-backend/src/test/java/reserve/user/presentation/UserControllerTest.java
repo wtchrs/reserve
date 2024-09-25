@@ -6,9 +6,6 @@ import io.restassured.RestAssured;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.restdocs.payload.RequestFieldsSnippet;
-import org.springframework.restdocs.payload.ResponseFieldsSnippet;
-import org.springframework.restdocs.request.PathParametersSnippet;
 import reserve.global.BaseRestAssuredTest;
 import reserve.global.TestUtils;
 import reserve.signin.dto.SignInToken;
@@ -22,13 +19,8 @@ import reserve.user.infrastructure.UserRepository;
 
 import javax.sql.DataSource;
 
-import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static reserve.global.DocumentationSnippetUtils.bearerTokenAuthorizationSnippet;
 
 class UserControllerTest extends BaseRestAssuredTest {
 
@@ -74,11 +66,6 @@ class UserControllerTest extends BaseRestAssuredTest {
         RestAssured
                 .given(spec)
                 .relaxedHTTPSValidation()
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        userIdToRetrievePathParametersSnippet(),
-                        userInfoResponseFieldsSnippet()
-                ))
                 .when().get("/v1/users/{username}", "username")
                 .then().statusCode(200)
                 .body("username", equalTo(user.getUsername()))
@@ -101,11 +88,6 @@ class UserControllerTest extends BaseRestAssuredTest {
                 .header("Authorization", "Bearer " + accessToken)
                 .contentType("application/json")
                 .body(payload)
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        userUpdateRequestFieldsSnippet()
-                ))
                 .relaxedHTTPSValidation()
                 .when().put("/v1/users")
                 .then().statusCode(200);
@@ -134,11 +116,6 @@ class UserControllerTest extends BaseRestAssuredTest {
                 .header("Authorization", "Bearer " + accessToken)
                 .contentType("application/json")
                 .body(payload)
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        passwordUpdateRequestFieldsSnippet()
-                ))
                 .relaxedHTTPSValidation()
                 .when().put("/v1/users/password")
                 .then().statusCode(200);
@@ -162,68 +139,11 @@ class UserControllerTest extends BaseRestAssuredTest {
                 .header("Authorization", "Bearer " + accessToken)
                 .contentType("application/json")
                 .body(payload)
-                .filter(document(
-                        DEFAULT_RESTDOC_PATH,
-                        bearerTokenAuthorizationSnippet(),
-                        userDeleteRequestFieldsSnippet()
-                ))
                 .relaxedHTTPSValidation()
                 .when().delete("/v1/users")
                 .then().statusCode(200);
 
         userRepository.findByUsername("username").ifPresent(user -> fail("User not deleted"));
-    }
-
-    private static PathParametersSnippet userIdToRetrievePathParametersSnippet() {
-        return pathParameters(
-                parameterWithName("username").description("The username to retrieve the user info")
-        );
-    }
-
-    /**
-     * @return The response fields snippet
-     * @see reserve.user.dto.response.UserInfoResponse
-     */
-    private static ResponseFieldsSnippet userInfoResponseFieldsSnippet() {
-        return responseFields(
-                fieldWithPath("username").description("The username of the user"),
-                fieldWithPath("nickname").description("The nickname of the user"),
-                fieldWithPath("description").description("The description of the user"),
-                fieldWithPath("signUpDate").description("The sign up date of the user")
-        );
-    }
-
-    /**
-     * @return The request fields snippet
-     * @see reserve.user.dto.request.UserUpdateRequest
-     */
-    private static RequestFieldsSnippet userUpdateRequestFieldsSnippet() {
-        return requestFields(
-                fieldWithPath("nickname").description("The new nickname of the logged-in user"),
-                fieldWithPath("description").description("The new description of the logged-in user")
-        );
-    }
-
-    /**
-     * @return The request fields snippet
-     * @see reserve.user.dto.request.PasswordUpdateRequest
-     */
-    private static RequestFieldsSnippet passwordUpdateRequestFieldsSnippet() {
-        return requestFields(
-                fieldWithPath("oldPassword").description("The old password of the logged-in user"),
-                fieldWithPath("newPassword").description("The new password of the logged-in user"),
-                fieldWithPath("confirmation").description("The confirmation of the new password")
-        );
-    }
-
-    /**
-     * @return The request fields snippet
-     * @see reserve.user.dto.request.UserDeleteRequest
-     */
-    private static RequestFieldsSnippet userDeleteRequestFieldsSnippet() {
-        return requestFields(
-                fieldWithPath("password").description("The password of the logged-in user")
-        );
     }
 
 }

@@ -1,10 +1,14 @@
 package reserve.global.exception;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@Schema(type = "object", format = "object")
 public enum ErrorCode {
 
     // 1xx: Authentication and authorization errors.
@@ -42,7 +46,10 @@ public enum ErrorCode {
     // 9xx: server errors.
     INTERNAL_SERVER_ERROR(900, "An internal server error has occurred. Please try again later.");
 
+    @Schema(description = "Error code", example = "101")
     private final int code;
+
+    @Schema(description = "Error message", example = "The Access token format is invalid.")
     private final String message;
 
     @Override

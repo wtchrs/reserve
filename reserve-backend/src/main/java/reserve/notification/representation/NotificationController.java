@@ -11,15 +11,17 @@ import reserve.notification.service.NotificationService;
 @RestController
 @RequestMapping("/v1/notifications")
 @RequiredArgsConstructor
-public class NotificationController {
+public class NotificationController implements NotificationOperations {
 
     private final NotificationService notificationService;
 
+    @Override
     @GetMapping
     public NotificationInfoListResponse getUserNotifications(@Authentication AuthInfo authInfo, Pageable pageable) {
         return notificationService.getUserNotifications(authInfo.getUserId(), pageable);
     }
 
+    @Override
     @PostMapping("/{notificationId}/read")
     public void readNotification(
             @Authentication AuthInfo authInfo,
@@ -28,6 +30,7 @@ public class NotificationController {
         notificationService.readNotification(authInfo.getUserId(), notificationId);
     }
 
+    @Override
     @PostMapping("/read-all")
     public void readAllNotifications(@Authentication AuthInfo authInfo) {
         notificationService.readAllNotifications(authInfo.getUserId());

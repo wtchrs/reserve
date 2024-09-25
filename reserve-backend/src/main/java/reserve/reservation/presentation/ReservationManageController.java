@@ -13,11 +13,12 @@ import reserve.reservation.service.ReservationManageService;
 @RestController
 @RequestMapping("/v1/reservations/manage")
 @RequiredArgsConstructor
-public class ReservationManageController {
+public class ReservationManageController implements ReservationManageOperations {
 
     private final ReservationManageService reservationManageService;
     private final NotificationService notificationService;
 
+    @Override
     @PostMapping("/{reservationId}/cancel")
     public void cancel(@Authentication AuthInfo authInfo, @PathVariable("reservationId") Long reservationId) {
         reservationManageService.cancel(authInfo.getUserId(), reservationId);
@@ -28,12 +29,14 @@ public class ReservationManageController {
         );
     }
 
+    @Override
     @PostMapping("/{reservationId}/start")
     public void startService(@Authentication AuthInfo authInfo, @PathVariable("reservationId") Long reservationId) {
         reservationManageService.startService(authInfo.getUserId(), reservationId);
         notificationService.notifyReservation(reservationId, "Service has been started.");
     }
 
+    @Override
     @PostMapping("/{reservationId}/complete")
     public void complete(@Authentication AuthInfo authInfo, @PathVariable("reservationId") Long reservationId) {
         reservationManageService.complete(authInfo.getUserId(), reservationId);

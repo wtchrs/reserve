@@ -21,12 +21,13 @@ import java.net.URI;
 @RestController
 @RequestMapping("/v1/reservations")
 @RequiredArgsConstructor
-public class ReservationController {
+public class ReservationController implements ReservationOperations {
 
     private final ReservationService reservationService;
 
     private final NotificationService notificationService;
 
+    @Override
     @PostMapping
     public ResponseEntity<Void> create(
             @Authentication AuthInfo authInfo,
@@ -41,6 +42,7 @@ public class ReservationController {
         return ResponseEntity.created(URI.create("/v1/reservations/" + reservationId)).build();
     }
 
+    @Override
     @GetMapping("/{reservationId}")
     public ReservationInfoResponse getReservationInfo(
             @Authentication AuthInfo authInfo,
@@ -49,6 +51,7 @@ public class ReservationController {
         return reservationService.getReservationInfo(authInfo.getUserId(), reservationId);
     }
 
+    @Override
     @GetMapping("/{reservationId}/menus")
     public ReservationMenuListResponse getReservationMenus(
             @Authentication AuthInfo authInfo,
@@ -57,6 +60,7 @@ public class ReservationController {
         return reservationService.getReservationMenus(authInfo.getUserId(), reservationId);
     }
 
+    @Override
     @GetMapping
     public ReservationInfoListResponse search(
             @Authentication AuthInfo authInfo,
@@ -66,6 +70,7 @@ public class ReservationController {
         return reservationService.search(authInfo.getUserId(), reservationSearchRequest, pageable);
     }
 
+    @Override
     @PutMapping("/{reservationId}")
     public void update(
             @Authentication AuthInfo authInfo,
@@ -80,6 +85,7 @@ public class ReservationController {
         );
     }
 
+    @Override
     @PostMapping("/{reservationId}/cancel")
     public void cancel(@Authentication AuthInfo authInfo, @PathVariable("reservationId") Long reservationId) {
         reservationService.cancel(authInfo.getUserId(), reservationId);

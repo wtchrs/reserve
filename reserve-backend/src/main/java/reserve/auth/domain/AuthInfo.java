@@ -1,11 +1,13 @@
 package reserve.auth.domain;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
+@Hidden
 public class AuthInfo {
 
     private static final AuthInfo GUEST_PLACEHOLDER = new AuthInfo(0L, AuthType.GUEST);

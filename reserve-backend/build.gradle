@@ -1,18 +1,7 @@
-import org.hidetake.gradle.swagger.generator.GenerateSwaggerUI
-import org.springframework.boot.gradle.tasks.bundling.BootJar
-
-buildscript {
-    ext {
-        restdocsApiSpecVersion = '0.18.2'
-    }
-}
-
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.2.2'
     id 'io.spring.dependency-management' version '1.1.4'
-    id 'com.epages.restdocs-api-spec' version "${restdocsApiSpecVersion}"
-    id 'org.hidetake.swagger.generator' version '2.19.2'
 }
 
 group = 'reserve'
@@ -28,21 +17,7 @@ configurations {
     }
 }
 
-openapi3 {
-    setServer "https://localhost:8080"
-    title = "reserve-backend API Documentation"
-    description = "reserve-backend OpenAPI 3 Documentation with SwaggerUI."
-    version = "0.0.1"
-}
-
-swaggerSources {
-    sample {
-        setInputFile layout.buildDirectory.file("api-spec/openapi3.json").get().getAsFile()
-    }
-}
-
 ext {
-    set('snippetsDir', file("build/generated-snippets"))
     queryDslVersion = '5.0.0'
     generated = 'src/main/generated'
 }
@@ -75,17 +50,17 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
+    // Swagger
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
     testRuntimeOnly 'com.h2database:h2'
 
-    testImplementation 'org.springframework.restdocs:spring-restdocs-restassured'
-    testImplementation "com.epages:restdocs-api-spec-restassured:${restdocsApiSpecVersion}"
-    testImplementation "com.epages:restdocs-api-spec-mockmvc:${restdocsApiSpecVersion}"
+//    testImplementation 'org.springframework.restdocs:spring-restdocs-restassured'
     testImplementation 'io.rest-assured:rest-assured'
-    swaggerUI 'org.webjars:swagger-ui:5.11.8'
 }
 
 tasks.named('test') {
@@ -104,24 +79,4 @@ sourceSets {
 
 tasks.named('clean') {
     delete file(generated)
-}
-
-// SwaggerUI config
-
-tasks.withType(GenerateSwaggerUI).configureEach {
-    dependsOn 'openapi3'
-}
-
-tasks.register('copySwaggerUI', Copy) {
-    dependsOn 'generateSwaggerUISample'
-    dependsOn 'resolveMainClassName'
-
-    def generateSwaggerUISampleTask = tasks.named('generateSwaggerUISample', GenerateSwaggerUI).get()
-
-    from "${generateSwaggerUISampleTask.outputDir}"
-    into layout.buildDirectory.file("resources/main/static/docs")
-}
-
-tasks.withType(BootJar).configureEach {
-    dependsOn 'copySwaggerUI'
 }
