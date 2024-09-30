@@ -11,6 +11,7 @@ import UserDetailPage from './components/user/UserDetailPage'
 import UserUpdatePage from './components/user/UserUpdatePage'
 import MyPage from './components/user/MyPage'
 import PasswordUpdatePage from './components/user/PasswordUpdatePage'
+import SearchPage from './components/user/SearchPage'
 
 const LinkBehavior = React.forwardRef<
     HTMLAnchorElement,
@@ -56,6 +57,10 @@ const router = createBrowserRouter([
             {
                 path: 'mypage',
                 element: <MyPage/>,
+            },
+            {
+                path: 'users',
+                element: <SearchPage/>
             },
             {
                 path: 'users/:username',

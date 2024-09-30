@@ -12,9 +12,7 @@ function Copyright(props: { sx: SxProps }) {
             <Link color="inherit" href="/">
                 Reserve
             </Link>
-            {' '}
-            {new Date().getFullYear()}
-            {'.'}
+            {' 2024.'}
         </Typography>
     )
 }
@@ -31,7 +29,11 @@ function Layout({showError}: Props) {
     return (
         <>
             <CssBaseline/>
-            <Container>
+            <Container sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                minHeight: '100vh'
+            }}>
                 <Box pb="1rem">
                     <Toolbar>
                         <Button href="/">
@@ -45,7 +47,7 @@ function Layout({showError}: Props) {
                         <AuthInfo/>
                     </Toolbar>
                 </Box>
-                <Container component="main">
+                <Container component="main" sx={{flexGrow: 1}}>
                     {showError ? <ErrorPage/> : <Outlet/>}
                 </Container>
                 <Copyright sx={{mt: 8, mb: 4}}/>
