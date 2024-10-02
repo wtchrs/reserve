@@ -2,7 +2,7 @@ import {Box, Button, TextField, Typography} from '@mui/material'
 import {useNavigate} from 'react-router-dom'
 import {FormEvent, useRef} from 'react'
 
-function SearchPage() {
+function UserSearchPage() {
     const navigate = useNavigate()
     const ref = useRef<HTMLInputElement | null>(null)
 
@@ -59,4 +59,4 @@ function SearchPage() {
     )
 }
 
-export default SearchPage
+export default UserSearchPage

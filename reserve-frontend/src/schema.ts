@@ -24,6 +24,9 @@ export const signUpSchema = z
         path: ['passwordConfirmation'],
     })
 
+export type SignInRequest = z.infer<typeof signInSchema>
+export type SignUpRequest = z.infer<typeof signUpSchema>
+
 export const updateUserSchema = z.object({
     nickname: z.string()
         .min(2, 'Nickname must be at least 2 characters.')
@@ -48,8 +51,13 @@ export const deleteUserSchema = z.object({
     password: z.string(),
 })
 
-export type SignInRequest = z.infer<typeof signInSchema>
-export type SignUpRequest = z.infer<typeof signUpSchema>
 export type UpdateUserRequest = z.infer<typeof updateUserSchema>
 export type UpdatePasswordRequest = z.infer<typeof updatePasswordSchema>
 export type DeleteUserRequest = z.infer<typeof deleteUserSchema>
+
+export const searchStoreSchema = z.object({
+    registrant: z.union([z.literal(''), z.string().min(4)]).optional(),
+    query: z.union([z.literal(''), z.string().min(2)]).optional(),
+})
+
+export type SearchStoreParams = z.infer<typeof searchStoreSchema>

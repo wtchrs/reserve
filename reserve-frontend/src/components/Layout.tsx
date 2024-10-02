@@ -22,7 +22,7 @@ type Props = {
 }
 
 function Layout({showError}: Props) {
-    const routeMatch = useRouteMatch(['/', '/users', '/users/:username'])
+    const routeMatch = useRouteMatch(['/', '/users', '/users/:username', '/stores'])
     let currentTab = routeMatch?.pattern?.path || false
     currentTab = currentTab && /^\/users/.test(currentTab) ? '/users' : currentTab
 
@@ -43,6 +43,7 @@ function Layout({showError}: Props) {
                         <Tabs value={currentTab} sx={{flexGrow: 1}}>
                             <Tab label="Home" value="/" to="/" component={RouterLink}/>
                             <Tab label="Users" value="/users" to="/users" component={RouterLink}/>
+                            <Tab label="Stores" value="/stores" to="/stores" component={RouterLink}/>
                         </Tabs>
                         <AuthInfo/>
                     </Toolbar>
