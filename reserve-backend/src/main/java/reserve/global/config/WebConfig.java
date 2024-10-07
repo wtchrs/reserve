@@ -43,7 +43,7 @@ public class WebConfig implements WebMvcConfigurer {
                     .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                     .allowCredentials(true)
                     .allowedHeaders(CorsConfiguration.ALL)
-                    .exposedHeaders("Authorization", "Set-Cookie");
+                    .exposedHeaders("Authorization", "Set-Cookie", "Location");
         }
     }
 }
