@@ -66,7 +66,17 @@ function StoreSearchPage() {
     }
 
     return (
-        <Box sx={{padding: 4}}>
+        <Box sx={{mb: 4}}>
+            <Box sx={{display: 'flex', flexDirection: 'row'}}>
+                <Button variant="text" onClick={() => navigate(-1)} sx={{mb: 3, textTransform: 'none'}}>
+                    {'< Go Back'}
+                </Button>
+                <Button variant="contained" onClick={() => navigate('/stores/register')}
+                        sx={{marginBottom: 3, marginLeft: 'auto'}}>
+                    Register Store
+                </Button>
+            </Box>
+
             <Typography variant="h4" align="center" gutterBottom>
                 Store Search
             </Typography>
@@ -127,9 +137,9 @@ function StoreSearchPage() {
                                         },
                                     }}
                                 >
-                                    <Typography variant="h6">{store.name}</Typography>
-                                    <Typography variant="caption">{store.registrant}</Typography>
-                                    <Typography>{store.description}</Typography>
+                                    <Typography noWrap variant="h6">{store.name}</Typography>
+                                    <Typography noWrap variant="caption">{store.registrant}</Typography>
+                                    <Typography noWrap>{store.description}</Typography>
                                 </Box>
                             </Grid>
                         ))}

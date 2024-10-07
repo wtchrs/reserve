@@ -55,9 +55,16 @@ export type UpdateUserRequest = z.infer<typeof updateUserSchema>
 export type UpdatePasswordRequest = z.infer<typeof updatePasswordSchema>
 export type DeleteUserRequest = z.infer<typeof deleteUserSchema>
 
+export const createStoreSchema = z.object({
+    name: z.string().min(1, 'Name must not be empty.'),
+    address: z.string().min(1, 'Address must not be empty.'),
+    description: z.string().min(1, 'Description must not be empty.'),
+})
+
 export const searchStoreSchema = z.object({
     registrant: z.union([z.literal(''), z.string().min(4)]).optional(),
     query: z.union([z.literal(''), z.string().min(2)]).optional(),
 })
 
+export type CreateStoreRequest = z.infer<typeof createStoreSchema>
 export type SearchStoreParams = z.infer<typeof searchStoreSchema>

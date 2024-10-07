@@ -1,13 +1,28 @@
 import client from './api-client'
-import {SearchStoreParams} from '../schema'
-import {ListResponse, PageParams, Store} from '../type'
+import {CreateStoreRequest, SearchStoreParams} from '../schema'
+import {Auth, ListResponse, PageParams, Store} from '../type'
+
+const basePath = /https?:\/\/[a-zA-Z0-9@:%._+~#=]{2,256}\b(.*)/.exec(import.meta.env.VITE_API_URL)?.[1]
 
 abstract class StoreService {
+    static async create({accessToken}: Auth, request: CreateStoreRequest) {
+        const res = await client.post('/stores', request, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        })
+        if (res.status !== 201) throw new Error('Failed to create store')
+        // Extract storeId
+        const location = res.headers['location']
+        if (!location) throw new Error('Location header is missing')
+        return location.split(basePath + '/stores/')[1]
+    }
+
     static async search(request: SearchStoreParams, page: PageParams<Store>) {
         const res = await client.get<ListResponse<Store>>('/stores', {
             params: {...request, ...page},
             paramsSerializer: {indexes: null},
-        });
+        })
         return res.data
     }
 

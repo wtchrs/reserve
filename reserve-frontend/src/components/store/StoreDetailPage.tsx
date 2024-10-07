@@ -5,6 +5,10 @@ import storeService from '../../services/storeService.ts'
 import {Store} from '../../type.ts'
 import StoreDetail from './StoreDetail.tsx'
 
+function isInteger(value?: string) {
+    return value != undefined && /^\d+$/.test(value)
+}
+
 function StoreDetailPage() {
     const {storeId} = useParams()
     const navigate = useNavigate()
@@ -21,11 +25,12 @@ function StoreDetailPage() {
             })
     }, [storeId])
 
+    if (!isInteger(storeId)) throw new Response('Resource Not Found', {status: 404})
     if (error) throw error
 
     return (
         <Box sx={{mb: 4}}>
-            <Button variant="text" onClick={() => navigate(-1)} sx={{marginBottom: 3}}>
+            <Button variant="text" onClick={() => navigate(-1)} sx={{mb: 3, textTransform: 'none'}}>
                 {'< Go Back'}
             </Button>
             <Box sx={{mx: 5}}>

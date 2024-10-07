@@ -22,7 +22,7 @@ type Props = {
 }
 
 function Layout({showError}: Props) {
-    const routeMatch = useRouteMatch(['/', '/users', '/users/:username', '/stores'])
+    const routeMatch = useRouteMatch(['/', '/users', '/users/:username', '/stores', '/stores/:storeId', '/stores/register'])
     let currentTab = routeMatch?.pattern?.path || false
     currentTab = currentTab && /^\/users/.test(currentTab) ? '/users' : currentTab
     currentTab = currentTab && /^\/stores/.test(currentTab) ? '/stores' : currentTab
@@ -33,7 +33,7 @@ function Layout({showError}: Props) {
             <Container sx={{
                 display: 'flex',
                 flexDirection: 'column',
-                minHeight: '100vh'
+                minHeight: '100vh',
             }}>
                 <Box pb="1rem">
                     <Toolbar>
