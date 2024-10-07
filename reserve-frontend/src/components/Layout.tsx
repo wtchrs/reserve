@@ -25,6 +25,7 @@ function Layout({showError}: Props) {
     const routeMatch = useRouteMatch(['/', '/users', '/users/:username', '/stores'])
     let currentTab = routeMatch?.pattern?.path || false
     currentTab = currentTab && /^\/users/.test(currentTab) ? '/users' : currentTab
+    currentTab = currentTab && /^\/stores/.test(currentTab) ? '/stores' : currentTab
 
     return (
         <>

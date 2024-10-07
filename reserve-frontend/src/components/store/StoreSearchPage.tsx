@@ -2,18 +2,23 @@ import {useState} from 'react'
 import {Box, Button, CircularProgress, Grid, TextField, Typography} from '@mui/material'
 import {zodResolver} from '@hookform/resolvers/zod'
 import {SubmitHandler, useForm} from 'react-hook-form'
+import {useNavigate} from 'react-router-dom'
 import {SearchStoreParams, searchStoreSchema} from '../../schema'
 import ErrorMessages from '../ErrorMessages'
 import storeService from '../../services/storeService'
 import {PageParams, Store} from '../../type'
 
 function StoreSearchPage() {
+    const navigate = useNavigate()
+
     const {
         handleSubmit,
         register,
         setError,
         formState: {errors: fieldErrors, isValid},
     } = useForm<SearchStoreParams>({resolver: zodResolver(searchStoreSchema), mode: 'onChange'})
+
+    // TODO: Replace the page and searchParams state with query params
 
     const [page, setPage] = useState<PageParams<Store>>({
         page: 0,
@@ -29,35 +34,35 @@ function StoreSearchPage() {
 
     const hasFieldError = (field: string) => field in fieldErrors
 
-    const onSubmit: SubmitHandler<SearchStoreParams> = async params => {
+    const fetchStores = async (params: SearchStoreParams, page: PageParams<Store>) => {
         setLoading(true)
-        setPage(prev => ({...prev, page: 0}))
         try {
             const res = await storeService.search(params, page)
-            setStores(res.data.results)
-            setSearchParams(params)
-            setHasNext(res.data.hasNext)
+            setStores(res.results)
+            setHasNext(res.hasNext)
         } catch (_err) {
             setError('root', {message: 'Something went wrong. Please try again later.'})
         }
         setLoading(false)
     }
 
+    const onSubmit: SubmitHandler<SearchStoreParams> = async params => {
+        setSearchParams(params)
+        setPage(prev => ({...prev, page: 0}))
+        await fetchStores(params, page)
+    }
+
     const onPageMove = async (move: number) => {
-        setLoading(true)
         const newPage = {
             ...page,
-            page: Math.max(0, page.page + move)
+            page: Math.max(0, page.page + move),
         }
-        try {
-            const res = await storeService.search(searchParams, newPage)
-            setStores(res.data.results)
-            setHasNext(res.data.hasNext)
-            setPage(newPage)
-        } catch (_err) {
-            setError('root', {message: 'Something went wrong. Please try again later.'})
-        }
-        setLoading(false)
+        await fetchStores(searchParams, newPage)
+        setPage(newPage)
+    }
+
+    const handleRouteStore = (storeId: bigint) => {
+        navigate(`/stores/${storeId}`)
     }
 
     return (
@@ -109,16 +114,19 @@ function StoreSearchPage() {
                     <Grid container spacing={2} columns={{xs: 4, sm: 8, md: 12}}>
                         {stores.map((store, index) => (
                             <Grid item key={index} xs={4}>
-                                <Box sx={{
-                                    p: 2,
-                                    height: '100%',
-                                    border: '1px solid gray',
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    ':hover': {
-                                        boxShadow: 2,
-                                    },
-                                }}>
+                                <Box
+                                    onClick={() => handleRouteStore(store.storeId)}
+                                    sx={{
+                                        p: 2,
+                                        height: '100%',
+                                        border: '1px solid gray',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        ':hover': {
+                                            boxShadow: 2,
+                                        },
+                                    }}
+                                >
                                     <Typography variant="h6">{store.name}</Typography>
                                     <Typography variant="caption">{store.registrant}</Typography>
                                     <Typography>{store.description}</Typography>
