@@ -61,10 +61,17 @@ export const createStoreSchema = z.object({
     description: z.string().min(1, 'Description must not be empty.'),
 })
 
+export const updateStoreSchema = z.object({
+    name: z.string().min(1, 'Name must not be empty.').optional(),
+    address: z.string().min(1, 'Address must not be empty.').optional(),
+    description: z.string().min(1, 'Description must not be empty.').optional(),
+})
+
 export const searchStoreSchema = z.object({
     registrant: z.union([z.literal(''), z.string().min(4)]).optional(),
     query: z.union([z.literal(''), z.string().min(2)]).optional(),
 })
 
 export type CreateStoreRequest = z.infer<typeof createStoreSchema>
+export type UpdateStoreRequest = z.infer<typeof updateStoreSchema>
 export type SearchStoreParams = z.infer<typeof searchStoreSchema>

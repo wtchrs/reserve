@@ -129,9 +129,7 @@ function StoreSearchPage() {
                 </Typography>
             )}
 
-            {loading && (
-                <CircularProgress sx={{display: 'block', margin: '0 auto', mt: 4}}/>
-            )}
+            {loading && <CircularProgress sx={{display: 'block', margin: '0 auto', mt: 4}}/>}
 
             <PageNavigator hasPrevious={pageParam.page > 0} hasNext={hasNext} onPageMove={onPageMove}/>
         </Box>

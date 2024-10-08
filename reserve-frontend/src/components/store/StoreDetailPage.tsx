@@ -1,6 +1,7 @@
 import {Box, Button} from '@mui/material'
 import {useEffect, useState} from 'react'
 import {useNavigate, useParams} from 'react-router-dom'
+import {useAuth} from '../../hooks/useAuth.tsx'
 import storeService from '../../services/storeService.ts'
 import {Store} from '../../type.ts'
 import StoreDetail from './StoreDetail.tsx'
@@ -10,6 +11,7 @@ function isInteger(value?: string) {
 }
 
 function StoreDetailPage() {
+    const {auth} = useAuth()
     const {storeId} = useParams()
     const navigate = useNavigate()
     const [store, setStore] = useState<Store>()
@@ -30,9 +32,17 @@ function StoreDetailPage() {
 
     return (
         <Box sx={{mb: 4}}>
-            <Button variant="text" onClick={() => navigate(-1)} sx={{mb: 3, textTransform: 'none'}}>
-                {'< Go Back'}
-            </Button>
+            <Box sx={{mb: 3, display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
+                <Button variant="text" sx={{textTransform: 'none'}} onClick={() => navigate(-1)}>
+                    {'< Go Back'}
+                </Button>
+                {auth?.user.username === store?.registrant && (
+                    <Button variant="contained" sx={{textTransform: 'none'}}
+                            onClick={() => navigate(`/stores/${storeId}/edit`)}>
+                        Edit
+                    </Button>
+                )}
+            </Box>
             <Box sx={{mx: 5}}>
                 <StoreDetail store={store}/>
             </Box>

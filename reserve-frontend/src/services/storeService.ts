@@ -1,5 +1,5 @@
 import client from './api-client'
-import {CreateStoreRequest, SearchStoreParams} from '../schema'
+import {CreateStoreRequest, SearchStoreParams, UpdateStoreRequest} from '../schema'
 import {Auth, ListResponse, PageParams, Store} from '../type'
 
 const basePath = /https?:\/\/[a-zA-Z0-9@:%._+~#=]{2,256}\b(.*)/.exec(import.meta.env.VITE_API_URL)?.[1]
@@ -37,6 +37,14 @@ abstract class StoreService {
             paramsSerializer: {indexes: null},
         })
         return res.data
+    }
+
+    static async update({accessToken}: Auth, storeId: string, request: UpdateStoreRequest) {
+        await client.put(`/stores/${storeId}`, request, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        })
     }
 }
 

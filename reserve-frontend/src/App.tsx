@@ -8,6 +8,7 @@ import SignInPage from './components/auth/SignInPage'
 import SignUpPage from './components/auth/SignUpPage'
 import StoreCreatePage from './components/store/StoreCreatePage'
 import StoreDetailPage from './components/store/StoreDetailPage'
+import StoreUpdatePage from './components/store/StoreUpdatePage.tsx'
 import UserStoreListPage from './components/store/UserStoreListPage.tsx'
 import {AuthProvider} from './hooks/useAuth'
 import UserDetailPage from './components/user/UserDetailPage'
@@ -93,6 +94,10 @@ const router = createBrowserRouter([
             {
                 path: 'stores/:storeId',
                 element: <StoreDetailPage/>,
+            },
+            {
+                path: 'stores/:storeId/edit',
+                element: <StoreUpdatePage/>,
             },
         ],
     },
