@@ -8,6 +8,7 @@ import SignInPage from './components/auth/SignInPage'
 import SignUpPage from './components/auth/SignUpPage'
 import StoreCreatePage from './components/store/StoreCreatePage'
 import StoreDetailPage from './components/store/StoreDetailPage'
+import UserStoreListPage from './components/store/UserStoreListPage.tsx'
 import {AuthProvider} from './hooks/useAuth'
 import UserDetailPage from './components/user/UserDetailPage'
 import UserUpdatePage from './components/user/UserUpdatePage'
@@ -76,6 +77,10 @@ const router = createBrowserRouter([
             {
                 path: 'users/password',
                 element: <PasswordUpdatePage/>,
+            },
+            {
+                path: 'users/:username/stores',
+                element: <UserStoreListPage/>,
             },
             {
                 path: 'stores',

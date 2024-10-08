@@ -7,6 +7,8 @@ import {SearchStoreParams, searchStoreSchema} from '../../schema'
 import ErrorMessages from '../ErrorMessages'
 import storeService from '../../services/storeService'
 import {PageParams, Store} from '../../type'
+import PageNavigator from '../PageNavigator.tsx'
+import StoreList from './StoreList.tsx'
 
 function StoreSearchPage() {
     const navigate = useNavigate()
@@ -18,9 +20,9 @@ function StoreSearchPage() {
         formState: {errors: fieldErrors, isValid},
     } = useForm<SearchStoreParams>({resolver: zodResolver(searchStoreSchema), mode: 'onChange'})
 
-    // TODO: Replace the page and searchParams state with query params
+    // TODO: Replace the pageParam and searchParams state with query params
 
-    const [page, setPage] = useState<PageParams<Store>>({
+    const [pageParam, setPageParam] = useState<PageParams<Store>>({
         page: 0,
         size: import.meta.env.VITE_DEFAULT_PAGE_SIZE,
         sort: [],
@@ -48,21 +50,17 @@ function StoreSearchPage() {
 
     const onSubmit: SubmitHandler<SearchStoreParams> = async params => {
         setSearchParams(params)
-        setPage(prev => ({...prev, page: 0}))
-        await fetchStores(params, page)
+        setPageParam(prev => ({...prev, page: 0}))
+        await fetchStores(params, pageParam)
     }
 
     const onPageMove = async (move: number) => {
         const newPage = {
-            ...page,
-            page: Math.max(0, page.page + move),
+            ...pageParam,
+            page: Math.max(0, pageParam.page + move),
         }
         await fetchStores(searchParams, newPage)
-        setPage(newPage)
-    }
-
-    const handleRouteStore = (storeId: bigint) => {
-        navigate(`/stores/${storeId}`)
+        setPageParam(newPage)
     }
 
     return (
@@ -121,29 +119,7 @@ function StoreSearchPage() {
                     <Typography variant="h6" gutterBottom>
                         Search Results
                     </Typography>
-                    <Grid container spacing={2} columns={{xs: 4, sm: 8, md: 12}}>
-                        {stores.map((store, index) => (
-                            <Grid item key={index} xs={4}>
-                                <Box
-                                    onClick={() => handleRouteStore(store.storeId)}
-                                    sx={{
-                                        p: 2,
-                                        height: '100%',
-                                        border: '1px solid gray',
-                                        borderRadius: '8px',
-                                        cursor: 'pointer',
-                                        ':hover': {
-                                            boxShadow: 2,
-                                        },
-                                    }}
-                                >
-                                    <Typography noWrap variant="h6">{store.name}</Typography>
-                                    <Typography noWrap variant="caption">{store.registrant}</Typography>
-                                    <Typography noWrap>{store.description}</Typography>
-                                </Box>
-                            </Grid>
-                        ))}
-                    </Grid>
+                    <StoreList stores={stores}/>
                 </Box>
             )}
 
@@ -153,28 +129,11 @@ function StoreSearchPage() {
                 </Typography>
             )}
 
-            <Box sx={{
-                marginTop: 3,
-                display: 'flex',
-                gap: 1,
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexDirection: 'row',
-                width: 'auto',
-            }}>
-                <Button
-                    variant="contained" disabled={page.page === 0}
-                    onClick={async () => await onPageMove(-1)}
-                >
-                    previous
-                </Button>
-                <Button
-                    variant="contained"
-                    disabled={!hasNext} onClick={async () => await onPageMove(1)}
-                >
-                    next
-                </Button>
-            </Box>
+            {loading && (
+                <CircularProgress sx={{display: 'block', margin: '0 auto', mt: 4}}/>
+            )}
+
+            <PageNavigator hasPrevious={pageParam.page > 0} hasNext={hasNext} onPageMove={onPageMove}/>
         </Box>
     )
 }

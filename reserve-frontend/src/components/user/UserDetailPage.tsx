@@ -31,9 +31,15 @@ function UserDetailPage() {
 
     return (
         <Box sx={{mb: 4}}>
-            <Button variant="text" onClick={() => navigate(-1)} sx={{marginBottom: 3}}>
-                {'< Go Back'}
-            </Button>
+            <Box sx={{mb: 3, display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
+                <Button variant="text" sx={{textTransform: 'none'}} onClick={() => navigate(-1)}>
+                    {'< Go Back'}
+                </Button>
+                <Button variant="text" sx={{textTransform: 'none'}}
+                        onClick={() => navigate(`/users/${username}/stores`)}>
+                    {username}'s Stores
+                </Button>
+            </Box>
             <Box sx={{padding: 4, maxWidth: 800, margin: '0 auto', textAlign: 'center'}}>
                 <UserDetail user={user}/>
             </Box>

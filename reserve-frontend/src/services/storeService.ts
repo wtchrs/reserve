@@ -8,14 +8,19 @@ abstract class StoreService {
     static async create({accessToken}: Auth, request: CreateStoreRequest) {
         const res = await client.post('/stores', request, {
             headers: {
-                Authorization: `Bearer ${accessToken}`
-            }
+                Authorization: `Bearer ${accessToken}`,
+            },
         })
         if (res.status !== 201) throw new Error('Failed to create store')
         // Extract storeId
         const location = res.headers['location']
         if (!location) throw new Error('Location header is missing')
         return location.split(basePath + '/stores/')[1]
+    }
+
+    static async getStore(storeId: string) {
+        const res = await client.get<Store>(`/stores/${storeId}`)
+        return res.data
     }
 
     static async search(request: SearchStoreParams, page: PageParams<Store>) {
@@ -26,8 +31,11 @@ abstract class StoreService {
         return res.data
     }
 
-    static async getStore(storeId: string) {
-        const res = await client.get<Store>(`/stores/${storeId}`)
+    static async getStoresByUsername(username: string, page: PageParams<Store>) {
+        const res = await client.get<ListResponse<Store>>(`/stores`, {
+            params: {registrant: username, ...page},
+            paramsSerializer: {indexes: null},
+        })
         return res.data
     }
 }
