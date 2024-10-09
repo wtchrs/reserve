@@ -46,6 +46,14 @@ abstract class StoreService {
             },
         })
     }
+
+    static async delete({accessToken}: Auth, storeId: string) {
+        await client.delete(`/stores/${storeId}`, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        })
+    }
 }
 
 export default StoreService

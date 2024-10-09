@@ -7,6 +7,7 @@ import {useAuth} from '../../hooks/useAuth.tsx'
 import storeService from '../../services/storeService.ts'
 import ErrorMessages from '../ErrorMessages.tsx'
 import {UpdateStoreRequest, updateStoreSchema} from '../../schema.ts'
+import StoreDeleteDialog from './StoreDeleteDialog.tsx'
 
 function StoreUpdatePage() {
     const navigate = useNavigate()
@@ -22,6 +23,7 @@ function StoreUpdatePage() {
     } = useForm<UpdateStoreRequest>({resolver: zodResolver(updateStoreSchema), mode: 'onChange'})
 
     const [loading, setLoading] = useState(false)
+    const [showDialog, setShowDialog] = useState(false)
 
     const hasFieldError = (field: string) => field in fieldErrors
 
@@ -47,6 +49,9 @@ function StoreUpdatePage() {
             setError('root', {message: 'Something went wrong. Please try again later.'})
         }
     }
+
+    if (!auth) throw new Response('Unauthorized', {status: 401})
+    if (!storeId) throw new Response('Resource Not Found', {status: 404})
 
     return (
         <Box sx={{mb: 4}}>
@@ -85,7 +90,14 @@ function StoreUpdatePage() {
                                     Update
                                 </Button>
                             </Grid>
+                            <Grid item xs={12}>
+                                <Button variant="outlined" color="error" fullWidth onClick={() => setShowDialog(true)}>
+                                    Delete Store
+                                </Button>
+                            </Grid>
                         </Grid>
+
+                        <StoreDeleteDialog open={showDialog} storeId={storeId} onClose={() => setShowDialog(false)}/>
                     </Box>
                 )}
 
