@@ -75,3 +75,18 @@ export const searchStoreSchema = z.object({
 export type CreateStoreRequest = z.infer<typeof createStoreSchema>
 export type UpdateStoreRequest = z.infer<typeof updateStoreSchema>
 export type SearchStoreParams = z.infer<typeof searchStoreSchema>
+
+export const createMenuSchema = z.object({
+    name: z.string().min(1, 'Name must not be empty.'),
+    price: z.number().int().min(0, 'Price must be at least 0.'),
+    description: z.string().min(1, 'Description must not be empty.'),
+})
+
+export const updateMenuSchema = z.object({
+    name: z.string().min(1, 'Name must not be empty.').optional(),
+    price: z.number().int().min(0, 'Price must be at least 0.').optional(),
+    description: z.string().min(1, 'Description must not be empty.').optional(),
+})
+
+export type CreateMenuRequest = z.infer<typeof createMenuSchema>
+export type UpdateMenuRequest = z.infer<typeof updateMenuSchema>

@@ -30,6 +30,19 @@ export type Store = {
     description: string,
 }
 
+export type Menu = {
+    menuId: bigint,
+    storeId: bigint,
+    name: string,
+    price: number,
+    description: string,
+}
+
+export type MenuListResponse = {
+    count: number,
+    results: Menu[],
+}
+
 export type ListResponse<T> = {
     count: number,
     pageSize: number,

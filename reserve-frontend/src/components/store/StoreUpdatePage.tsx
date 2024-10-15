@@ -7,6 +7,7 @@ import {useAuth} from '../../hooks/useAuth.tsx'
 import storeService from '../../services/storeService.ts'
 import ErrorMessages from '../ErrorMessages.tsx'
 import {UpdateStoreRequest, updateStoreSchema} from '../../schema.ts'
+import MenuListUpdate from './menu/MenuListUpdate.tsx'
 import StoreDeleteDialog from './StoreDeleteDialog.tsx'
 
 function StoreUpdatePage() {
@@ -23,7 +24,7 @@ function StoreUpdatePage() {
     } = useForm<UpdateStoreRequest>({resolver: zodResolver(updateStoreSchema), mode: 'onChange'})
 
     const [loading, setLoading] = useState(false)
-    const [showDialog, setShowDialog] = useState(false)
+    const [deleteDialog, setDeleteDialog] = useState(false)
 
     const hasFieldError = (field: string) => field in fieldErrors
 
@@ -91,17 +92,19 @@ function StoreUpdatePage() {
                                 </Button>
                             </Grid>
                             <Grid item xs={12}>
-                                <Button variant="outlined" color="error" fullWidth onClick={() => setShowDialog(true)}>
+                                <Button variant="outlined" color="error" fullWidth onClick={() => setDeleteDialog(true)}>
                                     Delete Store
                                 </Button>
                             </Grid>
                         </Grid>
-
-                        <StoreDeleteDialog open={showDialog} storeId={storeId} onClose={() => setShowDialog(false)}/>
                     </Box>
                 )}
 
+                <MenuListUpdate storeId={storeId}/>
+
                 {loading && <CircularProgress sx={{display: 'block', margin: '0 auto', mt: 4}}/>}
+
+                <StoreDeleteDialog open={deleteDialog} storeId={storeId} onClose={() => setDeleteDialog(false)}/>
             </Box>
         </Box>
     )
