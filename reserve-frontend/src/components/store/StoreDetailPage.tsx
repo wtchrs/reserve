@@ -4,6 +4,7 @@ import {useNavigate, useParams} from 'react-router-dom'
 import {useAuth} from '../../hooks/useAuth.tsx'
 import storeService from '../../services/storeService.ts'
 import {Store} from '../../type.ts'
+import MenuList from './menu/MenuList.tsx'
 import StoreDetail from './StoreDetail.tsx'
 
 function isInteger(value?: string) {
@@ -27,7 +28,7 @@ function StoreDetailPage() {
             })
     }, [storeId])
 
-    if (!isInteger(storeId)) throw new Response('Resource Not Found', {status: 404})
+    if (!storeId || !isInteger(storeId)) throw new Response('Resource Not Found', {status: 404})
     if (error) throw error
 
     return (
@@ -45,6 +46,7 @@ function StoreDetailPage() {
             </Box>
             <Box sx={{mx: 5}}>
                 <StoreDetail store={store}/>
+                <MenuList storeId={storeId}/>
             </Box>
         </Box>
     )
