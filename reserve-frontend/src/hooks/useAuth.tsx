@@ -13,27 +13,34 @@ type AuthContext = {
 const authContext = createContext<AuthContext>({} as AuthContext)
 
 export function AuthProvider({children}: { children: ReactNode }) {
-    const [auth, setAuth] = useState<Auth>()
+    const storedToken = localStorage.getItem('auth')
+    let parsed = undefined
+    if (storedToken) parsed = authService.extractAuth(storedToken)
+
+    const [auth, setAuth] = useState<Auth | undefined>(parsed)
 
     useEffect(() => {
-        authService.refreshToken()
-            .then(res => {
-                setAuth(res)
-            })
+        authService.refreshToken().then(res => {
+            setAuth(res)
+            localStorage.setItem('auth', res.accessToken)
+        })
     }, [])
 
     const signIn = useCallback(async (request: SignInRequest) => {
         const res = await authService.signIn(request)
+        localStorage.setItem('auth', res.accessToken)
         setAuth(res)
     }, [])
 
     const signOut = useCallback(async () => {
         await authService.signOut()
+        localStorage.removeItem('auth')
         setAuth(undefined)
     }, [])
 
     const refresh = useCallback(async () => {
         const res = await authService.refreshToken()
+        localStorage.setItem('auth', res.accessToken)
         setAuth(res)
     }, [])
 
