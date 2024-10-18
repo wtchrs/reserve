@@ -46,7 +46,7 @@ function StoreDetailPage() {
             </Box>
             <Box sx={{mx: 5}}>
                 <StoreDetail store={store}/>
-                <MenuList storeId={storeId}/>
+                {store && <MenuList store={store}/>}
             </Box>
         </Box>
     )

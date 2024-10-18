@@ -1,15 +1,17 @@
-import {Box, CircularProgress, Typography} from '@mui/material'
+import {Box, CircularProgress, Grid, Typography} from '@mui/material'
 import {useCallback, useEffect, useState} from 'react'
-import {Menu} from '../../../type.ts'
+import {Menu, Store} from '../../../type.ts'
 import ErrorMessages from '../../ErrorMessages.tsx'
 import menuService from '../../../services/menuService.ts'
+import CartAddDialog from './CartAddDialog.tsx'
 
-type Props = { storeId: string }
+type Props = { store: Store }
 
-function MenuList({storeId}: Props) {
+function MenuList({store}: Props) {
     const [menus, setMenus] = useState<Menu[]>([])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
+    const [cartAddItem, setCartAddItem] = useState<Menu>()
 
     const loadMenus = useCallback(async (storeId: string) => {
         setLoading(true)
@@ -19,8 +21,12 @@ function MenuList({storeId}: Props) {
     }, [])
 
     useEffect(() => {
-        loadMenus(storeId).catch(_err => setError('Something went wrong. Please try again later.'))
-    }, [loadMenus, storeId])
+        loadMenus(store.storeId.toString()).catch(_err => setError('Something went wrong. Please try again later.'))
+    }, [loadMenus, store])
+
+    const handleCloseDialog = useCallback(() => {
+        setCartAddItem(undefined)
+    }, [])
 
     return (
         <Box sx={{mt: 5, width: 'auto', textAlign: 'left'}}>
@@ -33,25 +39,32 @@ function MenuList({storeId}: Props) {
                 {!loading && menus.length === 0 && <Typography>No menus found.</Typography>}
                 {error && <ErrorMessages errors={error}/>}
                 {!loading && menus.length > 0 && (
-                    menus.map(menu => (
-                        <Box key={menu.menuId} sx={{
-                            border: '1px solid gray',
-                            borderRadius: 1,
-                            padding: 2,
-                            marginTop: 2,
-                            width: 'auto',
-                            cursor: 'pointer',
-                            ':hover': {
-                                boxShadow: 2,
-                            },
-                        }}>
-                            <Typography variant="h6">{menu.name}</Typography>
-                            <Typography variant="body2">{menu.price}</Typography>
-                            <Typography variant="body1">{menu.description}</Typography>
-                        </Box>
-                    ))
+                    <Grid container spacing={2} columns={{sm: 6, md: 12}}>
+                        {menus.map(menu => (
+                            <Grid item xs={6} key={menu.menuId}>
+                                <Box
+                                    onClick={() => setCartAddItem(menu)}
+                                    sx={{
+                                        border: '1px solid gray',
+                                        borderRadius: 1,
+                                        padding: 2,
+                                        cursor: 'pointer',
+                                        ':hover': {
+                                            boxShadow: 2,
+                                        },
+                                    }}
+                                >
+                                    <Typography variant="h6">{menu.name}</Typography>
+                                    <Typography variant="body2">{menu.price}</Typography>
+                                    <Typography variant="body1">{menu.description}</Typography>
+                                </Box>
+                            </Grid>
+                        ))}
+                    </Grid>
                 )}
             </Box>
+
+            {cartAddItem && <CartAddDialog store={store} menu={cartAddItem} onClose={handleCloseDialog}/>}
         </Box>
     )
 }

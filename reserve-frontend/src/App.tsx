@@ -17,6 +17,7 @@ import MyPage from './components/user/MyPage'
 import PasswordUpdatePage from './components/user/PasswordUpdatePage'
 import UserSearchPage from './components/user/UserSearchPage'
 import StoreSearchPage from './components/store/StoreSearchPage'
+import {CartProvider} from './hooks/useCart.tsx'
 
 const LinkBehavior = React.forwardRef<
     HTMLAnchorElement,
@@ -106,9 +107,11 @@ const router = createBrowserRouter([
 function App() {
     return (
         <AuthProvider>
-            <ThemeProvider theme={theme}>
-                <RouterProvider router={router}/>
-            </ThemeProvider>
+            <CartProvider>
+                <ThemeProvider theme={theme}>
+                    <RouterProvider router={router}/>
+                </ThemeProvider>
+            </CartProvider>
         </AuthProvider>
     )
 }

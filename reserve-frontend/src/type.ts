@@ -51,6 +51,13 @@ export type ListResponse<T> = {
     results: T[],
 }
 
+export type CartItem = {
+    menuId: bigint,
+    name: string,
+    price: number,
+    quantity: number,
+}
+
 type Direction = 'asc' | 'desc'
 // T must have only string keys.
 type Key<T> = Extract<keyof T, string>
