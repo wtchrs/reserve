@@ -3,6 +3,7 @@ import {Link as RouterLink, Outlet} from 'react-router-dom'
 import Link from '@mui/material/Link'
 import useRouteMatch from '../hooks/useRouteMatch'
 import AuthInfo from './auth/AuthInfo.tsx'
+import CartPopupButton from './cart/CartPopupButton.tsx'
 import ErrorPage from './ErrorPage'
 
 function Copyright(props: { sx: SxProps }) {
@@ -46,6 +47,7 @@ function Layout({showError}: Props) {
                             <Tab label="Users" value="/users" to="/users" component={RouterLink}/>
                             <Tab label="Stores" value="/stores" to="/stores" component={RouterLink}/>
                         </Tabs>
+                        <CartPopupButton/>
                         <AuthInfo/>
                     </Toolbar>
                 </Box>

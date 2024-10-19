@@ -3,9 +3,10 @@ import {CartItem, Menu, Store} from '../type.ts'
 
 type CartContext = {
     store?: Store
-    items: CartItem[]
-    setItem: (store: Store, item: Menu, quantity: number) => void
-    remove: (menuId: bigint) => void
+    cartItems: CartItem[]
+    addItem: (store: Store, item: Menu, quantity: number) => void
+    updateItem: (itemIndex: number, quantity: number) => void
+    removeItem: (itemIndex: number) => void
     clear: () => void
 }
 
@@ -13,41 +14,50 @@ const cartContext = createContext<CartContext>({} as CartContext)
 
 export function CartProvider({children}: { children: ReactNode }) {
     const [store, setStore] = useState<Store>()
-    const [cartItem, setCartItem] = useState<CartItem[]>([])
+    const [cartItems, setCartItems] = useState<CartItem[]>([])
 
-    const remove = useCallback((menuId: bigint) => {
-        const index = cartItem.findIndex(item => item.menuId === menuId)
-        if (index !== -1) {
-            cartItem.splice(index, 1)
-            if (cartItem.length === 0) setStore(undefined)
-        }
-    }, [cartItem])
+    const removeItem = useCallback((itemIndex: number) => {
+        const newCartItems = cartItems.slice()
+        newCartItems.splice(itemIndex, 1)
+        setCartItems(newCartItems)
+        if (newCartItems.length === 0) setStore(undefined)
+    }, [cartItems])
 
-    const setItem = useCallback((newStore: Store, menu: Menu, quantity: number) => {
+    const addItem = useCallback((newStore: Store, menu: Menu, quantity: number) => {
         if (store && store.storeId !== newStore.storeId) {
             setStore(newStore)
-            setCartItem([{menuId: menu.menuId, name: menu.name, price: menu.price, quantity}])
+            setCartItems([{menuId: menu.menuId, name: menu.name, price: menu.price, quantity}])
             return
         }
 
-        const index = cartItem.findIndex(item => item.menuId === menu.menuId)
+        setStore(newStore)
+        const index = cartItems.findIndex(item => item.menuId === menu.menuId)
 
         if (index !== -1 && quantity === 0) {
-            remove(menu.menuId)
+            removeItem(index)
             return
         } else if (index !== -1) {
-            setCartItem(cartItem.map(item => item.menuId === menu.menuId ? {...item, quantity} : item))
+            setCartItems(cartItems.map(item => item.menuId === menu.menuId ? {...item, quantity} : item))
         } else {
-            cartItem.push({menuId: menu.menuId, name: menu.name, price: menu.price, quantity})
+            cartItems.push({menuId: menu.menuId, name: menu.name, price: menu.price, quantity})
         }
-    }, [cartItem, remove, store])
+    }, [cartItems, removeItem, store])
+
+    const updateItem = useCallback((itemIndex: number, quantity: number) => {
+        if (quantity === 0) {
+            removeItem(itemIndex)
+            return
+        }
+        setCartItems(cartItems.map((item, index) => index === itemIndex ? {...item, quantity} : item))
+    }, [cartItems, removeItem])
 
     const clear = useCallback(() => {
-        cartItem.splice(0, cartItem.length)
-    }, [cartItem])
+        setStore(undefined)
+        setCartItems([])
+    }, [])
 
     return (
-        <cartContext.Provider value={{items: cartItem, setItem: setItem, remove, clear}}>
+        <cartContext.Provider value={{store, cartItems, addItem, updateItem, removeItem, clear}}>
             {children}
         </cartContext.Provider>
     )
