@@ -65,7 +65,7 @@ public class JwtProvider {
     private String generateToken(String subject, Map<String, String> claims, int expirationPeriod, Key signingKey) {
         Instant now = Instant.now();
         Date issued = Date.from(now);
-        Date expiration = Date.from(now.plusSeconds(expirationPeriod * 1000L));
+        Date expiration = Date.from(now.plusSeconds(expirationPeriod));
         return Jwts.builder()
                 .setHeaderParam(JWT_TYPE_HEADER_NAME, JWT_TYPE_HEADER_VALUE)
                 .setClaims(claims)
