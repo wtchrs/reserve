@@ -1,6 +1,6 @@
 import client from './api-client'
-import type {User} from '../../types/domain.d.ts'
-import {DeleteUserRequest, UpdatePasswordRequest, UpdateUserRequest} from '../schema'
+import type {User} from '@customTypes/domain.d.ts'
+import {DeleteUserRequest, UpdatePasswordRequest, UpdateUserRequest} from '@/schema'
 
 abstract class UserService {
     static async getUser(username: string) {

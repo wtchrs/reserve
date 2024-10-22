@@ -1,6 +1,6 @@
 import client from './api-client.ts'
-import {CreateMenuRequest, UpdateMenuRequest} from '../schema.ts'
-import type {Menu, MenuListResponse} from '../../types/domain.d.ts'
+import {CreateMenuRequest, UpdateMenuRequest} from '@/schema.ts'
+import type {Menu, MenuListResponse} from '@customTypes/domain.d.ts'
 
 const basePath = /https?:\/\/[a-zA-Z0-9@:%._+~#=]{2,256}\b(.*)/.exec(import.meta.env.VITE_API_URL)?.[1]
 

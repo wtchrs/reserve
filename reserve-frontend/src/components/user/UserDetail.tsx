@@ -1,6 +1,6 @@
 import {Avatar, Box, Typography} from '@mui/material'
-import type {User} from '../../../types/domain.d.ts'
-import {formatDate} from '../../utils/date.ts'
+import type {User} from '@customTypes/domain'
+import {formatDate} from '@utils/date.ts'
 import UserDetailSkeleton from './UserDetailSkeleton'
 
 type Props = { user?: User }

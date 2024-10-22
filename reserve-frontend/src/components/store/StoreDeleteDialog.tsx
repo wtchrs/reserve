@@ -1,9 +1,9 @@
 import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, Typography} from '@mui/material'
 import {useState} from 'react'
 import {useNavigate} from 'react-router-dom'
-import {useAuth} from '../../hooks/useAuth.tsx'
-import storeService from '../../services/storeService.ts'
-import ErrorMessages from '../ErrorMessages.tsx'
+import {useAuth} from '@hooks/useAuth.tsx'
+import storeService from '@services/storeService.ts'
+import ErrorMessages from '@components/ErrorMessages.tsx'
 
 type Props = {
     open: boolean

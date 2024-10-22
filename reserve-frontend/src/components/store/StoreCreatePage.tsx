@@ -2,10 +2,10 @@ import {zodResolver} from '@hookform/resolvers/zod'
 import {Box, Button, Grid, TextField, Typography} from '@mui/material'
 import {useForm} from 'react-hook-form'
 import {useNavigate} from 'react-router-dom'
-import {useAuth} from '../../hooks/useAuth.tsx'
-import {CreateStoreRequest, createStoreSchema} from '../../schema.ts'
-import storeService from '../../services/storeService.ts'
-import ErrorMessages from '../ErrorMessages.tsx'
+import {useAuth} from '@hooks/useAuth.tsx'
+import {CreateStoreRequest, createStoreSchema} from '@/schema.ts'
+import storeService from '@services/storeService.ts'
+import ErrorMessages from '@components/ErrorMessages.tsx'
 
 function StoreCreatePage() {
     const navigate = useNavigate()

@@ -4,10 +4,10 @@ import {SubmitHandler, useForm} from 'react-hook-form'
 import {zodResolver} from '@hookform/resolvers/zod'
 import {isAxiosError} from 'axios'
 import {useNavigate} from 'react-router-dom'
-import ErrorMessages from '../ErrorMessages'
-import {UpdatePasswordRequest, updatePasswordSchema as schema} from '../../schema'
-import userService from '../../services/userService'
-import {useAuth} from '../../hooks/useAuth'
+import {UpdatePasswordRequest, updatePasswordSchema as schema} from '@/schema.ts'
+import userService from '@services/userService.ts'
+import {useAuth} from '@hooks/useAuth.tsx'
+import ErrorMessages from '@components/ErrorMessages'
 
 function PasswordUpdatePage() {
     const {auth} = useAuth()
@@ -32,9 +32,9 @@ function PasswordUpdatePage() {
             navigate('/')
         } catch (err) {
             if (isAxiosError(err) && err.response && err.response.status === 403) {
-                setError('oldPassword', {message:'Password is incorrect.'})
+                setError('oldPassword', {message: 'Password is incorrect.'})
             } else {
-                setError('root', {message:'Something went wrong. Please try again later.'})
+                setError('root', {message: 'Something went wrong. Please try again later.'})
             }
         }
     }
@@ -73,7 +73,7 @@ function PasswordUpdatePage() {
                                        error={hasFieldError('confirmation')}/>
                         </Grid>
                     </Grid>
-                    <Grid container spacing={2} sx={{marginTop:3}}>
+                    <Grid container spacing={2} sx={{marginTop: 3}}>
                         <Grid item xs={6}>
                             <Button fullWidth variant="outlined" onClick={() => navigate(-1)} sx={{marginRight: 1}}>
                                 Cancel

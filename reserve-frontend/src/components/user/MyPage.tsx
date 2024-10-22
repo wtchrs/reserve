@@ -1,10 +1,10 @@
 import {useEffect, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
 import {Box, Button, Grid} from '@mui/material'
-import {useAuth} from '../../hooks/useAuth'
+import {useAuth} from '@hooks/useAuth.tsx'
+import userService from '@services/userService'
+import type {User} from '@customTypes/domain'
 import UserDetail from './UserDetail'
-import type {User} from '../../../types/domain.d.ts'
-import userService from '../../services/userService'
 import UserDeleteDialog from './UserDeleteDialog.tsx'
 
 function MyPage() {

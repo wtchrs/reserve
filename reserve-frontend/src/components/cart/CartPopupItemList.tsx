@@ -1,6 +1,6 @@
 import {Divider, Stack, Typography} from '@mui/material'
-import type {CartItem} from '../../../types/domain.d.ts'
 import CartPopupItem from './CartPopupItem.tsx'
+import type {CartItem} from '@customTypes/domain'
 
 type Props = {
     items: CartItem[]

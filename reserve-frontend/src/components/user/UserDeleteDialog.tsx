@@ -3,10 +3,10 @@ import {useNavigate} from 'react-router-dom'
 import {SubmitHandler, useForm} from 'react-hook-form'
 import {zodResolver} from '@hookform/resolvers/zod'
 import {isAxiosError} from 'axios'
-import ErrorMessages from '../ErrorMessages'
-import {DeleteUserRequest, deleteUserSchema as schema} from '../../schema'
-import userService from '../../services/userService'
-import {useAuth} from '../../hooks/useAuth'
+import ErrorMessages from '@components/ErrorMessages'
+import {DeleteUserRequest, deleteUserSchema as schema} from '@/schema.ts'
+import userService from '@services/userService'
+import {useAuth} from '@hooks/useAuth.tsx'
 
 type Props = {
     open: boolean

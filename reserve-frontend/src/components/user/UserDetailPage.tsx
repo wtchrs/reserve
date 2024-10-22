@@ -2,8 +2,8 @@ import {useEffect, useState} from 'react'
 import {useNavigate, useParams} from 'react-router-dom'
 import {Box, Button} from '@mui/material'
 import UserDetail from './UserDetail'
-import type {User} from '../../../types/domain.d.ts'
-import userService from '../../services/userService'
+import type {User} from '@customTypes/domain'
+import userService from '@services/userService'
 
 function UserDetailPage() {
     const {username} = useParams<{ username: string }>()

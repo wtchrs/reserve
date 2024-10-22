@@ -1,9 +1,9 @@
 import {Box, Button} from '@mui/material'
 import {useEffect, useState} from 'react'
 import {useNavigate, useParams} from 'react-router-dom'
-import {useAuth} from '../../hooks/useAuth.tsx'
-import storeService from '../../services/storeService.ts'
-import type {Store} from '../../../types/domain.d.ts'
+import {useAuth} from '@hooks/useAuth.tsx'
+import storeService from '@services/storeService.ts'
+import type {Store} from '@customTypes/domain'
 import MenuList from './menu/MenuList.tsx'
 import StoreDetail from './StoreDetail.tsx'
 

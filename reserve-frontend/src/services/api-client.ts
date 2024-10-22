@@ -1,8 +1,8 @@
 import axios, {AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig} from 'axios'
-import {ErrorResponse} from '../../types/domain'
-import {logOnDev} from '../utils/log.ts'
-import {getAccessToken, removeAccessToken, setAccessToken} from '../utils/token.ts'
-import '../../types/axios.d.ts'
+import {ErrorResponse} from '@customTypes/domain'
+import {logOnDev} from '@utils/log.ts'
+import {getAccessToken, removeAccessToken, setAccessToken} from '@utils/token.ts'
+import '@customTypes/axios.d.ts'
 
 const apiUrl = import.meta.env.VITE_API_URL
 

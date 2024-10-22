@@ -3,12 +3,12 @@ import {Avatar, Box, Button, Container, Grid, TextField, Typography} from '@mui/
 import {useNavigate} from 'react-router-dom'
 import {SubmitHandler, useForm} from 'react-hook-form'
 import {zodResolver} from '@hookform/resolvers/zod'
-import {UpdateUserRequest, updateUserSchema} from '../../schema.ts'
-import userService from '../../services/userService.ts'
-import {useAuth} from '../../hooks/useAuth.tsx'
-import type {User} from '../../../types/domain.d.ts'
+import {UpdateUserRequest, updateUserSchema} from '@/schema.ts'
+import userService from '@services/userService.ts'
+import {useAuth} from '@hooks/useAuth.tsx'
+import type {User} from '@customTypes/domain'
 import UserUpdateSkeleton from './UserUpdateSkeleton.tsx'
-import ErrorMessages from '../ErrorMessages.tsx'
+import ErrorMessages from '@components/ErrorMessages.tsx'
 
 function UserUpdatePage() {
     const {auth} = useAuth()

@@ -1,10 +1,10 @@
 import {Button, Container, CssBaseline, Tabs, Tab, Toolbar, Typography, Box, SxProps} from '@mui/material'
 import {Link as RouterLink, Outlet} from 'react-router-dom'
 import Link from '@mui/material/Link'
-import useRouteMatch from '../hooks/useRouteMatch'
+import useRouteMatch from '@hooks/useRouteMatch.ts'
 import AuthInfo from './auth/AuthInfo.tsx'
 import CartPopupButton from './cart/CartPopupButton.tsx'
-import ErrorPage from './ErrorPage'
+import ErrorPage from './ErrorPage.tsx'
 
 function Copyright(props: { sx: SxProps }) {
     return (

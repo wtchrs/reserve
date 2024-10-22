@@ -1,6 +1,6 @@
 import {ShoppingCart, Store} from '@mui/icons-material'
 import {Box, Button, Divider, Popover, Typography} from '@mui/material'
-import {useCart} from '../../hooks/useCart.tsx'
+import {useCart} from '@hooks/useCart.tsx'
 import CartPopupItemList from './CartPopupItemList.tsx'
 
 type Props = {

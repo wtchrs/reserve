@@ -1,9 +1,9 @@
 import {createContext, ReactNode, useCallback, useContext, useEffect, useState} from 'react'
-import type {Auth} from '../../types/domain.d.ts'
-import authService from '../services/authService.ts'
-import {SignInRequest} from '../schema.ts'
-import {logOnDev} from '../utils/log.ts'
-import {getAccessToken,/*getAccessToken,*/ removeAccessToken, setAccessToken} from '../utils/token.ts'
+import type {Auth} from '@customTypes/domain.d.ts'
+import authService from '@services/authService.ts'
+import {SignInRequest} from '@/schema.ts'
+import {logOnDev} from '@utils/log.ts'
+import {getAccessToken, removeAccessToken, setAccessToken} from '@utils/token.ts'
 
 type AuthContext = {
     auth?: Auth,

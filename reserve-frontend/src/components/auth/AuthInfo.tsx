@@ -1,5 +1,5 @@
 import {Box, Button, Link} from '@mui/material'
-import {useAuth} from '../../hooks/useAuth.tsx'
+import {useAuth} from '@hooks/useAuth.tsx'
 import {useCallback} from 'react'
 
 function AuthInfo() {

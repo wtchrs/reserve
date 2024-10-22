@@ -1,11 +1,11 @@
 import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, Typography} from '@mui/material'
 import {useState} from 'react'
-import {useAuth} from '../../../hooks/useAuth.tsx'
-import menuService from '../../../services/menuService.ts'
-import type {Menu} from '../../../../types/domain.d.ts'
-import ErrorMessages from '../../ErrorMessages.tsx'
-import FlashMessageDialog from '../../FlashMessageDialog.tsx'
-import LoadingDialog from '../../LoadingDialog.tsx'
+import {useAuth} from '@hooks/useAuth.tsx'
+import menuService from '@services/menuService.ts'
+import type {Menu} from '@customTypes/domain'
+import ErrorMessages from '@components/ErrorMessages.tsx'
+import FlashMessageDialog from '@components/FlashMessageDialog.tsx'
+import LoadingDialog from '@components/LoadingDialog.tsx'
 
 type Props = {
     menu: Menu

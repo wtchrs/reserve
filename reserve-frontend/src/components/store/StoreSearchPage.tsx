@@ -3,11 +3,11 @@ import {Box, Button, CircularProgress, Grid, TextField, Typography} from '@mui/m
 import {zodResolver} from '@hookform/resolvers/zod'
 import {SubmitHandler, useForm} from 'react-hook-form'
 import {useNavigate} from 'react-router-dom'
-import {SearchStoreParams, searchStoreSchema} from '../../schema'
-import ErrorMessages from '../ErrorMessages'
-import storeService from '../../services/storeService'
-import type {PageParams, Store} from '../../../types/domain.d.ts'
-import PageNavigator from '../PageNavigator.tsx'
+import {SearchStoreParams, searchStoreSchema} from '@/schema.ts'
+import ErrorMessages from '@components/ErrorMessages'
+import storeService from '@services/storeService'
+import type {PageParams, Store} from '@customTypes/domain'
+import PageNavigator from '@components/PageNavigator.tsx'
 import StoreList from './StoreList.tsx'
 
 function StoreSearchPage() {

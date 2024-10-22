@@ -1,7 +1,6 @@
-import {MouseEvent} from 'react'
+import {useCallback, useState, MouseEvent} from 'react'
 import {Box, IconButton} from '@mui/material'
 import {ShoppingCart} from '@mui/icons-material'
-import {useCallback, useState} from 'react'
 import CartPopup from './CartPopup.tsx'
 
 function CartPopupButton() {

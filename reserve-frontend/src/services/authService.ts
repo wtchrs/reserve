@@ -1,7 +1,7 @@
 import client from './api-client'
 import {jwtDecode} from 'jwt-decode'
-import {SignInRequest, SignUpRequest} from '../schema'
-import type {Auth, AuthUser} from '../../types/domain.d.ts'
+import {SignInRequest, SignUpRequest} from '@/schema'
+import type {Auth, AuthUser} from '@customTypes/domain.d.ts'
 
 type TokenDecoded = { sub: string, username: string, nickname: string }
 

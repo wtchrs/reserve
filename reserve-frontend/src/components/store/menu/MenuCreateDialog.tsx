@@ -12,11 +12,11 @@ import {
     Grid,
     TextField,
 } from '@mui/material'
-import {useAuth} from '../../../hooks/useAuth.tsx'
-import {CreateMenuRequest, createMenuSchema} from '../../../schema.ts'
-import menuService from '../../../services/menuService.ts'
-import ErrorMessages from '../../ErrorMessages.tsx'
-import FlashMessageDialog from '../../FlashMessageDialog.tsx'
+import {useAuth} from '@hooks/useAuth.tsx'
+import {CreateMenuRequest, createMenuSchema} from '@/schema.ts'
+import menuService from '@services/menuService.ts'
+import ErrorMessages from '@components/ErrorMessages.tsx'
+import FlashMessageDialog from '@components/FlashMessageDialog.tsx'
 
 type Props = {
     storeId: string

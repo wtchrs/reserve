@@ -1,6 +1,6 @@
 import client from './api-client'
-import {CreateStoreRequest, SearchStoreParams, UpdateStoreRequest} from '../schema'
-import type {ListResponse, PageParams, Store} from '../../types/domain.d.ts'
+import {CreateStoreRequest, SearchStoreParams, UpdateStoreRequest} from '@/schema'
+import type {ListResponse, PageParams, Store} from '@customTypes/domain.d.ts'
 
 const basePath = /https?:\/\/[a-zA-Z0-9@:%._+~#=]{2,256}\b(.*)/.exec(import.meta.env.VITE_API_URL)?.[1]
 

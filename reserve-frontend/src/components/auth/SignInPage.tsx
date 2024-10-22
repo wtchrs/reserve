@@ -12,12 +12,12 @@ import {
 } from '@mui/material'
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
 import {SubmitHandler, useForm} from 'react-hook-form'
-import {zodResolver} from '@hookform/resolvers/zod'
-import {signInSchema as schema, SignInRequest} from '../../schema.ts'
-import {useAuth} from '../../hooks/useAuth.tsx'
-import {useNavigate} from 'react-router-dom'
-import ErrorMessages from '../ErrorMessages.tsx'
 import {isAxiosError} from 'axios'
+import {zodResolver} from '@hookform/resolvers/zod'
+import {useNavigate} from 'react-router-dom'
+import {signInSchema as schema, SignInRequest} from '@/schema.ts'
+import {useAuth} from '@hooks/useAuth.tsx'
+import ErrorMessages from '@components/ErrorMessages.tsx'
 
 function SignInPage() {
     const {auth, signIn} = useAuth()

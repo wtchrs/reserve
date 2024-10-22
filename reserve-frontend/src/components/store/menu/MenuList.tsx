@@ -1,8 +1,8 @@
 import {Box, CircularProgress, Grid, Typography} from '@mui/material'
 import {useCallback, useEffect, useState} from 'react'
-import type {Menu, Store} from '../../../../types/domain.d.ts'
-import ErrorMessages from '../../ErrorMessages.tsx'
-import menuService from '../../../services/menuService.ts'
+import type {Menu, Store} from '@customTypes/domain'
+import ErrorMessages from '@components/ErrorMessages.tsx'
+import menuService from '@services/menuService.ts'
 import CartAddDialog from './CartAddDialog.tsx'
 
 type Props = { store: Store }
