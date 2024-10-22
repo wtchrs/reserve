@@ -10,7 +10,7 @@ type Props = {
 }
 
 function CartPopup({anchorEl, id, handleClose}: Props) {
-    const {store, cartItems, clear} = useCart()
+    const {cart, clear} = useCart()
 
     const open = Boolean(anchorEl)
 
@@ -35,11 +35,11 @@ function CartPopup({anchorEl, id, handleClose}: Props) {
                     <Typography variant="h5">Cart</Typography>
                 </Box>
                 <Divider sx={{borderColor: '#bbb'}}/>
-                {store && (
+                {cart.store && (
                     <>
                         <Button
                             fullWidth color="inherit"
-                            href={`/stores/${store.storeId}`}
+                            href={`/stores/${cart.store.storeId}`}
                             sx={{
                                 p: 2,
                                 display: 'flex',
@@ -50,18 +50,18 @@ function CartPopup({anchorEl, id, handleClose}: Props) {
                             }}
                         >
                             <Store sx={{mr: 1}}/>
-                            <Typography variant="h6">{store.name}</Typography>
+                            <Typography variant="h6">{cart.store.name}</Typography>
                         </Button>
                         <Divider sx={{borderColor: '#ccc'}}/>
                     </>
                 )}
                 <Box sx={{p: 2, backgroundColor: 'white'}}>
-                    <CartPopupItemList items={cartItems}/>
+                    <CartPopupItemList items={cart.items}/>
                 </Box>
                 <Divider sx={{borderColor: '#bbb'}}/>
                 <Box sx={{p: 2}}>
                     <Typography variant="h6" sx={{color: '#111'}}>
-                        Total: {cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0)}
+                        Total: {cart.items.reduce((acc, item) => acc + item.price * item.quantity, 0)}
                     </Typography>
                 </Box>
                 <Divider sx={{borderColor: '#bbb'}}/>

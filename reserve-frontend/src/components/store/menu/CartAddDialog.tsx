@@ -28,7 +28,7 @@ type Props = {
 }
 
 function CartAddDialog({store, menu, onClose}: Props) {
-    const {cartItems, addItem} = useCart()
+    const {cart, addItem} = useCart()
     const [quantity, setQuantity] = useState(1)
     const {
         register,
@@ -45,14 +45,14 @@ function CartAddDialog({store, menu, onClose}: Props) {
     }, [])
 
     const onSubmit = useCallback((input: SchemaType) => {
-        const item = cartItems.find(item => item.menuId === menu.menuId)
+        const item = cart.items.find(item => item.menuId === menu.menuId)
         if (item) {
             addItem(store, menu, item.quantity + input.quantity)
         } else {
             addItem(store, menu, input.quantity)
         }
         onClose()
-    }, [cartItems, menu, store])
+    }, [cart.items, menu, store])
 
     return (
         <Dialog open={true} onClose={onClose}>
