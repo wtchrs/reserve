@@ -2,7 +2,7 @@ import {Box, Button, Typography} from '@mui/material'
 import {useEffect, useState} from 'react'
 import {useNavigate, useParams} from 'react-router-dom'
 import storeService from '../../services/storeService.ts'
-import {PageParams, Store} from '../../type.ts'
+import type {PageParams, Store} from '../../../types/domain.d.ts'
 import PageNavigator from '../PageNavigator.tsx'
 import StoreList from './StoreList.tsx'
 

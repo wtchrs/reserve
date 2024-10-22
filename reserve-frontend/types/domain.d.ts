@@ -1,9 +1,3 @@
-declare module 'axios' {
-    interface AxiosRequestConfig {
-        urlParams?: Record<string, string>;
-    }
-}
-
 export type AuthUser = {
     userId: string
     username: string
@@ -67,4 +61,9 @@ export type PageParams<T> = {
     page: number,
     size: number,
     sort: PageSort<T>[],
+}
+
+export type ErrorResponse = {
+    code: number,
+    message: string,
 }

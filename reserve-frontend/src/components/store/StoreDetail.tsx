@@ -1,5 +1,5 @@
 import {Box, Typography} from '@mui/material'
-import {Store} from '../../type'
+import type {Store} from '../../../types/domain.d.ts'
 import StoreDetailSkeleton from './StoreDetailSkeleton'
 
 type Props = {

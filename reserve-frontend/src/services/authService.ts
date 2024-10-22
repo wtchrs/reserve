@@ -1,7 +1,7 @@
 import client from './api-client'
 import {jwtDecode} from 'jwt-decode'
 import {SignInRequest, SignUpRequest} from '../schema'
-import {Auth, AuthUser} from '../type'
+import type {Auth, AuthUser} from '../../types/domain.d.ts'
 
 type TokenDecoded = { sub: string, username: string, nickname: string }
 
@@ -28,7 +28,7 @@ abstract class AuthService {
     }
 
     static async refreshToken() {
-        const res = await client.post('/token-refresh')
+        const res = await client.post('/token-refresh', null, {withCredentials: true})
         const accessToken = res.headers['authorization']
         const decoded = jwtDecode<TokenDecoded>(accessToken)
         const user: AuthUser = {userId: decoded.sub, username: decoded.username, nickname: decoded.nickname}

@@ -1,51 +1,52 @@
 import {createContext, ReactNode, useCallback, useContext, useEffect, useState} from 'react'
-import {Auth} from '../type.ts'
+import type {Auth} from '../../types/domain.d.ts'
 import authService from '../services/authService.ts'
 import {SignInRequest} from '../schema.ts'
+import {logOnDev} from '../utils/log.ts'
+import {getAccessToken,/*getAccessToken,*/ removeAccessToken, setAccessToken} from '../utils/token.ts'
 
 type AuthContext = {
     auth?: Auth,
     signIn: (request: SignInRequest) => Promise<void>,
     signOut: () => Promise<void>,
-    refresh: () => Promise<void>
 }
 
 const authContext = createContext<AuthContext>({} as AuthContext)
 
 export function AuthProvider({children}: { children: ReactNode }) {
-    const storedToken = localStorage.getItem('auth')
-    let parsed = undefined
-    if (storedToken) parsed = authService.extractAuth(storedToken)
+    const [auth, setAuth] = useState<Auth>()
 
-    const [auth, setAuth] = useState<Auth | undefined>(parsed)
+    const handleAuthChange = useCallback((event: CustomEvent<string | null>) => {
+        logOnDev('authChanged', event.detail)
+
+        if (event.detail) {
+            setAuth(authService.extractAuth(event.detail))
+        } else {
+            setAuth(undefined)
+        }
+    }, [])
 
     useEffect(() => {
-        authService.refreshToken().then(res => {
-            setAuth(res)
-            localStorage.setItem('auth', res.accessToken)
-        })
-    }, [])
+        logOnDev('AuthProvider mounted')
+
+        if (getAccessToken()) {
+            authService.refreshToken().then(res => setAccessToken(res.accessToken))
+        }
+        window.addEventListener('authChanged', handleAuthChange as EventListener)
+    }, [handleAuthChange])
 
     const signIn = useCallback(async (request: SignInRequest) => {
         const res = await authService.signIn(request)
-        localStorage.setItem('auth', res.accessToken)
-        setAuth(res)
+        setAccessToken(res.accessToken)
     }, [])
 
     const signOut = useCallback(async () => {
         await authService.signOut()
-        localStorage.removeItem('auth')
-        setAuth(undefined)
-    }, [])
-
-    const refresh = useCallback(async () => {
-        const res = await authService.refreshToken()
-        localStorage.setItem('auth', res.accessToken)
-        setAuth(res)
+        removeAccessToken()
     }, [])
 
     return (
-        <authContext.Provider value={{auth, signIn, signOut, refresh: refresh}}>
+        <authContext.Provider value={{auth, signIn, signOut}}>
             {children}
         </authContext.Provider>
     )

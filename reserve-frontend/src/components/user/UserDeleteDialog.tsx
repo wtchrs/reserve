@@ -30,7 +30,7 @@ function UserDeleteDialog({open, onClose}: Props) {
         console.log('data', data)
         if (auth) {
             try {
-                await userService.deleteUser(auth, data)
+                await userService.deleteUser(data)
                 navigate('/')
             } catch (err) {
                 if (isAxiosError(err) && err.response?.status === 403) {

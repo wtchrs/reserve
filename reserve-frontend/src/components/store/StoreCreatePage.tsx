@@ -26,7 +26,7 @@ function StoreCreatePage() {
     const onSubmit = async (data: CreateStoreRequest) => {
         if (!auth) return
         try {
-            const storeId = await storeService.create(auth, data)
+            const storeId = await storeService.create(data)
             navigate('/stores/' + storeId)
         } catch (err) {
             console.log('err', err)

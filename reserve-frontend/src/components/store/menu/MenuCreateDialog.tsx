@@ -43,7 +43,7 @@ function MenuCreateDialog({storeId, onClose, onCreated}: Props) {
     const onSubmit = async (request: CreateMenuRequest) => {
         try {
             setLoading(true)
-            await menuService.create(auth, storeId, request)
+            await menuService.create(storeId, request)
             setFinished(true)
         } catch (_err) {
             setError('root', {message: 'Something went wrong. Please try again later.'})

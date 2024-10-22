@@ -1,7 +1,7 @@
 import {Clear} from '@mui/icons-material'
 import {Box, IconButton, MenuItem, Select, Typography} from '@mui/material'
 import {useCart} from '../../hooks/useCart.tsx'
-import {CartItem} from '../../type.ts'
+import type {CartItem} from '../../../types/domain.d.ts'
 
 type Props = {
     item: CartItem

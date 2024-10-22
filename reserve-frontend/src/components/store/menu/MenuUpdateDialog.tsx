@@ -5,7 +5,7 @@ import {useForm} from 'react-hook-form'
 import {useAuth} from '../../../hooks/useAuth.tsx'
 import {UpdateMenuRequest, updateMenuSchema} from '../../../schema.ts'
 import menuService from '../../../services/menuService.ts'
-import {Menu} from '../../../type.ts'
+import type {Menu} from '../../../../types/domain.d.ts'
 import ErrorMessages from '../../ErrorMessages.tsx'
 import FlashMessageDialog from '../../FlashMessageDialog.tsx'
 import LoadingDialog from '../../LoadingDialog.tsx'
@@ -38,7 +38,7 @@ function MenuUpdateDialog({menu, onClose, onUpdated}: Props) {
         if (!auth) return
         setLoading(true)
         try {
-            await menuService.update(auth, menu.menuId.toString(), request)
+            await menuService.update(menu.menuId.toString(), request)
             setFlashOpen(true)
         } catch (_err) {
             setError('root', {message: 'Something went wrong. Please try again later.'})

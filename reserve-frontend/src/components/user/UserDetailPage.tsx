@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react'
 import {useNavigate, useParams} from 'react-router-dom'
 import {Box, Button} from '@mui/material'
 import UserDetail from './UserDetail'
-import {User} from '../../type'
+import type {User} from '../../../types/domain.d.ts'
 import userService from '../../services/userService'
 
 function UserDetailPage() {

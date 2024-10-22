@@ -43,7 +43,7 @@ function StoreUpdatePage() {
         try {
             if (!auth || !storeId) return
             setLoading(true)
-            await storeService.update(auth, storeId, request)
+            await storeService.update(storeId, request)
             setLoading(false)
             navigate(`/stores/${storeId}`)
         } catch (_err) {

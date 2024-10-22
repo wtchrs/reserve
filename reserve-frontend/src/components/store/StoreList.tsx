@@ -1,6 +1,6 @@
 import {Box, Grid, Typography} from '@mui/material'
 import {useNavigate} from 'react-router-dom'
-import {Store} from '../../type.ts'
+import type {Store} from '../../../types/domain.d.ts'
 
 type Props = {
     stores: Store[]

@@ -6,7 +6,7 @@ import {zodResolver} from '@hookform/resolvers/zod'
 import {UpdateUserRequest, updateUserSchema} from '../../schema.ts'
 import userService from '../../services/userService.ts'
 import {useAuth} from '../../hooks/useAuth.tsx'
-import {User} from '../../type.ts'
+import type {User} from '../../../types/domain.d.ts'
 import UserUpdateSkeleton from './UserUpdateSkeleton.tsx'
 import ErrorMessages from '../ErrorMessages.tsx'
 
@@ -44,7 +44,7 @@ function UserUpdatePage() {
 
     const onSubmit: SubmitHandler<UpdateUserRequest> = async (data) => {
         try {
-            await userService.updateUser(auth, data)
+            await userService.updateUser(data)
             navigate(`/users/${auth.user.username}`)
         } catch (_err) {
             setFieldError('root', {message: 'Something went wrong. Please try again later.'})

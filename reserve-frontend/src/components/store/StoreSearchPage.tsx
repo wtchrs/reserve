@@ -6,7 +6,7 @@ import {useNavigate} from 'react-router-dom'
 import {SearchStoreParams, searchStoreSchema} from '../../schema'
 import ErrorMessages from '../ErrorMessages'
 import storeService from '../../services/storeService'
-import {PageParams, Store} from '../../type'
+import type {PageParams, Store} from '../../../types/domain.d.ts'
 import PageNavigator from '../PageNavigator.tsx'
 import StoreList from './StoreList.tsx'
 

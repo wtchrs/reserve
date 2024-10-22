@@ -1,16 +1,12 @@
 import client from './api-client'
 import {CreateStoreRequest, SearchStoreParams, UpdateStoreRequest} from '../schema'
-import {Auth, ListResponse, PageParams, Store} from '../type'
+import type {ListResponse, PageParams, Store} from '../../types/domain.d.ts'
 
 const basePath = /https?:\/\/[a-zA-Z0-9@:%._+~#=]{2,256}\b(.*)/.exec(import.meta.env.VITE_API_URL)?.[1]
 
 abstract class StoreService {
-    static async create({accessToken}: Auth, request: CreateStoreRequest) {
-        const res = await client.post('/stores', request, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-            },
-        })
+    static async create(request: CreateStoreRequest) {
+        const res = await client.post('/stores', request, {withAccessToken: true})
         if (res.status !== 201) throw new Error('Failed to create store')
         // Extract storeId
         const location = res.headers['location']
@@ -39,20 +35,12 @@ abstract class StoreService {
         return res.data
     }
 
-    static async update({accessToken}: Auth, storeId: string, request: UpdateStoreRequest) {
-        await client.put(`/stores/${storeId}`, request, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-            },
-        })
+    static async update(storeId: string, request: UpdateStoreRequest) {
+        await client.put(`/stores/${storeId}`, request, {withAccessToken: true})
     }
 
-    static async delete({accessToken}: Auth, storeId: string) {
-        await client.delete(`/stores/${storeId}`, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`
-            }
-        })
+    static async delete(storeId: string) {
+        await client.delete(`/stores/${storeId}`, {withAccessToken: true})
     }
 }
 

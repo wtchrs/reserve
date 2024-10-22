@@ -28,7 +28,7 @@ function PasswordUpdatePage() {
             return
         }
         try {
-            await userService.updatePassword(auth, data)
+            await userService.updatePassword(data)
             navigate('/')
         } catch (err) {
             if (isAxiosError(err) && err.response && err.response.status === 403) {

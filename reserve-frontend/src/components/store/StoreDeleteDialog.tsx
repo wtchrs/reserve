@@ -20,7 +20,7 @@ function StoreDeleteDialog({open, storeId, onClose}: Props) {
 
     const handleDelete = async () => {
         try {
-            await storeService.delete(auth, storeId)
+            await storeService.delete(storeId)
             navigate('/stores')
         } catch (_err) {
             setError('Something went wrong. Please try again later.')

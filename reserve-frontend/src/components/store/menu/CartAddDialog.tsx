@@ -13,7 +13,7 @@ import {useCallback, useEffect, useState} from 'react'
 import {useForm} from 'react-hook-form'
 import {z} from 'zod'
 import {useCart} from '../../../hooks/useCart.tsx'
-import {Menu, Store} from '../../../type.ts'
+import type {Menu, Store} from '../../../../types/domain.d.ts'
 
 const schema = z.object({
     quantity: z.number().min(1, 'Quantity must be at least 1').max(100, 'Quantity must be at most 100'),

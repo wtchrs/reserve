@@ -1,7 +1,7 @@
 import {MouseEvent, useCallback, useEffect, useState} from 'react'
 import {Box, Button, CircularProgress, Typography} from '@mui/material'
 import menuService from '../../../services/menuService.ts'
-import {Menu} from '../../../type.ts'
+import type {Menu} from '../../../../types/domain.d.ts'
 import ErrorMessages from '../../ErrorMessages.tsx'
 import MenuCreateDialog from './MenuCreateDialog.tsx'
 import MenuDeleteDialog from './MenuDeleteDialog.tsx'

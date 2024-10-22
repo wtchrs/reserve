@@ -1,5 +1,5 @@
 import {createContext, ReactNode, useCallback, useContext, useState} from 'react'
-import {CartItem, Menu, Store} from '../type.ts'
+import type {CartItem, Menu, Store} from '../../types/domain.d.ts'
 
 type CartContext = {
     store?: Store

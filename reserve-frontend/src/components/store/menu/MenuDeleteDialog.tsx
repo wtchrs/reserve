@@ -2,7 +2,7 @@ import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, Typogra
 import {useState} from 'react'
 import {useAuth} from '../../../hooks/useAuth.tsx'
 import menuService from '../../../services/menuService.ts'
-import {Menu} from '../../../type.ts'
+import type {Menu} from '../../../../types/domain.d.ts'
 import ErrorMessages from '../../ErrorMessages.tsx'
 import FlashMessageDialog from '../../FlashMessageDialog.tsx'
 import LoadingDialog from '../../LoadingDialog.tsx'
@@ -23,7 +23,7 @@ function MenuDeleteDialog({menu, onClose, onDeleted}: Props) {
         if (!auth) return
         setLoading(true)
         try {
-            await menuService.delete(auth, menu.menuId.toString())
+            await menuService.delete(menu.menuId.toString())
             setFinished(true)
         } catch (_err) {
             setError('Something went wrong. Please try again later.')

@@ -1,5 +1,5 @@
 import client from './api-client'
-import {Auth, User} from '../type'
+import type {User} from '../../types/domain.d.ts'
 import {DeleteUserRequest, UpdatePasswordRequest, UpdateUserRequest} from '../schema'
 
 abstract class UserService {
@@ -8,18 +8,18 @@ abstract class UserService {
         return res.data
     }
 
-    static async updateUser({accessToken}: Auth, request: UpdateUserRequest) {
-        await client.put('/users', request, {headers: {Authorization: `Bearer ${accessToken}`}})
+    static async updateUser(request: UpdateUserRequest) {
+        await client.put('/users', request, {withAccessToken: true})
     }
 
-    static async updatePassword({accessToken}: Auth, request: UpdatePasswordRequest) {
-        await client.put('/users/password', request, {headers: {Authorization: `Bearer ${accessToken}`}})
+    static async updatePassword(request: UpdatePasswordRequest) {
+        await client.put('/users/password', request, {withAccessToken: true})
     }
 
-    static async deleteUser({accessToken}: Auth, request: DeleteUserRequest) {
+    static async deleteUser(request: DeleteUserRequest) {
         await client.delete('/users', {
-            headers: {Authorization: `Bearer ${accessToken}`},
-            data: request
+            data: request,
+            withAccessToken: true,
         })
     }
 }

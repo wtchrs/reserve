@@ -3,7 +3,7 @@ import {useEffect, useState} from 'react'
 import {useNavigate, useParams} from 'react-router-dom'
 import {useAuth} from '../../hooks/useAuth.tsx'
 import storeService from '../../services/storeService.ts'
-import {Store} from '../../type.ts'
+import type {Store} from '../../../types/domain.d.ts'
 import MenuList from './menu/MenuList.tsx'
 import StoreDetail from './StoreDetail.tsx'
 
