@@ -16,24 +16,26 @@ const authContext = createContext<AuthContext>({} as AuthContext)
 export function AuthProvider({children}: { children: ReactNode }) {
     const [auth, setAuth] = useState<Auth>()
 
-    const handleAuthChange = useCallback((event: CustomEvent<string | null>) => {
-        logOnDev('authChanged', event.detail)
-
-        if (event.detail) {
-            setAuth(authService.extractAuth(event.detail))
-        } else {
-            setAuth(undefined)
-        }
-    }, [])
-
     useEffect(() => {
         logOnDev('AuthProvider mounted')
 
         if (getAccessToken()) {
             authService.refreshToken().then(res => setAccessToken(res.accessToken))
         }
+
+        const handleAuthChange = (event: CustomEvent<string | null>) => {
+            logOnDev('authChanged', event.detail)
+
+            if (event.detail) {
+                setAuth(authService.extractAuth(event.detail))
+            } else {
+                setAuth(undefined)
+            }
+        }
+
         window.addEventListener('authChanged', handleAuthChange as EventListener)
-    }, [handleAuthChange])
+        return () => window.removeEventListener('authChanged', handleAuthChange as EventListener)
+    }, [])
 
     const signIn = useCallback(async (request: SignInRequest) => {
         const res = await authService.signIn(request)

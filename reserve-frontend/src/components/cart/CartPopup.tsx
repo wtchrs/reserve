@@ -22,11 +22,11 @@ function CartPopup({anchorEl, id, handleClose}: Props) {
             onClose={handleClose}
             anchorOrigin={{
                 vertical: 'bottom',
-                horizontal: 'center',
+                horizontal: 'right',
             }}
             transformOrigin={{
                 vertical: 'top',
-                horizontal: 'center',
+                horizontal: 'right',
             }}
         >
             <Box sx={{width: '25rem'}}>

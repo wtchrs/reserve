@@ -30,6 +30,15 @@ export function CartProvider({children}: { children: ReactNode }) {
 
     useEffect(() => {
         setCart(getCartFromLocalStorage())
+
+        const handleStorageChange = (event: StorageEvent) => {
+            if (event.key === 'cart') {
+                setCart(getCartFromLocalStorage())
+            }
+        }
+
+        window.addEventListener('storage', handleStorageChange)
+        return () => window.removeEventListener('storage', handleStorageChange)
     }, [])
 
     // Update cart state and save to local storage
