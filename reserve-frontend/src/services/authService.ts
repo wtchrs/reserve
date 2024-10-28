@@ -13,13 +13,13 @@ abstract class AuthService {
     }
 
     static async signIn(request: SignInRequest) {
-        const res = await client.post('/sign-in', request)
+        const res = await client.post('/sign-in', request, {withCredentials: true})
         const accessToken = res.headers['authorization']
         return this.extractAuth(accessToken)
     }
 
     static async signOut() {
-        await client.post('/sign-out')
+        await client.post('/sign-out', null, {withCredentials: true})
     }
 
     static async signUp(request: SignUpRequest) {
