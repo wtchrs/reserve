@@ -20,12 +20,11 @@ public class ReservationSearchRequest {
     private SearchType type;
 
     @Schema(description = "Query string for name, address, and description of the store",
-            example = "store query string", requiredMode = Schema.RequiredMode.REQUIRED)
+            example = "store query string")
     @NullOrNotEmpty(message = "Query must not be empty string.")
     private String query;
 
-    @Schema(description = "Date of the reservation",
-            example = "2025-01-01", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Date of the reservation", example = "2025-01-01")
     private LocalDate date;
 
     public enum SearchType {
