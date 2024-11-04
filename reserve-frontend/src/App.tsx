@@ -1,3 +1,5 @@
+import {LocalizationProvider} from '@mui/x-date-pickers'
+import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs'
 import React from 'react'
 import {createBrowserRouter, RouterProvider, Link as RouterLink, LinkProps as RouterLinkProps} from 'react-router-dom'
 import {ThemeProvider, createTheme} from '@mui/material'
@@ -106,13 +108,15 @@ const router = createBrowserRouter([
 
 function App() {
     return (
-        <AuthProvider>
-            <CartProvider>
-                <ThemeProvider theme={theme}>
-                    <RouterProvider router={router}/>
-                </ThemeProvider>
-            </CartProvider>
-        </AuthProvider>
+        <ThemeProvider theme={theme}>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <AuthProvider>
+                    <CartProvider>
+                        <RouterProvider router={router}/>
+                    </CartProvider>
+                </AuthProvider>
+            </LocalizationProvider>
+        </ThemeProvider>
     )
 }
 

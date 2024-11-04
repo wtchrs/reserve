@@ -1,10 +1,5 @@
+import type {Cart, CartItem, Menu, Store} from '@customTypes/domain.d.ts'
 import {createContext, ReactNode, useCallback, useContext, useEffect, useState} from 'react'
-import type {CartItem, Menu, Store} from '@customTypes/domain.d.ts'
-
-type Cart = {
-    store?: Store
-    items: CartItem[]
-}
 
 type CartContext = {
     cart: Cart

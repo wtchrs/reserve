@@ -52,6 +52,20 @@ export type CartItem = {
     quantity: number,
 }
 
+export type Cart = {
+    store?: Store
+    items: CartItem[]
+}
+
+export type Reservation = {
+    reservationId: bigint,
+    storeId: bigint,
+    registrant: string,
+    reservationName: string,
+    date: Date,
+    hour: number,
+}
+
 type Direction = 'asc' | 'desc'
 // T must have only string keys.
 type Key<T> = Extract<keyof T, string>

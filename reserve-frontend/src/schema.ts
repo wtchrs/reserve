@@ -90,3 +90,36 @@ export const updateMenuSchema = z.object({
 
 export type CreateMenuRequest = z.infer<typeof createMenuSchema>
 export type UpdateMenuRequest = z.infer<typeof updateMenuSchema>
+
+export const createReservationMenuSchema = z.object({
+    menuId: z.number().or(z.bigint()),
+    quantity: z.number().int().min(1, 'Quantity must be at least 1.'),
+})
+
+export const createReservationSchema = z.object({
+    storeId: z.number().or(z.bigint()),
+    date: z.date().min(new Date(Date.now()), 'Date must be in the future.'),
+    hour: z.number().int()
+        .min(0, 'Hour must be between 0 and 23.')
+        .max(23, 'Hour must be between 0 and 23.'),
+    menus: z.array(createReservationMenuSchema),
+})
+
+export const searchReservationSchema = z.object({
+    type: z.union([z.literal('REGISTRANT'), z.literal('CUSTOMER')]),
+    query: z.string().min(1).optional(),
+    date: z.date().optional(),
+})
+
+export const updateReservationSchema = z.object({
+    date: z.date().min(new Date(Date.now()), 'Date must be in the future.').optional(),
+    hour: z.number().int()
+        .min(0, 'Hour must be between 0 and 23.')
+        .max(23, 'Hour must be between 0 and 23.')
+        .optional(),
+})
+
+export type CreateReservationMenuRequest = z.infer<typeof createReservationMenuSchema>
+export type CreateReservationRequest = z.infer<typeof createReservationSchema>
+export type SearchReservationParams = z.infer<typeof searchReservationSchema>
+export type UpdateReservationRequest = z.infer<typeof updateReservationSchema>
