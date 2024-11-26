@@ -62,10 +62,13 @@ application:
 
 # OpenAPI
 springdoc:
+  api-docs:
+    path: '/api/v3/api-docs'
   swagger-ui:
     groups-order: asc
     tags-sorter: alpha
     operations-sorter: alpha
+    path: '/api/swagger-ui'
   paths-to-match:
     - /v1/**
   override-with-generic-response: off

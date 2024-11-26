@@ -17,55 +17,66 @@ import reserve.global.exception.ErrorCode;
 import reserve.global.swagger.annotation.ApiErrorCodeResponse;
 import reserve.global.swagger.annotation.ApiErrorCodeResponses;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 @Component
 @Slf4j
 public class OperationCustomizerImpl implements OperationCustomizer {
 
     @Override
     public Operation customize(Operation operation, HandlerMethod handlerMethod) {
+        Map<String, List<ErrorCode>> errorCodeMap = new HashMap<>();
         // Add SecurityRequirement to indicate JWT Authentication
         Streams.of(handlerMethod.getMethod().getParameters())
                 .filter(p -> p.getType().equals(AuthInfo.class))
                 .filter(p -> p.isAnnotationPresent(Authentication.class))
                 .findFirst()
-                .ifPresent(p -> addSecurityRequirement(operation));
-
+                .ifPresent(p -> addSecurityRequirement(errorCodeMap, operation));
         // Add ApiErrorCodeResponses as ApiResponses to the operation
         ApiErrorCodeResponses annot = handlerMethod.getMethodAnnotation(ApiErrorCodeResponses.class);
         if (annot != null) {
-            Streams.of(annot.value()).forEach(a -> addApiErrorCodeResponse(operation, a));
+            Streams.of(annot.value()).forEach(a -> addApiErrorCodeResponse(errorCodeMap, a));
         }
-
+        // Apply errorCodeMap to the operation
+        errorCodeMap.forEach((key, errorCodes) -> applyToOperation(operation, key, errorCodes));
         return operation;
     }
 
-    private void addSecurityRequirement(Operation operation) {
+    private void addSecurityRequirement(Map<String, List<ErrorCode>> errorCodeMap, Operation operation) {
         SecurityRequirement securityRequirement = new SecurityRequirement().addList("JWT");
         operation.addSecurityItem(securityRequirement);
-        addApiErrorCodeResponse(operation, "400", ErrorCode.INVALID_ACCESS_TOKEN_FORMAT);
-        addApiErrorCodeResponse(operation, "401", ErrorCode.EXPIRED_ACCESS_TOKEN);
-        addApiErrorCodeResponse(operation, "403", ErrorCode.SIGN_IN_REQUIRED);
+        addApiErrorCodeResponse(errorCodeMap, "400", ErrorCode.INVALID_ACCESS_TOKEN_FORMAT);
+        addApiErrorCodeResponse(errorCodeMap, "401", ErrorCode.EXPIRED_ACCESS_TOKEN);
+        addApiErrorCodeResponse(errorCodeMap, "403", ErrorCode.SIGN_IN_REQUIRED);
     }
 
-    private void addApiErrorCodeResponse(Operation operation, ApiErrorCodeResponse annot) {
-        addApiErrorCodeResponse(operation, annot.responseCode(), annot.errorCode());
+    private void addApiErrorCodeResponse(Map<String, List<ErrorCode>> errorCodeMap, ApiErrorCodeResponse annot) {
+        addApiErrorCodeResponse(errorCodeMap, annot.responseCode(), annot.errorCode());
     }
 
-    private void addApiErrorCodeResponse(Operation operation, String responseCode, ErrorCode errorCode) {
+    private void addApiErrorCodeResponse(
+            Map<String, List<ErrorCode>> errorCodeMap, String responseCode, ErrorCode errorCode
+    ) {
+        errorCodeMap
+                .computeIfAbsent(responseCode, key -> new LinkedList<>())
+                .add(errorCode);
+    }
+
+    private void applyToOperation(Operation operation, String responseCode, List<ErrorCode> errorCodes) {
+        // Description for all possible ErrorCode
+        String itemsStr = errorCodes.stream().map(this::getErrorCodeTableDescription).collect(Collectors.joining("\n"));
+        String description = "| Error Code | Message |\n| - | - |\n" + itemsStr;
         // New Schema for the ErrorCode
-        Schema<ErrorCode> schema = new Schema<>();
-        schema.setType("object");
-        schema.addProperty("code", new Schema<>().type("integer").example(errorCode.getCode()));
-        schema.addProperty("message", new Schema<>().type("string").example(errorCode.getMessage()));
-        // Put the Schema into the ApiResponse
+        Schema<?> schema = new Schema<>().$ref("ErrorCode");
         MediaType mediaType = new MediaType().schema(schema);
         Content content = new Content().addMediaType("application/json", mediaType);
-        ApiResponse response = new ApiResponse().content(content).description(errorCode.getMessage());
-        operation.getResponses().addApiResponse(getErrorResponseCode(responseCode, errorCode), response);
+        ApiResponse response = new ApiResponse().content(content).description(description);
+        operation.getResponses().addApiResponse(responseCode, response);
     }
 
-    private String getErrorResponseCode(String responseCode, ErrorCode errorCode) {
-        return responseCode + " (ErrorCode: " + errorCode.getCode() + ")";
+    private String getErrorCodeTableDescription(ErrorCode errorCode) {
+        return String.format("| %s | %s |", errorCode.getCode(), errorCode.getMessage());
     }
 
 }
