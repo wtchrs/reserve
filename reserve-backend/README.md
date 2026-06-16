@@ -1,12 +1,18 @@
 # Reserve-backend
 
-## Example of `src/main/resources/application.yml`
+## Getting started
+
+### Prerequisites
+
+#### `application.yml`
+
+Add `src/main/resources/application.yml`:
 
 ```yml
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://your-database.com:3306/db?serverTimezone=UTC
+    url: jdbc:mysql://<your-database-url>:3306/db?serverTimezone=UTC
     username: username
     password: password
 
@@ -25,7 +31,7 @@ spring:
 
   data:
     redis:
-      host: your-redis.com
+      host: your-redis.com # your redis url
       password: password
       port: 6379
 
@@ -53,8 +59,8 @@ application:
   matchThreshold: 0
   security:
     jwt:
-      accessTokenSecretKey: <64 characters>
-      refreshTokenSecretKey: <64 characters>
+      accessTokenSecretKey: <generated-secret>
+      refreshTokenSecretKey: <generated-secret>
       accessTokenExpire: 600
       refreshTokenExpire: 604800
   cors:
@@ -76,21 +82,93 @@ springdoc:
 
 See [springdoc.org](https://springdoc.org/#properties) for more information about Springdoc OpenAPI configuration.
 
-## Create a PKCS #12 certificate using Certbot
+#### Launch MySQL and Redis with docker
+
+```bash
+docker run -d --name reserve-mysql \
+  -e MYSQL_DATABASE=db \
+  -e MYSQL_USER=username \
+  -e MYSQL_PASSWORD=password \
+  -e MYSQL_ROOT_PASSWORD=rootpassword \
+  -p 3306:3306 \
+  mysql:8.0 \
+  --character-set-server=utf8mb4 \
+  --collation-server=utf8mb4_unicode_ci
+
+docker run -d --name reserve-redis \
+  -p 6379:6379 \
+  redis:7-alpine redis-server --requirepass password
+```
+
+Update `src/main/resources/application.yml`:
+
+```yml
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/db?serverTimezone=UTC
+    # ...
+  data:
+    redis:
+      host: localhost
+      # ...
+```
+
+#### Generate access/refresh token secret keys
+
+Run twice:
+
+```bash
+openssl rand -base64 64
+# or without newline:
+openssl rand -base64 64 | tr -d '\n'
+```
+
+and paste each generated value to `application.yml`:
+
+```yml
+application:
+  security:
+    jwt:
+      accessTokenSecretKey: <generated-secret> # replace
+      refreshTokenSecretKey: <generated-secret> # replace
+      # ...
+```
+
+#### Create a PKCS #12 certificate using Certbot
+
+Use certbot docker image to generate a certificate:
 
 ```bash
 docker run -it --rm \
-  -v ${pwd}/certbot/etc/letsencrypt:/etc/letsencrypt \
-  -v ${pwd}/certbot/var/lib/letsencrypt:/var/lib/letsencrypt \
+  -v ${PWD}/certbot/etc/letsencrypt:/etc/letsencrypt \
+  -v ${PWD}/certbot/var/lib/letsencrypt:/var/lib/letsencrypt \
   certbot/certbot certonly --manual \
   --preferred-challenges dns \
-  --email your_email@example.com \
-  --domain '*.your-domain.com' \
+  --email <your-email-address> \
+  --domain '*.<your-domain-url>' \
   --server https://acme-v02.api.letsencrypt.org/directory \
   --agree-tos
+```
 
+Generate a PKCS #12 certificate from the pem file:
+
+```bash
 openssl pkcs12 -export \
-  -in certbot/etc/letsencrypt/archive/your-domain.com/fullchain1.pem \
-  -inkey certbot/etc/letsencrypt/archive/your-domain.com/privkey1.pem \
-  -out src/main/resources/reserve.p12
+  -in certbot/etc/letsencrypt/archive/<your-domain-url>/fullchain1.pem \
+  -inkey certbot/etc/letsencrypt/archive/<your-domain-url>/privkey1.pem \
+  -out src/main/resources/reserve.p12 \
+  -name reserve \
+  -passout pass:reserve
+```
+
+### Test
+
+```bash
+./gradlew test
+```
+
+### Launch the spring server
+
+```bash
+./gradlew bootRun
 ```
