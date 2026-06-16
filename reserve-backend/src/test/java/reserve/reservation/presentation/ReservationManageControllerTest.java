@@ -110,7 +110,7 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
                 .when().post(CANCEL_ENDPOINT_URL_TEMPLATE, inService.getId())
                 .then()
                 .statusCode(409)
-                .body("errorCode", equalTo(ErrorCode.RESERVATION_CANNOT_CANCEL.getCode()))
+                .body("code", equalTo(ErrorCode.RESERVATION_CANNOT_CANCEL.getCode()))
                 .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_CANCEL.getMessage()));
     }
 
@@ -128,7 +128,7 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
                 .when().post(CANCEL_ENDPOINT_URL_TEMPLATE, completed.getId())
                 .then()
                 .statusCode(409)
-                .body("errorCode", equalTo(ErrorCode.RESERVATION_CANNOT_CANCEL.getCode()))
+                .body("code", equalTo(ErrorCode.RESERVATION_CANNOT_CANCEL.getCode()))
                 .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_CANCEL.getMessage()));
     }
 
@@ -185,7 +185,7 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
                 .when().post(START_ENDPOINT_URL_TEMPLATE, completed.getId())
                 .then()
                 .statusCode(409)
-                .body("errorCode", equalTo(ErrorCode.RESERVATION_CANNOT_START.getCode()))
+                .body("code", equalTo(ErrorCode.RESERVATION_CANNOT_START.getCode()))
                 .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_START.getMessage()));
     }
 
@@ -203,7 +203,7 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
                 .when().post(START_ENDPOINT_URL_TEMPLATE, cancelled.getId())
                 .then()
                 .statusCode(409)
-                .body("errorCode", equalTo(ErrorCode.RESERVATION_CANNOT_START.getCode()))
+                .body("code", equalTo(ErrorCode.RESERVATION_CANNOT_START.getCode()))
                 .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_START.getMessage()));
     }
 
@@ -221,7 +221,7 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
                 .when().post(COMPLETE_ENDPOINT_URL_TEMPLATE, ready.getId())
                 .then()
                 .statusCode(409)
-                .body("errorCode", equalTo(ErrorCode.RESERVATION_CANNOT_COMPLETE.getCode()))
+                .body("code", equalTo(ErrorCode.RESERVATION_CANNOT_COMPLETE.getCode()))
                 .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_COMPLETE.getMessage()));
     }
 
@@ -267,7 +267,7 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
                 .when().post(COMPLETE_ENDPOINT_URL_TEMPLATE, cancelled.getId())
                 .then()
                 .statusCode(409)
-                .body("errorCode", equalTo(ErrorCode.RESERVATION_CANNOT_COMPLETE.getCode()))
+                .body("code", equalTo(ErrorCode.RESERVATION_CANNOT_COMPLETE.getCode()))
                 .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_COMPLETE.getMessage()));
     }
 

@@ -141,7 +141,7 @@ class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
                 .when().get("/v1/reservations/{reservationId}", reservation.getId())
                 .then()
                 .statusCode(404)
-                .body("errorCode", equalTo(ErrorCode.RESERVATION_NOT_FOUND.getCode()))
+                .body("code", equalTo(ErrorCode.RESERVATION_NOT_FOUND.getCode()))
                 .body("message", equalTo(ErrorCode.RESERVATION_NOT_FOUND.getMessage()));
     }
 
@@ -211,7 +211,7 @@ class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
                 .when().get("/v1/reservations/{reservationId}/menus", reservation.getId())
                 .then()
                 .statusCode(403)
-                .body("errorCode", equalTo(ErrorCode.ACCESS_DENIED.getCode()))
+                .body("code", equalTo(ErrorCode.ACCESS_DENIED.getCode()))
                 .body("message", equalTo(ErrorCode.ACCESS_DENIED.getMessage()));
     }
 
