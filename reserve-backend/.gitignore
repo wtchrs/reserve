@@ -46,6 +46,9 @@ docker/*
 ### Certbot docker volume ###
 certbot/
 
+### Openssl output ###
+local-certs/
+
 ### SSL Certificate ###
 **/*.p12
 

@@ -134,7 +134,7 @@ application:
       # ...
 ```
 
-#### Create a PKCS #12 certificate using Certbot
+#### Create a PKCS #12 certificate
 
 Use certbot docker image to generate a certificate:
 
@@ -156,6 +156,32 @@ Generate a PKCS #12 certificate from the pem file:
 openssl pkcs12 -export \
   -in certbot/etc/letsencrypt/archive/<your-domain-url>/fullchain1.pem \
   -inkey certbot/etc/letsencrypt/archive/<your-domain-url>/privkey1.pem \
+  -out src/main/resources/reserve.p12 \
+  -name reserve \
+  -passout pass:reserve
+```
+
+You can generate a certificate without certbot for local testing:
+
+```bash
+mkdir -p local-certs
+
+openssl req -x509 \
+  -newkey rsa:2048 \
+  -sha256 \
+  -nodes \
+  -days 365 \
+  -keyout local-certs/privkey.pem \
+  -out local-certs/cert.pem \
+  -subj "/CN=*.example.local" \
+  -addext "subjectAltName=DNS:localhost,IP:127.0.0.1,IP:::1" \
+  -addext "basicConstraints=critical,CA:FALSE" \
+  -addext "keyUsage=critical,digitalSignature,keyEncipherment" \
+  -addext "extendedKeyUsage=serverAuth"
+
+openssl pkcs12 -export \
+  -in local-certs/cert.pem \
+  -inkey local-certs/privkey.pem \
   -out src/main/resources/reserve.p12 \
   -name reserve \
   -passout pass:reserve
