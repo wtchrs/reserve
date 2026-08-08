@@ -11,6 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import reserve.global.config.TimeConfig;
 import reserve.signin.dto.SignInToken;
 import reserve.signin.dto.request.SignInRequest;
 import reserve.signin.infrastructure.JwtProvider;
@@ -20,7 +21,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(SignInController.class)
-@Import(JwtProvider.class)
+@Import({JwtProvider.class, TimeConfig.class})
 class SignInControllerWebMvcTest {
 
     @Autowired

@@ -9,6 +9,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import reserve.global.TestUtils;
+import reserve.global.config.TimeConfig;
 import reserve.notification.service.NotificationService;
 import reserve.reservation.service.ReservationManageService;
 import reserve.signin.dto.SignInToken;
@@ -18,7 +19,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ReservationManageController.class)
-@Import(JwtProvider.class)
+@Import({JwtProvider.class, TimeConfig.class})
 class ReservationManageControllerWebMvcTest {
 
     @Autowired

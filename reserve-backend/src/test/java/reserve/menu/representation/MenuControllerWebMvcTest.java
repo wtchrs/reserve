@@ -10,6 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import reserve.global.TestUtils;
+import reserve.global.config.TimeConfig;
 import reserve.menu.dto.request.MenuCreateRequest;
 import reserve.menu.dto.request.MenuUpdateRequest;
 import reserve.menu.dto.response.MenuInfoListResponse;
@@ -25,7 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(MenuController.class)
-@Import(JwtProvider.class)
+@Import({JwtProvider.class, TimeConfig.class})
 class MenuControllerWebMvcTest {
 
     @Autowired

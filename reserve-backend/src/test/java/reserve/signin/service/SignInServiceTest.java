@@ -19,6 +19,7 @@ import reserve.signup.infrastructure.Pbkdf2PasswordEncoder;
 import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
 
+import java.time.Clock;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,7 +40,7 @@ class SignInServiceTest {
     PasswordEncoder passwordEncoder = new Pbkdf2PasswordEncoder();
 
     @Spy
-    JwtProvider jwtProvider = new JwtProvider(ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET, 600, 604800);
+    JwtProvider jwtProvider = new JwtProvider(ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET, 600, 604800, Clock.systemUTC());
 
     SignInService signInService;
 

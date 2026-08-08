@@ -12,6 +12,7 @@ import reserve.signin.dto.SignInToken;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
@@ -23,6 +24,8 @@ public class JwtProvider {
     public static final String JWT_TYPE_HEADER_VALUE = "JWT";
     public static final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
 
+    private final Clock clock;
+
     private final Key accessTokenSigningKey;
     private final Key refreshTokenSigningKey;
     private final int accessTokenExpPeriod;
@@ -32,7 +35,8 @@ public class JwtProvider {
             @Value("${application.security.jwt.accessTokenSecretKey}") String accessTokenSecret,
             @Value("${application.security.jwt.refreshTokenSecretKey}") String refreshTokenSecret,
             @Value("${application.security.jwt.accessTokenExpire}") int accessTokenExpPeriod,
-            @Value("${application.security.jwt.refreshTokenExpire}") int refreshTokenExpPeriod
+            @Value("${application.security.jwt.refreshTokenExpire}") int refreshTokenExpPeriod,
+            Clock clock
     ) {
         this.accessTokenSigningKey = new SecretKeySpec(
                 accessTokenSecret.getBytes(StandardCharsets.UTF_8),
@@ -44,6 +48,7 @@ public class JwtProvider {
         );
         this.accessTokenExpPeriod = accessTokenExpPeriod;
         this.refreshTokenExpPeriod = refreshTokenExpPeriod;
+        this.clock = clock;
     }
 
     public SignInToken generateSignInToken(TokenDetails tokenDetails) {
@@ -63,7 +68,7 @@ public class JwtProvider {
     }
 
     private String generateToken(String subject, Map<String, String> claims, int expirationPeriod, Key signingKey) {
-        Instant now = Instant.now();
+        Instant now = clock.instant();
         Date issued = Date.from(now);
         Date expiration = Date.from(now.plusSeconds(expirationPeriod));
         return Jwts.builder()
@@ -113,9 +118,10 @@ public class JwtProvider {
         }
     }
 
-    private static Jws<Claims> parseToken(String jwt, Key signingKey) {
+    private Jws<Claims> parseToken(String jwt, Key signingKey) {
         return Jwts.parserBuilder()
                 .setSigningKey(signingKey)
+                .setClock(() -> Date.from(clock.instant()))
                 .build()
                 .parseClaimsJws(jwt);
     }

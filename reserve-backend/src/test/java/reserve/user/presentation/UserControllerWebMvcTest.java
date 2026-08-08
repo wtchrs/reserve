@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import reserve.global.TestUtils;
+import reserve.global.config.TimeConfig;
 import reserve.signin.infrastructure.JwtProvider;
 import reserve.user.dto.request.PasswordUpdateRequest;
 import reserve.user.dto.request.UserDeleteRequest;
@@ -23,7 +24,7 @@ import java.time.LocalDate;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserController.class)
-@Import(JwtProvider.class)
+@Import({JwtProvider.class, TimeConfig.class})
 class UserControllerWebMvcTest {
 
     @Autowired

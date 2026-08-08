@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.web.servlet.MockMvc;
 import reserve.global.TestUtils;
+import reserve.global.config.TimeConfig;
 import reserve.notification.service.NotificationService;
 import reserve.reservation.dto.request.ReservationCreateRequest;
 import reserve.reservation.dto.request.ReservationSearchRequest;
@@ -30,7 +31,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ReservationController.class)
-@Import(JwtProvider.class)
+@Import({JwtProvider.class, TimeConfig.class})
 class ReservationControllerWebMvcTest {
 
     @Autowired

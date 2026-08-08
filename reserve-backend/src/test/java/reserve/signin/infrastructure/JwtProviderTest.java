@@ -12,6 +12,7 @@ import reserve.signin.domain.TokenDetails;
 import reserve.signin.dto.SignInToken;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
 import javax.crypto.spec.SecretKeySpec;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,7 +25,11 @@ class JwtProviderTest {
     final int ACCESS_TOKEN_EXPIRATION = 600;
 
     JwtProvider jwtProvider = new JwtProvider(
-            ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET, ACCESS_TOKEN_EXPIRATION, REFRESH_TOKEN_EXPIRATION
+            ACCESS_TOKEN_SECRET,
+            REFRESH_TOKEN_SECRET,
+            ACCESS_TOKEN_EXPIRATION,
+            REFRESH_TOKEN_EXPIRATION,
+            Clock.systemUTC()
     );
 
     @Test

@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.MockMvc;
 import reserve.global.TestUtils;
+import reserve.global.config.TimeConfig;
 import reserve.notification.domain.NotificationStatus;
 import reserve.notification.domain.ResourceType;
 import reserve.notification.dto.response.NotificationInfo;
@@ -30,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(NotificationController.class)
-@Import(JwtProvider.class)
+@Import({JwtProvider.class, TimeConfig.class})
 class NotificationControllerWebMvcTest {
 
     @Autowired
