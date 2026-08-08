@@ -2,10 +2,17 @@ package reserve.signin.infrastructure;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import reserve.global.TestUtils;
 import reserve.global.exception.InvalidAuthorizationException;
 import reserve.signin.domain.TokenDetails;
 import reserve.signin.dto.SignInToken;
+
+import java.nio.charset.StandardCharsets;
+import javax.crypto.spec.SecretKeySpec;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -13,8 +20,12 @@ class JwtProviderTest {
 
     final String ACCESS_TOKEN_SECRET = "1234567890123456789012345678901234567890123456789012345678901234";
     final String REFRESH_TOKEN_SECRET = "9876543210987654321098765432109876543210987654321098765432109876";
+    final int REFRESH_TOKEN_EXPIRATION = 604800;
+    final int ACCESS_TOKEN_EXPIRATION = 600;
 
-    JwtProvider jwtProvider = new JwtProvider(ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET, 600, 604800);
+    JwtProvider jwtProvider = new JwtProvider(
+            ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET, ACCESS_TOKEN_EXPIRATION, REFRESH_TOKEN_EXPIRATION
+    );
 
     @Test
     @DisplayName("Testing sign-in token generation")
@@ -59,6 +70,34 @@ class JwtProviderTest {
         assertEquals("1", tokenDetails.getUserId());
         assertEquals("user", tokenDetails.getUsername());
         assertEquals("User", tokenDetails.getNickname());
+    }
+
+    @Test
+    void generateSignInToken_setsConfiguredValidityDurations() {
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(1L));
+
+        Claims accessTokenClaims = getTokenClaims(ACCESS_TOKEN_SECRET, signInToken.getAccessToken());
+        assertEquals(
+            ACCESS_TOKEN_EXPIRATION * 1000,
+            accessTokenClaims.getExpiration().getTime() - accessTokenClaims.getIssuedAt().getTime()
+        );
+
+        Claims refreshTokenClaims = getTokenClaims(REFRESH_TOKEN_SECRET, signInToken.getRefreshToken());
+        assertEquals(
+            REFRESH_TOKEN_EXPIRATION * 1000,
+            refreshTokenClaims.getExpiration().getTime() - refreshTokenClaims.getIssuedAt().getTime()
+        );
+    }
+
+    private Claims getTokenClaims(String secret, String token) {
+        return Jwts.parserBuilder()
+            .setSigningKey(new SecretKeySpec(
+                    secret.getBytes(StandardCharsets.UTF_8),
+                    JwtProvider.SIGNATURE_ALGORITHM.getJcaName()
+            ))
+            .build()
+            .parseClaimsJws(token)
+            .getBody();
     }
 
 }
