@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import reserve.global.MutableClock;
 import reserve.global.TestUtils;
 import reserve.global.exception.InvalidAuthorizationException;
 import reserve.signin.domain.TokenDetails;
@@ -13,6 +14,9 @@ import reserve.signin.dto.SignInToken;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import javax.crypto.spec.SecretKeySpec;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -103,6 +107,50 @@ class JwtProviderTest {
             .build()
             .parseClaimsJws(token)
             .getBody();
+    }
+
+    @Test
+    void accessToken_expiresAfterConfiguredSeconds() {
+        MutableClock clock = new MutableClock(Instant.parse("2026-01-01T00:00:00Z"), ZoneOffset.UTC);
+        JwtProvider provider = new JwtProvider(
+                ACCESS_TOKEN_SECRET,
+                REFRESH_TOKEN_SECRET,
+                ACCESS_TOKEN_EXPIRATION,
+                REFRESH_TOKEN_EXPIRATION,
+                clock
+        );
+
+        String token = provider.generateSignInToken(TestUtils.getTokenDetails(1L)).getAccessToken();
+
+        // one second before expiration
+        clock.advance(Duration.ofSeconds(ACCESS_TOKEN_EXPIRATION - 1));
+        assertFalse(provider.isAccessTokenExpired(token));
+
+        // one second after expiration
+        clock.advance(Duration.ofSeconds(2));
+        assertTrue(provider.isAccessTokenExpired(token));
+    }
+
+    @Test
+    void refreshToken_expiresAfterConfiguredSeconds() {
+        MutableClock clock = new MutableClock(Instant.parse("2026-01-01T00:00:00Z"), ZoneOffset.UTC);
+        JwtProvider provider = new JwtProvider(
+                ACCESS_TOKEN_SECRET,
+                REFRESH_TOKEN_SECRET,
+                ACCESS_TOKEN_EXPIRATION,
+                REFRESH_TOKEN_EXPIRATION,
+                clock
+        );
+
+        String token = provider.generateSignInToken(TestUtils.getTokenDetails(1L)).getRefreshToken();
+
+        // one second before expiration
+        clock.advance(Duration.ofSeconds(REFRESH_TOKEN_EXPIRATION - 1));
+        assertFalse(provider.isRefreshTokenExpired(token));
+
+        // one second after expiration
+        clock.advance(Duration.ofSeconds(2));
+        assertTrue(provider.isRefreshTokenExpired(token));
     }
 
 }
