@@ -29,69 +29,43 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/{username}")
-    @Operation(
-            summary = "Get user information",
-            description = "Get user information by username",
-            operationId = "1_getUserInfo"
-    )
-    @ApiResponses(@ApiResponse(
-            responseCode = "200", description = "Response with user information",
-            content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = UserInfoResponse.class)
-            )
-    ))
+    @Operation(summary = "Get user information", description = "Get user information by username",
+            operationId = "1_getUserInfo")
+    @ApiResponses(@ApiResponse(responseCode = "200", description = "Response with user information",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = UserInfoResponse.class))))
     @ApiErrorCodeResponses(@ApiErrorCodeResponse(responseCode = "404", errorCode = ErrorCode.USER_NOT_FOUND))
     public UserInfoResponse getUserInfo(
-            @PathVariable("username") @Schema(description = "Username", example = "username") String username
-    ) {
+            @PathVariable("username") @Schema(description = "Username", example = "username") String username) {
         return userService.getUserInfo(username);
     }
 
     @PutMapping
-    @Operation(
-            summary = "Update user information",
-            description = "Update the signed-in user's information",
-            operationId = "2_updateUserInfo"
-    )
+    @Operation(summary = "Update user information", description = "Update the signed-in user's information",
+            operationId = "2_updateUserInfo")
     @ApiResponses(@ApiResponse(responseCode = "200", description = "Successfully updated"))
     @ApiErrorCodeResponses(@ApiErrorCodeResponse(responseCode = "403", errorCode = ErrorCode.INVALID_SIGN_IN_INFO))
-    public void updateUserInfo(
-            @Authentication AuthInfo authInfo,
-            @RequestBody @Validated UserUpdateRequest userUpdateRequest
-    ) {
+    public void updateUserInfo(@Authentication AuthInfo authInfo,
+            @RequestBody @Validated UserUpdateRequest userUpdateRequest) {
         userService.update(authInfo.getUserId(), userUpdateRequest);
     }
 
     @PutMapping("/password")
-    @Operation(
-            summary = "Update user password",
-            description = "Update the signed-in user's password",
-            operationId = "3_updatePassword"
-    )
+    @Operation(summary = "Update user password", description = "Update the signed-in user's password",
+            operationId = "3_updatePassword")
     @ApiResponses(@ApiResponse(responseCode = "200", description = "Successfully updated"))
-    @ApiErrorCodeResponses({
-            @ApiErrorCodeResponse(responseCode = "403", errorCode = ErrorCode.INVALID_SIGN_IN_INFO),
-            @ApiErrorCodeResponse(responseCode = "403", errorCode = ErrorCode.WRONG_PASSWORD)
-    })
-    public void updatePassword(
-            @Authentication AuthInfo authInfo,
-            @RequestBody @Validated PasswordUpdateRequest passwordUpdateRequest
-    ) {
+    @ApiErrorCodeResponses({ @ApiErrorCodeResponse(responseCode = "403", errorCode = ErrorCode.INVALID_SIGN_IN_INFO),
+            @ApiErrorCodeResponse(responseCode = "403", errorCode = ErrorCode.WRONG_PASSWORD) })
+    public void updatePassword(@Authentication AuthInfo authInfo,
+            @RequestBody @Validated PasswordUpdateRequest passwordUpdateRequest) {
         userService.updatePassword(authInfo.getUserId(), passwordUpdateRequest);
     }
 
     @DeleteMapping
-    @Operation(
-            summary = "Delete user",
-            description = "Delete the signed-in user",
-            operationId = "4_deleteUser"
-    )
+    @Operation(summary = "Delete user", description = "Delete the signed-in user", operationId = "4_deleteUser")
     @ApiResponses(@ApiResponse(responseCode = "200", description = "Successfully deleted"))
-    @ApiErrorCodeResponses({
-            @ApiErrorCodeResponse(responseCode = "403", errorCode = ErrorCode.INVALID_SIGN_IN_INFO),
-            @ApiErrorCodeResponse(responseCode = "403", errorCode = ErrorCode.WRONG_PASSWORD)
-    })
+    @ApiErrorCodeResponses({ @ApiErrorCodeResponse(responseCode = "403", errorCode = ErrorCode.INVALID_SIGN_IN_INFO),
+            @ApiErrorCodeResponse(responseCode = "403", errorCode = ErrorCode.WRONG_PASSWORD) })
     public void delete(@Authentication AuthInfo authInfo, @RequestBody @Validated UserDeleteRequest userDeleteRequest) {
         userService.delete(authInfo.getUserId(), userDeleteRequest);
     }

@@ -6,6 +6,8 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
+import java.util.*;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.stream.Streams;
 import org.springdoc.core.customizers.OperationCustomizer;
@@ -17,9 +19,6 @@ import reserve.global.exception.ErrorCode;
 import reserve.global.swagger.annotation.ApiErrorCodeResponse;
 import reserve.global.swagger.annotation.ApiErrorCodeResponses;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 @Component
 @Slf4j
 public class OperationCustomizerImpl implements OperationCustomizer {
@@ -29,10 +28,10 @@ public class OperationCustomizerImpl implements OperationCustomizer {
         Map<String, List<ErrorCode>> errorCodeMap = new HashMap<>();
         // Add SecurityRequirement to indicate JWT Authentication
         Streams.of(handlerMethod.getMethod().getParameters())
-                .filter(p -> p.getType().equals(AuthInfo.class))
-                .filter(p -> p.isAnnotationPresent(Authentication.class))
-                .findFirst()
-                .ifPresent(p -> addSecurityRequirement(errorCodeMap, operation));
+            .filter(p -> p.getType().equals(AuthInfo.class))
+            .filter(p -> p.isAnnotationPresent(Authentication.class))
+            .findFirst()
+            .ifPresent(p -> addSecurityRequirement(errorCodeMap, operation));
         // Add ApiErrorCodeResponses as ApiResponses to the operation
         ApiErrorCodeResponses annot = handlerMethod.getMethodAnnotation(ApiErrorCodeResponses.class);
         if (annot != null) {
@@ -55,12 +54,9 @@ public class OperationCustomizerImpl implements OperationCustomizer {
         addApiErrorCodeResponse(errorCodeMap, annot.responseCode(), annot.errorCode());
     }
 
-    private void addApiErrorCodeResponse(
-            Map<String, List<ErrorCode>> errorCodeMap, String responseCode, ErrorCode errorCode
-    ) {
-        errorCodeMap
-                .computeIfAbsent(responseCode, key -> new LinkedList<>())
-                .add(errorCode);
+    private void addApiErrorCodeResponse(Map<String, List<ErrorCode>> errorCodeMap, String responseCode,
+            ErrorCode errorCode) {
+        errorCodeMap.computeIfAbsent(responseCode, key -> new LinkedList<>()).add(errorCode);
     }
 
     private void applyToOperation(Operation operation, String responseCode, List<ErrorCode> errorCodes) {

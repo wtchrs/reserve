@@ -1,5 +1,11 @@
 package reserve.reservation.service;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,13 +33,6 @@ import reserve.reservation.infrastructure.ReservationRepository;
 import reserve.store.domain.Store;
 import reserve.store.infrastructure.StoreRepository;
 import reserve.user.infrastructure.UserRepository;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
@@ -96,13 +95,10 @@ class ReservationServiceTest {
 
         Mockito.when(menuRepository.findAllById(List.of(10L, 20L))).thenReturn(List.of(menuMock1, menuMock2));
 
-        try (MockedConstruction<Reservation> ignored = Mockito.mockConstruction(
-                Reservation.class,
-                (mock, context) -> {
-                    Mockito.when(mock.getId()).thenReturn(1L);
-                    Mockito.when(mock.getStore()).thenReturn((Store) context.arguments().get(1));
-                }
-        )) {
+        try (MockedConstruction<Reservation> ignored = Mockito.mockConstruction(Reservation.class, (mock, context) -> {
+            Mockito.when(mock.getId()).thenReturn(1L);
+            Mockito.when(mock.getStore()).thenReturn((Store) context.arguments().get(1));
+        })) {
             Long result = reservationService.create(1L, reservationCreateRequest);
             assertEquals(result, 1L);
         }
@@ -113,10 +109,10 @@ class ReservationServiceTest {
     @Test
     @DisplayName("Testing retrieval of reservation information")
     void testReservationInfoRetrieval() {
-        ReservationInfoResponse reservationInfoResponse =
-                new ReservationInfoResponse(1L, 1L, "registrant", "username", LocalDate.now(), 1);
+        ReservationInfoResponse reservationInfoResponse = new ReservationInfoResponse(1L, 1L, "registrant", "username",
+                LocalDate.now(), 1);
         Mockito.when(reservationRepository.findResponseByIdAndUserId(1L, 1L))
-                .thenReturn(Optional.of(reservationInfoResponse));
+            .thenReturn(Optional.of(reservationInfoResponse));
 
         ReservationInfoResponse response = reservationService.getReservationInfo(1L, 1L);
 
@@ -131,7 +127,7 @@ class ReservationServiceTest {
 
         Mockito.when(reservationQueryRepository.hasReadAccessToReservation(1L, 1L)).thenReturn(true);
         Mockito.when(reservationMenuRepository.findResponsesByReservationId(1L))
-                .thenReturn(List.of(response1, response2, response3));
+            .thenReturn(List.of(response1, response2, response3));
         ReservationMenuListResponse reservationMenus = reservationService.getReservationMenus(1L, 1L);
 
         assertEquals(3, reservationMenus.getCount());
@@ -143,16 +139,16 @@ class ReservationServiceTest {
     void testReservationSearch() {
         ReservationSearchRequest reservationSearchRequest = new ReservationSearchRequest();
         PageRequest pageable = PageRequest.of(0, 20);
-        ReservationInfoResponse reservationInfo1 =
-                new ReservationInfoResponse(1L, 1L, "registrant", "username", LocalDate.now(), 1);
-        ReservationInfoResponse reservationInfo2 =
-                new ReservationInfoResponse(1L, 1L, "registrant", "username", LocalDate.now(), 2);
-        ReservationInfoResponse reservationInfo3 =
-                new ReservationInfoResponse(1L, 1L, "registrant", "username", LocalDate.now(), 3);
+        ReservationInfoResponse reservationInfo1 = new ReservationInfoResponse(1L, 1L, "registrant", "username",
+                LocalDate.now(), 1);
+        ReservationInfoResponse reservationInfo2 = new ReservationInfoResponse(1L, 1L, "registrant", "username",
+                LocalDate.now(), 2);
+        ReservationInfoResponse reservationInfo3 = new ReservationInfoResponse(1L, 1L, "registrant", "username",
+                LocalDate.now(), 3);
 
         Mockito.when(userRepository.existsById(1L)).thenReturn(true);
         Mockito.when(reservationQueryRepository.findResponsesBySearch(1L, reservationSearchRequest, pageable))
-                .thenReturn(new PageImpl<>(List.of(reservationInfo1, reservationInfo2, reservationInfo3), pageable, 3));
+            .thenReturn(new PageImpl<>(List.of(reservationInfo1, reservationInfo2, reservationInfo3), pageable, 3));
 
         ReservationInfoListResponse response = reservationService.search(1L, reservationSearchRequest, pageable);
 

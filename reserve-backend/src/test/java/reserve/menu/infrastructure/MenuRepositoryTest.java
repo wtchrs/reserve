@@ -1,5 +1,8 @@
 package reserve.menu.infrastructure;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,10 +16,6 @@ import reserve.store.domain.Store;
 import reserve.store.infrastructure.StoreRepository;
 import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
-
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
@@ -32,46 +31,32 @@ class MenuRepositoryTest {
     MenuRepository menuRepository;
 
     User user;
+
     Store store;
+
     Menu menu1, menu2, menu3;
 
     @BeforeEach
     void setUp() {
         user = userRepository.save(new User("user1", "password", "hello", "description"));
         store = storeRepository.save(new Store(user, "Pasta", "address", "Pasta only"));
-        menu1 = menuRepository.save(new Menu(
-                store,
-                "Spaghetti Aglio e Olio",
-                1000,
-                "Spaghetti with garlic and olive oil"
-        ));
-        menu2 = menuRepository.save(new Menu(
-                store,
-                "Spaghetti Carbonara",
-                1200,
-                "Spaghetti with bacon, eggs, and cheese"
-        ));
-        menu3 = menuRepository.save(new Menu(
-                store,
-                "Spaghetti Bolognese",
-                1200,
-                "Spaghetti with meat sauce"
-        ));
+        menu1 = menuRepository
+            .save(new Menu(store, "Spaghetti Aglio e Olio", 1000, "Spaghetti with garlic and olive oil"));
+        menu2 = menuRepository
+            .save(new Menu(store, "Spaghetti Carbonara", 1200, "Spaghetti with bacon, eggs, and cheese"));
+        menu3 = menuRepository.save(new Menu(store, "Spaghetti Bolognese", 1200, "Spaghetti with meat sauce"));
     }
 
     @Test
     @DisplayName("Testing menu response retrieval by ID")
     void testMenuResponseRetrievalById() {
-        menuRepository.findResponseById(menu1.getId()).ifPresentOrElse(
-                menuInfoResponse -> {
-                    assertEquals(menu1.getId(), menuInfoResponse.getMenuId());
-                    assertEquals(store.getId(), menuInfoResponse.getStoreId());
-                    assertEquals(menu1.getName(), menuInfoResponse.getName());
-                    assertEquals(menu1.getPrice(), menuInfoResponse.getPrice());
-                    assertEquals(menu1.getDescription(), menuInfoResponse.getDescription());
-                },
-                () -> fail("Menu not found")
-        );
+        menuRepository.findResponseById(menu1.getId()).ifPresentOrElse(menuInfoResponse -> {
+            assertEquals(menu1.getId(), menuInfoResponse.getMenuId());
+            assertEquals(store.getId(), menuInfoResponse.getStoreId());
+            assertEquals(menu1.getName(), menuInfoResponse.getName());
+            assertEquals(menu1.getPrice(), menuInfoResponse.getPrice());
+            assertEquals(menu1.getDescription(), menuInfoResponse.getDescription());
+        }, () -> fail("Menu not found"));
     }
 
     @Test
@@ -81,8 +66,8 @@ class MenuRepositoryTest {
 
         assertEquals(3, result.size());
         Assertions.assertThat(result)
-                .extracting(MenuInfoResponse::getMenuId)
-                .containsExactly(menu1.getId(), menu2.getId(), menu3.getId());
+            .extracting(MenuInfoResponse::getMenuId)
+            .containsExactly(menu1.getId(), menu2.getId(), menu3.getId());
 
         result.forEach(menuInfoResponse -> {
             if (menuInfoResponse.getMenuId().equals(menu1.getId())) {
@@ -90,17 +75,20 @@ class MenuRepositoryTest {
                 assertEquals(menu1.getName(), menuInfoResponse.getName());
                 assertEquals(menu1.getPrice(), menuInfoResponse.getPrice());
                 assertEquals(menu1.getDescription(), menuInfoResponse.getDescription());
-            } else if (menuInfoResponse.getMenuId().equals(menu2.getId())) {
+            }
+            else if (menuInfoResponse.getMenuId().equals(menu2.getId())) {
                 assertEquals(store.getId(), menuInfoResponse.getStoreId());
                 assertEquals(menu2.getName(), menuInfoResponse.getName());
                 assertEquals(menu2.getPrice(), menuInfoResponse.getPrice());
                 assertEquals(menu2.getDescription(), menuInfoResponse.getDescription());
-            } else if (menuInfoResponse.getMenuId().equals(menu3.getId())) {
+            }
+            else if (menuInfoResponse.getMenuId().equals(menu3.getId())) {
                 assertEquals(store.getId(), menuInfoResponse.getStoreId());
                 assertEquals(menu3.getName(), menuInfoResponse.getName());
                 assertEquals(menu3.getPrice(), menuInfoResponse.getPrice());
                 assertEquals(menu3.getDescription(), menuInfoResponse.getDescription());
-            } else {
+            }
+            else {
                 fail("Not expected result");
             }
         });

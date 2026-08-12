@@ -1,8 +1,12 @@
 package reserve.store.representation;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
+import javax.sql.DataSource;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +22,6 @@ import reserve.store.dto.request.StoreUpdateRequest;
 import reserve.store.infrastructure.StoreRepository;
 import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
-
-import javax.sql.DataSource;
-
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.*;
 
 class StoreControllerTest extends BaseRestAssuredTest {
 
@@ -45,12 +44,7 @@ class StoreControllerTest extends BaseRestAssuredTest {
 
     @BeforeEach
     void setUp() {
-        user = userRepository.save(new User(
-                "username",
-                "password",
-                "nickname",
-                "StoreControllerTest.setUp()"
-        ));
+        user = userRepository.save(new User("username", "password", "nickname", "StoreControllerTest.setUp()"));
     }
 
     @AfterEach
@@ -72,16 +66,16 @@ class StoreControllerTest extends BaseRestAssuredTest {
 
         String payload = objectMapper.writeValueAsString(storeCreateRequest);
 
-        RestAssured
-                .given(spec)
-                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(payload)
-                .relaxedHTTPSValidation()
-                .when().post("/v1/stores")
-                .then()
-                .statusCode(201)
-                .header("Location", Matchers.startsWith("/v1/stores/"));
+        RestAssured.given(spec)
+            .header("Authorization", "Bearer " + signInToken.getAccessToken())
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .body(payload)
+            .relaxedHTTPSValidation()
+            .when()
+            .post("/v1/stores")
+            .then()
+            .statusCode(201)
+            .header("Location", Matchers.startsWith("/v1/stores/"));
 
         assertEquals(1, storeRepository.count());
     }
@@ -89,24 +83,20 @@ class StoreControllerTest extends BaseRestAssuredTest {
     @Test
     @DisplayName("[Integration] Testing GET /v1/stores/{id} endpoint")
     void testGetStoreInfoEndpoint() {
-        Store store = storeRepository.save(new Store(
-                user,
-                "Store name",
-                "City, Street, Zipcode",
-                "StoreControllerTest.testGetStoreInfoEndpoint()"
-        ));
+        Store store = storeRepository.save(new Store(user, "Store name", "City, Street, Zipcode",
+                "StoreControllerTest.testGetStoreInfoEndpoint()"));
 
-        RestAssured
-                .given(spec)
-                .relaxedHTTPSValidation()
-                .when().get("/v1/stores/{storeId}", store.getId())
-                .then()
-                .statusCode(200)
-                .body("storeId", equalTo(store.getId().intValue()))
-                .body("registrant", equalTo(user.getUsername()))
-                .body("name", equalTo(store.getName()))
-                .body("address", equalTo(store.getAddress()))
-                .body("description", equalTo(store.getDescription()));
+        RestAssured.given(spec)
+            .relaxedHTTPSValidation()
+            .when()
+            .get("/v1/stores/{storeId}", store.getId())
+            .then()
+            .statusCode(200)
+            .body("storeId", equalTo(store.getId().intValue()))
+            .body("registrant", equalTo(user.getUsername()))
+            .body("name", equalTo(store.getName()))
+            .body("address", equalTo(store.getAddress()))
+            .body("description", equalTo(store.getDescription()));
     }
 
     @Test
@@ -120,31 +110,29 @@ class StoreControllerTest extends BaseRestAssuredTest {
         storeRepository.save(new Store(user2, "Italian", "address", "Steak and Pasta"));
         storeRepository.save(new Store(user2, "Ramen", "address", "Ramen and Gyoza"));
 
-        RestAssured
-                .given(spec).param("registrant", "username").param("query", "pasta")
-                .relaxedHTTPSValidation()
-                .when().get("/v1/stores")
-                .then()
-                .statusCode(200)
-                .body("count", equalTo(3))
-                .body("pageSize", equalTo(20))
-                .body("pageNumber", equalTo(0))
-                .body("hasNext", equalTo(false))
-                .body("results.size()", equalTo(3))
-                .body("results[0].name", equalTo("Pasta"))
-                .body("results[1].name", equalTo("Pizza"))
-                .body("results[2].name", equalTo("Hamburger"));
+        RestAssured.given(spec)
+            .param("registrant", "username")
+            .param("query", "pasta")
+            .relaxedHTTPSValidation()
+            .when()
+            .get("/v1/stores")
+            .then()
+            .statusCode(200)
+            .body("count", equalTo(3))
+            .body("pageSize", equalTo(20))
+            .body("pageNumber", equalTo(0))
+            .body("hasNext", equalTo(false))
+            .body("results.size()", equalTo(3))
+            .body("results[0].name", equalTo("Pasta"))
+            .body("results[1].name", equalTo("Pizza"))
+            .body("results[2].name", equalTo("Hamburger"));
     }
 
     @Test
     @DisplayName("[Integration] Testing PUT /v1/stores/{id} endpoint")
     void testUpdateEndpoint() throws JsonProcessingException {
-        Store store = storeRepository.save(new Store(
-                user,
-                "Store name",
-                "City, Street, Zipcode",
-                "StoreControllerTest.testUpdateEndpoint()"
-        ));
+        Store store = storeRepository
+            .save(new Store(user, "Store name", "City, Street, Zipcode", "StoreControllerTest.testUpdateEndpoint()"));
 
         StoreUpdateRequest storeUpdateRequest = new StoreUpdateRequest();
         storeUpdateRequest.setName("New name");
@@ -155,46 +143,39 @@ class StoreControllerTest extends BaseRestAssuredTest {
 
         String payload = objectMapper.writeValueAsString(storeUpdateRequest);
 
-        RestAssured
-                .given(spec)
-                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(payload)
-                .relaxedHTTPSValidation()
-                .when().put("/v1/stores/{storeId}", store.getId())
-                .then()
-                .statusCode(200);
+        RestAssured.given(spec)
+            .header("Authorization", "Bearer " + signInToken.getAccessToken())
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .body(payload)
+            .relaxedHTTPSValidation()
+            .when()
+            .put("/v1/stores/{storeId}", store.getId())
+            .then()
+            .statusCode(200);
 
-        storeRepository.findById(store.getId()).ifPresentOrElse(
-                updatedStore -> {
-                    assertEquals("New name", updatedStore.getName());
-                    assertEquals("New address", updatedStore.getAddress());
-                    assertEquals("New description", updatedStore.getDescription());
-                },
-                () -> fail("Store not found")
-        );
+        storeRepository.findById(store.getId()).ifPresentOrElse(updatedStore -> {
+            assertEquals("New name", updatedStore.getName());
+            assertEquals("New address", updatedStore.getAddress());
+            assertEquals("New description", updatedStore.getDescription());
+        }, () -> fail("Store not found"));
     }
 
     @Test
     @DisplayName("[Integration] Testing DELETE /v1/stores/{id} endpoint")
     void testDeleteEndpoint() {
-        Store store = storeRepository.save(new Store(
-                user,
-                "Store name",
-                "City, Street, Zipcode",
-                "StoreControllerTest.testDeleteEndpoint()"
-        ));
+        Store store = storeRepository
+            .save(new Store(user, "Store name", "City, Street, Zipcode", "StoreControllerTest.testDeleteEndpoint()"));
 
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user));
 
-        RestAssured
-                .given(spec)
-                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .relaxedHTTPSValidation()
-                .when().delete("/v1/stores/{storeId}", store.getId())
-                .then()
-                .statusCode(200);
+        RestAssured.given(spec)
+            .header("Authorization", "Bearer " + signInToken.getAccessToken())
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .relaxedHTTPSValidation()
+            .when()
+            .delete("/v1/stores/{storeId}", store.getId())
+            .then()
+            .statusCode(200);
 
         assertFalse(storeRepository.existsById(store.getId()));
     }

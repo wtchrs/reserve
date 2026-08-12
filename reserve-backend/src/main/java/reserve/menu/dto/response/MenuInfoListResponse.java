@@ -1,10 +1,9 @@
 package reserve.menu.dto.response;
 
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-
-import java.util.List;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter

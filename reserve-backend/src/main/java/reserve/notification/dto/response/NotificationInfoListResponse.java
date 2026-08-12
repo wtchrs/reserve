@@ -3,16 +3,15 @@ package reserve.notification.dto.response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 
-import java.util.List;
-
 @RequiredArgsConstructor
 @Getter
-@JsonPropertyOrder({"count", "pageSize", "pageNumber", "hasNext", "results"})
+@JsonPropertyOrder({ "count", "pageSize", "pageNumber", "hasNext", "results" })
 public class NotificationInfoListResponse {
 
     @Schema(description = "Number of results", example = "1")
@@ -37,13 +36,8 @@ public class NotificationInfoListResponse {
     }
 
     public static NotificationInfoListResponse from(Page<NotificationInfo> page) {
-        return new NotificationInfoListResponse(
-                page.getTotalElements(),
-                page.getPageable().getPageSize(),
-                page.getPageable().getPageNumber(),
-                page.hasNext(),
-                page.getContent()
-        );
+        return new NotificationInfoListResponse(page.getTotalElements(), page.getPageable().getPageSize(),
+                page.getPageable().getPageNumber(), page.hasNext(), page.getContent());
     }
 
 }

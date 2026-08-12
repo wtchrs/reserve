@@ -8,7 +8,9 @@ import lombok.RequiredArgsConstructor;
 public class TokenDetails {
 
     private final String userId;
+
     private final String username;
+
     private final String nickname;
 
 }

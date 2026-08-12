@@ -1,8 +1,13 @@
 package reserve.reservation.presentation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
+import java.time.LocalDate;
+import java.util.List;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +30,6 @@ import reserve.store.domain.Store;
 import reserve.store.infrastructure.StoreRepository;
 import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
-
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 class ReservationControllerTest extends BaseRestAssuredTest {
 
@@ -59,6 +58,7 @@ class ReservationControllerTest extends BaseRestAssuredTest {
     NotificationRepository notificationRepository;
 
     User user1, user2, user3;
+
     Store store1, store2;
 
     @BeforeEach
@@ -104,16 +104,16 @@ class ReservationControllerTest extends BaseRestAssuredTest {
 
         String payload = objectMapper.writeValueAsString(reservationCreateRequest);
 
-        RestAssured
-                .given(spec)
-                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(payload)
-                .relaxedHTTPSValidation()
-                .when().post("/v1/reservations")
-                .then()
-                .statusCode(201)
-                .header("Location", Matchers.startsWith("/v1/reservations/"));
+        RestAssured.given(spec)
+            .header("Authorization", "Bearer " + signInToken.getAccessToken())
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .body(payload)
+            .relaxedHTTPSValidation()
+            .when()
+            .post("/v1/reservations")
+            .then()
+            .statusCode(201)
+            .header("Location", Matchers.startsWith("/v1/reservations/"));
 
         assertEquals(1, reservationRepository.count());
         assertEquals(2, reservationMenuRepository.count());
@@ -122,12 +122,8 @@ class ReservationControllerTest extends BaseRestAssuredTest {
     @Test
     @DisplayName("[Integration] Testing PUT /v1/reservations/{reservationId} endpoint")
     void testUpdateEndpoint() throws JsonProcessingException {
-        Reservation reservation = reservationRepository.save(new Reservation(
-                user1,
-                store2,
-                LocalDate.now().plusDays(7),
-                12
-        ));
+        Reservation reservation = reservationRepository
+            .save(new Reservation(user1, store2, LocalDate.now().plusDays(7), 12));
 
         ReservationUpdateRequest reservationUpdateRequest = new ReservationUpdateRequest();
         reservationUpdateRequest.setDate(LocalDate.now().plusDays(14));
@@ -137,49 +133,42 @@ class ReservationControllerTest extends BaseRestAssuredTest {
 
         String payload = objectMapper.writeValueAsString(reservationUpdateRequest);
 
-        RestAssured
-                .given(spec)
-                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(payload)
-                .relaxedHTTPSValidation()
-                .when().put("/v1/reservations/{reservationId}", reservation.getId())
-                .then()
-                .statusCode(200);
+        RestAssured.given(spec)
+            .header("Authorization", "Bearer " + signInToken.getAccessToken())
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .body(payload)
+            .relaxedHTTPSValidation()
+            .when()
+            .put("/v1/reservations/{reservationId}", reservation.getId())
+            .then()
+            .statusCode(200);
 
-        reservationRepository.findById(reservation.getId()).ifPresentOrElse(
-                updatedReservation -> {
-                    assertEquals(LocalDate.now().plusDays(14), updatedReservation.getDate());
-                    assertEquals(14, updatedReservation.getHour());
-                },
-                () -> fail("Reservation not found")
-        );
+        reservationRepository.findById(reservation.getId()).ifPresentOrElse(updatedReservation -> {
+            assertEquals(LocalDate.now().plusDays(14), updatedReservation.getDate());
+            assertEquals(14, updatedReservation.getHour());
+        }, () -> fail("Reservation not found"));
     }
 
     @Test
     @DisplayName("[Integration] Testing POST /v1/reservations/{reservationId}/cancel endpoint")
     void testCancelEndpoint() {
-        Reservation reservation = reservationRepository.save(new Reservation(
-                user1,
-                store2,
-                LocalDate.now().plusDays(7),
-                12
-        ));
+        Reservation reservation = reservationRepository
+            .save(new Reservation(user1, store2, LocalDate.now().plusDays(7), 12));
 
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user1));
 
-        RestAssured
-                .given(spec)
-                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                .relaxedHTTPSValidation()
-                .when().post("/v1/reservations/{reservationId}/cancel", reservation.getId())
-                .then()
-                .statusCode(200);
+        RestAssured.given(spec)
+            .header("Authorization", "Bearer " + signInToken.getAccessToken())
+            .relaxedHTTPSValidation()
+            .when()
+            .post("/v1/reservations/{reservationId}/cancel", reservation.getId())
+            .then()
+            .statusCode(200);
 
-        reservationRepository.findById(reservation.getId()).ifPresentOrElse(
-                updatedReservation -> assertEquals(ReservationStatusType.CANCELLED, updatedReservation.getStatus()),
-                () -> fail("Reservation not found")
-        );
+        reservationRepository.findById(reservation.getId())
+            .ifPresentOrElse(
+                    updatedReservation -> assertEquals(ReservationStatusType.CANCELLED, updatedReservation.getStatus()),
+                    () -> fail("Reservation not found"));
     }
 
 }

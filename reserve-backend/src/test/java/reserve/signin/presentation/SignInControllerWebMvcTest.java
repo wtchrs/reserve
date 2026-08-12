@@ -1,5 +1,8 @@
 package reserve.signin.presentation;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.DisplayName;
@@ -17,11 +20,8 @@ import reserve.signin.dto.request.SignInRequest;
 import reserve.signin.infrastructure.JwtProvider;
 import reserve.signin.service.SignInService;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 @WebMvcTest(SignInController.class)
-@Import({JwtProvider.class, TimeConfig.class})
+@Import({ JwtProvider.class, TimeConfig.class })
 class SignInControllerWebMvcTest {
 
     @Autowired
@@ -43,15 +43,11 @@ class SignInControllerWebMvcTest {
         SignInToken signInToken = new SignInToken("access", "refresh");
         Mockito.when(signInService.signIn(Mockito.any())).thenReturn(signInToken);
 
-        mockMvc.perform(
-                post("/v1/sign-in")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(signInRequest))
-        ).andExpectAll(
-                status().isOk(),
-                header().string("Authorization", signInToken.getAccessToken()),
-                cookie().value("refresh", signInToken.getRefreshToken())
-        );
+        mockMvc
+            .perform(post("/v1/sign-in").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(signInRequest)))
+            .andExpectAll(status().isOk(), header().string("Authorization", signInToken.getAccessToken()),
+                    cookie().value("refresh", signInToken.getRefreshToken()));
     }
 
     @Test
@@ -63,13 +59,9 @@ class SignInControllerWebMvcTest {
 
         Mockito.when(signInService.refreshAccessToken(refreshTokenValue)).thenReturn(signInToken);
 
-        mockMvc.perform(
-                post("/v1/token-refresh").cookie(refreshCookie)
-        ).andExpectAll(
-                status().isOk(),
-                header().string("Authorization", signInToken.getAccessToken()),
-                cookie().value("refresh", signInToken.getRefreshToken())
-        );
+        mockMvc.perform(post("/v1/token-refresh").cookie(refreshCookie))
+            .andExpectAll(status().isOk(), header().string("Authorization", signInToken.getAccessToken()),
+                    cookie().value("refresh", signInToken.getRefreshToken()));
     }
 
     @Test
@@ -78,12 +70,8 @@ class SignInControllerWebMvcTest {
         String refreshTokenValue = "refreshToken";
         Cookie refreshCookie = new Cookie("refresh", refreshTokenValue);
 
-        mockMvc.perform(
-                post("/v1/sign-out").cookie(refreshCookie)
-        ).andExpectAll(
-                status().isOk(),
-                cookie().maxAge("refresh", 0)
-        );
+        mockMvc.perform(post("/v1/sign-out").cookie(refreshCookie))
+            .andExpectAll(status().isOk(), cookie().maxAge("refresh", 0));
     }
 
 }

@@ -1,5 +1,10 @@
 package reserve.notification.service;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,12 +24,6 @@ import reserve.reservation.infrastructure.ReservationQueryRepository;
 import reserve.reservation.infrastructure.ReservationRepository;
 import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
-
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceTest {
@@ -48,7 +47,7 @@ class NotificationServiceTest {
     @DisplayName("Testing creation of notification for reservation")
     void testCreationOfNotificationForReservation() {
         Mockito.when(reservationQueryRepository.findForNotifyById(1L))
-                .thenReturn(Optional.of(new ReservationForNotifyDto(1L, 1L, 1L)));
+            .thenReturn(Optional.of(new ReservationForNotifyDto(1L, 1L, 1L)));
 
         notificationService.notifyReservation(1L, "message for user", "message for store registrant");
 
@@ -69,7 +68,7 @@ class NotificationServiceTest {
         Mockito.when(notification3.getId()).thenReturn(3L);
 
         Mockito.when(notificationRepository.findAllByUserIdOrderByCreatedAtDesc(1L, pageable))
-                .thenReturn(new PageImpl<>(List.of(notification1, notification2, notification3), pageable, 3L));
+            .thenReturn(new PageImpl<>(List.of(notification1, notification2, notification3), pageable, 3L));
 
         NotificationInfoListResponse response = notificationService.getUserNotifications(1L, pageable);
 

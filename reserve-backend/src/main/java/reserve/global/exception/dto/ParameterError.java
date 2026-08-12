@@ -9,6 +9,7 @@ import org.springframework.validation.FieldError;
 public class ParameterError {
 
     private final String name;
+
     private final String reason;
 
     public static ParameterError from(FieldError fieldError) {

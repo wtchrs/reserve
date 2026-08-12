@@ -28,12 +28,8 @@ public class AuthInfoArgumentResolver implements HandlerMethodArgumentResolver {
     }
 
     @Override
-    public Object resolveArgument(
-            MethodParameter parameter,
-            ModelAndViewContainer mavContainer,
-            NativeWebRequest webRequest,
-            WebDataBinderFactory binderFactory
-    ) {
+    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+            NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
         String authorization = request.getHeader("Authorization");
         AuthInfo authInfo = getAuthInfo(authorization);

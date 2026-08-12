@@ -1,5 +1,9 @@
 package reserve.reservation.infrastructure;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.time.LocalDate;
 import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +20,6 @@ import reserve.store.domain.Store;
 import reserve.store.infrastructure.StoreRepository;
 import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
-
-import java.time.LocalDate;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
@@ -59,8 +58,8 @@ class ReservationQueryRepositoryTest {
         User user2 = userRepository.save(new User("user2", "password", "hello", "description"));
         User registrant = userRepository.save(new User("registrant", "password", "world", "description"));
         Store store = storeRepository.save(new Store(registrant, "Pasta", "address", "Pasta only"));
-        Reservation reservation =
-                reservationRepository.save(new Reservation(user1, store, LocalDate.now().plusDays(7), 12));
+        Reservation reservation = reservationRepository
+            .save(new Reservation(user1, store, LocalDate.now().plusDays(7), 12));
 
         assertTrue(reservationQueryRepository.hasReadAccessToReservation(reservation.getId(), registrant.getId()));
         assertTrue(reservationQueryRepository.hasReadAccessToReservation(reservation.getId(), user1.getId()));
@@ -71,6 +70,7 @@ class ReservationQueryRepositoryTest {
     class ReservationSearchTest {
 
         User user1, user2;
+
         Store store1, store2, store3, store4, store5, store6;
 
         @BeforeEach
@@ -119,14 +119,14 @@ class ReservationQueryRepositoryTest {
             Mockito.when(request.getQuery()).thenReturn("pasta");
             Mockito.when(request.getDate()).thenReturn(LocalDate.now());
 
-            Page<ReservationInfoResponse> response =
-                    reservationQueryRepository.findResponsesBySearch(user1.getId(), request, PageRequest.of(0, 20));
+            Page<ReservationInfoResponse> response = reservationQueryRepository.findResponsesBySearch(user1.getId(),
+                    request, PageRequest.of(0, 20));
 
             assertEquals(5, response.getTotalElements());
             response.forEach(reservationInfoResponse -> {
                 assertEquals(user1.getUsername(), reservationInfoResponse.getReservationName());
-                assertThat(reservationInfoResponse.getStoreId())
-                        .isIn(store1.getId(), store2.getId(), store3.getId(), store5.getId());
+                assertThat(reservationInfoResponse.getStoreId()).isIn(store1.getId(), store2.getId(), store3.getId(),
+                        store5.getId());
             });
         }
 

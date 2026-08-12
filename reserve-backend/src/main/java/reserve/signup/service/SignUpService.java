@@ -5,10 +5,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reserve.global.exception.ErrorCode;
 import reserve.global.exception.UsernameDuplicateException;
+import reserve.signup.dto.request.SignUpRequest;
 import reserve.signup.infrastructure.PasswordEncoder;
 import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
-import reserve.signup.dto.request.SignUpRequest;
 
 @Service
 @RequiredArgsConstructor

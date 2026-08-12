@@ -24,45 +24,29 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @GetMapping
-    @Operation(
-            summary = "Get user notifications",
-            description = "Get sign-in user's notifications",
-            operationId = "1_getUserNotifications"
-    )
-    @ApiResponses(@ApiResponse(
-            responseCode = "200", description = "Response with user notifications",
-            content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = NotificationInfoListResponse.class)
-            )
-    ))
-    public NotificationInfoListResponse getUserNotifications(
-            @Authentication AuthInfo authInfo,
-            @ParameterObject Pageable pageable
-    ) {
+    @Operation(summary = "Get user notifications", description = "Get sign-in user's notifications",
+            operationId = "1_getUserNotifications")
+    @ApiResponses(@ApiResponse(responseCode = "200", description = "Response with user notifications",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = NotificationInfoListResponse.class))))
+    public NotificationInfoListResponse getUserNotifications(@Authentication AuthInfo authInfo,
+            @ParameterObject Pageable pageable) {
         return notificationService.getUserNotifications(authInfo.getUserId(), pageable);
     }
 
     @PostMapping("/{notificationId}/read")
-    @Operation(
-            summary = "Read notification",
-            description = "Mark notification as read by notification ID",
-            operationId = "2_readNotification"
-    )
+    @Operation(summary = "Read notification", description = "Mark notification as read by notification ID",
+            operationId = "2_readNotification")
     @ApiResponses(@ApiResponse(responseCode = "200", description = "Successfully read"))
-    public void readNotification(
-            @Authentication AuthInfo authInfo,
-            @PathVariable("notificationId") @Schema(description = "Notification ID", example = "1") Long notificationId
-    ) {
+    public void readNotification(@Authentication AuthInfo authInfo,
+            @PathVariable("notificationId") @Schema(description = "Notification ID",
+                    example = "1") Long notificationId) {
         notificationService.readNotification(authInfo.getUserId(), notificationId);
     }
 
     @PostMapping("/read-all")
-    @Operation(
-            summary = "Read all notifications",
-            description = "Mark all notifications as read",
-            operationId = "3_readAllNotifications"
-    )
+    @Operation(summary = "Read all notifications", description = "Mark all notifications as read",
+            operationId = "3_readAllNotifications")
     @ApiResponses(@ApiResponse(responseCode = "200", description = "Successfully read all"))
     public void readAllNotifications(@Authentication AuthInfo authInfo) {
         notificationService.readAllNotifications(authInfo.getUserId());

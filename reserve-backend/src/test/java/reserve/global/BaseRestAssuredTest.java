@@ -5,13 +5,12 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.specification.RequestSpecification;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-
-import java.io.OutputStream;
-import java.io.PrintStream;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -29,14 +28,9 @@ public abstract class BaseRestAssuredTest {
 
     @BeforeEach
     void setUpSpec() {
-        spec = new RequestSpecBuilder()
-                .setPort(port)
-                .setBaseUri("https://localhost")
-                .build();
-        RestAssured.filters(
-                RequestLoggingFilter.logRequestTo(createRedirectedPrintStream("Request:\n")),
-                ResponseLoggingFilter.logResponseTo(createRedirectedPrintStream("Response:\n"))
-        );
+        spec = new RequestSpecBuilder().setPort(port).setBaseUri("https://localhost").build();
+        RestAssured.filters(RequestLoggingFilter.logRequestTo(createRedirectedPrintStream("Request:\n")),
+                ResponseLoggingFilter.logResponseTo(createRedirectedPrintStream("Response:\n")));
     }
 
     private PrintStream createRedirectedPrintStream(String prefix) {

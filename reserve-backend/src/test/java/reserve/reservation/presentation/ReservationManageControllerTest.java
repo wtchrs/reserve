@@ -1,6 +1,10 @@
 package reserve.reservation.presentation;
 
+import static org.hamcrest.Matchers.equalTo;
+
 import io.restassured.RestAssured;
+import java.time.LocalDate;
+import javax.sql.DataSource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,15 +24,12 @@ import reserve.store.infrastructure.StoreRepository;
 import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
 
-import javax.sql.DataSource;
-import java.time.LocalDate;
-
-import static org.hamcrest.Matchers.equalTo;
-
 class ReservationManageControllerTest extends BaseRestAssuredTest {
 
     private static final String CANCEL_ENDPOINT_URL_TEMPLATE = "/v1/reservations/manage/{reservationId}/cancel";
+
     private static final String START_ENDPOINT_URL_TEMPLATE = "/v1/reservations/manage/{reservationId}/start";
+
     private static final String COMPLETE_ENDPOINT_URL_TEMPLATE = "/v1/reservations/manage/{reservationId}/complete";
 
     @Autowired
@@ -50,6 +51,7 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
     NotificationRepository notificationRepository;
 
     User registrant;
+
     Reservation ready, inService, completed, cancelled;
 
     @BeforeEach
@@ -63,10 +65,8 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         ready = reservationRepository.save(new Reservation(user, store, LocalDate.now().plusDays(7), 12));
 
         inService = reservationRepository.save(new Reservation(user, store, LocalDate.now().plusDays(7), 12));
-        jdbcTemplate.update(
-                "UPDATE reservations SET status = 'IN_SERVICE' WHERE reservation_id = ?",
-                inService.getId()
-        );
+        jdbcTemplate.update("UPDATE reservations SET status = 'IN_SERVICE' WHERE reservation_id = ?",
+                inService.getId());
 
         completed = reservationRepository.save(new Reservation(user, store, LocalDate.now().plusDays(7), 12));
         jdbcTemplate.update("UPDATE reservations SET status = 'COMPLETED' WHERE reservation_id = ?", completed.getId());
@@ -89,47 +89,50 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(registrant));
 
         // Cancel the ready reservation
-        RestAssured
-                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
-                .relaxedHTTPSValidation()
-                .when().post(CANCEL_ENDPOINT_URL_TEMPLATE, ready.getId())
-                .then().assertThat().statusCode(200);
+        RestAssured.given(spec)
+            .header("Authorization", "Bearer " + signInToken.getAccessToken())
+            .relaxedHTTPSValidation()
+            .when()
+            .post(CANCEL_ENDPOINT_URL_TEMPLATE, ready.getId())
+            .then()
+            .assertThat()
+            .statusCode(200);
     }
 
     @Test
-    @DisplayName(
-            "[Integration][Fail] Testing POST " + CANCEL_ENDPOINT_URL_TEMPLATE + " endpoint for in-service reservation"
-    )
+    @DisplayName("[Integration][Fail] Testing POST " + CANCEL_ENDPOINT_URL_TEMPLATE
+            + " endpoint for in-service reservation")
     void testCancelEndpointForInServiceReservation() {
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(registrant));
 
         // Cancel the in-service reservation
-        RestAssured
-                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
-                .relaxedHTTPSValidation()
-                .when().post(CANCEL_ENDPOINT_URL_TEMPLATE, inService.getId())
-                .then()
-                .statusCode(409)
-                .body("code", equalTo(ErrorCode.RESERVATION_CANNOT_CANCEL.getCode()))
-                .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_CANCEL.getMessage()));
+        RestAssured.given(spec)
+            .header("Authorization", "Bearer " + signInToken.getAccessToken())
+            .relaxedHTTPSValidation()
+            .when()
+            .post(CANCEL_ENDPOINT_URL_TEMPLATE, inService.getId())
+            .then()
+            .statusCode(409)
+            .body("code", equalTo(ErrorCode.RESERVATION_CANNOT_CANCEL.getCode()))
+            .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_CANCEL.getMessage()));
     }
 
     @Test
-    @DisplayName(
-            "[Integration][Fail] Testing POST " + CANCEL_ENDPOINT_URL_TEMPLATE + " endpoint for completed reservation"
-    )
+    @DisplayName("[Integration][Fail] Testing POST " + CANCEL_ENDPOINT_URL_TEMPLATE
+            + " endpoint for completed reservation")
     void testCancelEndpointForCompletedReservation() {
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(registrant));
 
         // Cancel the completed reservation
-        RestAssured
-                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
-                .relaxedHTTPSValidation()
-                .when().post(CANCEL_ENDPOINT_URL_TEMPLATE, completed.getId())
-                .then()
-                .statusCode(409)
-                .body("code", equalTo(ErrorCode.RESERVATION_CANNOT_CANCEL.getCode()))
-                .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_CANCEL.getMessage()));
+        RestAssured.given(spec)
+            .header("Authorization", "Bearer " + signInToken.getAccessToken())
+            .relaxedHTTPSValidation()
+            .when()
+            .post(CANCEL_ENDPOINT_URL_TEMPLATE, completed.getId())
+            .then()
+            .statusCode(409)
+            .body("code", equalTo(ErrorCode.RESERVATION_CANNOT_CANCEL.getCode()))
+            .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_CANCEL.getMessage()));
     }
 
     @Test
@@ -138,11 +141,14 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(registrant));
 
         // Cancel the cancelled reservation
-        RestAssured
-                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
-                .relaxedHTTPSValidation()
-                .when().post(CANCEL_ENDPOINT_URL_TEMPLATE, cancelled.getId())
-                .then().assertThat().statusCode(200);
+        RestAssured.given(spec)
+            .header("Authorization", "Bearer " + signInToken.getAccessToken())
+            .relaxedHTTPSValidation()
+            .when()
+            .post(CANCEL_ENDPOINT_URL_TEMPLATE, cancelled.getId())
+            .then()
+            .assertThat()
+            .statusCode(200);
     }
 
     @Test
@@ -151,11 +157,14 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(registrant));
 
         // Start the ready reservation
-        RestAssured
-                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
-                .relaxedHTTPSValidation()
-                .when().post(START_ENDPOINT_URL_TEMPLATE, ready.getId())
-                .then().assertThat().statusCode(200);
+        RestAssured.given(spec)
+            .header("Authorization", "Bearer " + signInToken.getAccessToken())
+            .relaxedHTTPSValidation()
+            .when()
+            .post(START_ENDPOINT_URL_TEMPLATE, ready.getId())
+            .then()
+            .assertThat()
+            .statusCode(200);
     }
 
     @Test
@@ -164,80 +173,85 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(registrant));
 
         // Start the in-service reservation
-        RestAssured
-                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
-                .relaxedHTTPSValidation()
-                .when().post(START_ENDPOINT_URL_TEMPLATE, inService.getId())
-                .then().assertThat().statusCode(200);
+        RestAssured.given(spec)
+            .header("Authorization", "Bearer " + signInToken.getAccessToken())
+            .relaxedHTTPSValidation()
+            .when()
+            .post(START_ENDPOINT_URL_TEMPLATE, inService.getId())
+            .then()
+            .assertThat()
+            .statusCode(200);
     }
 
     @Test
-    @DisplayName(
-            "[Integration][Fail] Testing POST " + START_ENDPOINT_URL_TEMPLATE + " endpoint for completed reservation"
-    )
+    @DisplayName("[Integration][Fail] Testing POST " + START_ENDPOINT_URL_TEMPLATE
+            + " endpoint for completed reservation")
     void testStartServiceEndpointForCompletedReservation() {
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(registrant));
 
         // Start the completed reservation
-        RestAssured
-                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
-                .relaxedHTTPSValidation()
-                .when().post(START_ENDPOINT_URL_TEMPLATE, completed.getId())
-                .then()
-                .statusCode(409)
-                .body("code", equalTo(ErrorCode.RESERVATION_CANNOT_START.getCode()))
-                .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_START.getMessage()));
+        RestAssured.given(spec)
+            .header("Authorization", "Bearer " + signInToken.getAccessToken())
+            .relaxedHTTPSValidation()
+            .when()
+            .post(START_ENDPOINT_URL_TEMPLATE, completed.getId())
+            .then()
+            .statusCode(409)
+            .body("code", equalTo(ErrorCode.RESERVATION_CANNOT_START.getCode()))
+            .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_START.getMessage()));
     }
 
     @Test
-    @DisplayName(
-            "[Integration][Fail] Testing POST " + START_ENDPOINT_URL_TEMPLATE + " endpoint for cancelled reservation"
-    )
+    @DisplayName("[Integration][Fail] Testing POST " + START_ENDPOINT_URL_TEMPLATE
+            + " endpoint for cancelled reservation")
     void testStartServiceEndpointForCancelledReservation() {
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(registrant));
 
         // Start the cancelled reservation
-        RestAssured
-                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
-                .relaxedHTTPSValidation()
-                .when().post(START_ENDPOINT_URL_TEMPLATE, cancelled.getId())
-                .then()
-                .statusCode(409)
-                .body("code", equalTo(ErrorCode.RESERVATION_CANNOT_START.getCode()))
-                .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_START.getMessage()));
+        RestAssured.given(spec)
+            .header("Authorization", "Bearer " + signInToken.getAccessToken())
+            .relaxedHTTPSValidation()
+            .when()
+            .post(START_ENDPOINT_URL_TEMPLATE, cancelled.getId())
+            .then()
+            .statusCode(409)
+            .body("code", equalTo(ErrorCode.RESERVATION_CANNOT_START.getCode()))
+            .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_START.getMessage()));
     }
 
     @Test
-    @DisplayName(
-            "[Integration][Fail] Testing POST " + COMPLETE_ENDPOINT_URL_TEMPLATE + " endpoint for ready reservation"
-    )
+    @DisplayName("[Integration][Fail] Testing POST " + COMPLETE_ENDPOINT_URL_TEMPLATE
+            + " endpoint for ready reservation")
     void testCompleteEndpointForReadyReservation() {
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(registrant));
 
         // Complete the ready reservation
-        RestAssured
-                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
-                .relaxedHTTPSValidation()
-                .when().post(COMPLETE_ENDPOINT_URL_TEMPLATE, ready.getId())
-                .then()
-                .statusCode(409)
-                .body("code", equalTo(ErrorCode.RESERVATION_CANNOT_COMPLETE.getCode()))
-                .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_COMPLETE.getMessage()));
+        RestAssured.given(spec)
+            .header("Authorization", "Bearer " + signInToken.getAccessToken())
+            .relaxedHTTPSValidation()
+            .when()
+            .post(COMPLETE_ENDPOINT_URL_TEMPLATE, ready.getId())
+            .then()
+            .statusCode(409)
+            .body("code", equalTo(ErrorCode.RESERVATION_CANNOT_COMPLETE.getCode()))
+            .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_COMPLETE.getMessage()));
     }
 
     @Test
-    @DisplayName(
-            "[Integration] Testing POST " + COMPLETE_ENDPOINT_URL_TEMPLATE + " endpoint for in-service reservation"
-    )
+    @DisplayName("[Integration] Testing POST " + COMPLETE_ENDPOINT_URL_TEMPLATE
+            + " endpoint for in-service reservation")
     void testCompleteEndpointForInServiceReservation() {
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(registrant));
 
         // Complete the in-service reservation
-        RestAssured
-                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
-                .relaxedHTTPSValidation()
-                .when().post(COMPLETE_ENDPOINT_URL_TEMPLATE, inService.getId())
-                .then().assertThat().statusCode(200);
+        RestAssured.given(spec)
+            .header("Authorization", "Bearer " + signInToken.getAccessToken())
+            .relaxedHTTPSValidation()
+            .when()
+            .post(COMPLETE_ENDPOINT_URL_TEMPLATE, inService.getId())
+            .then()
+            .assertThat()
+            .statusCode(200);
     }
 
     @Test
@@ -246,29 +260,32 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(registrant));
 
         // Complete the completed reservation
-        RestAssured
-                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
-                .relaxedHTTPSValidation()
-                .when().post(COMPLETE_ENDPOINT_URL_TEMPLATE, completed.getId())
-                .then().assertThat().statusCode(200);
+        RestAssured.given(spec)
+            .header("Authorization", "Bearer " + signInToken.getAccessToken())
+            .relaxedHTTPSValidation()
+            .when()
+            .post(COMPLETE_ENDPOINT_URL_TEMPLATE, completed.getId())
+            .then()
+            .assertThat()
+            .statusCode(200);
     }
 
     @Test
-    @DisplayName(
-            "[Integration][Fail] Testing POST " + COMPLETE_ENDPOINT_URL_TEMPLATE + " endpoint for cancelled reservation"
-    )
+    @DisplayName("[Integration][Fail] Testing POST " + COMPLETE_ENDPOINT_URL_TEMPLATE
+            + " endpoint for cancelled reservation")
     void testCompleteEndpointForCancelledReservation() {
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(registrant));
 
         // Complete the cancelled reservation
-        RestAssured
-                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
-                .relaxedHTTPSValidation()
-                .when().post(COMPLETE_ENDPOINT_URL_TEMPLATE, cancelled.getId())
-                .then()
-                .statusCode(409)
-                .body("code", equalTo(ErrorCode.RESERVATION_CANNOT_COMPLETE.getCode()))
-                .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_COMPLETE.getMessage()));
+        RestAssured.given(spec)
+            .header("Authorization", "Bearer " + signInToken.getAccessToken())
+            .relaxedHTTPSValidation()
+            .when()
+            .post(COMPLETE_ENDPOINT_URL_TEMPLATE, cancelled.getId())
+            .then()
+            .statusCode(409)
+            .body("code", equalTo(ErrorCode.RESERVATION_CANNOT_COMPLETE.getCode()))
+            .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_COMPLETE.getMessage()));
     }
 
 }

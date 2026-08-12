@@ -9,10 +9,8 @@ public class FullTextSearchFunctionContributor implements FunctionContributor {
 
     @Override
     public void contributeFunctions(FunctionContributions functionContributions) {
-        functionContributions.getFunctionRegistry().register(
-                FUNCTION_NAME,
-                new FullTextSearchSQLFunction(FUNCTION_NAME)
-        );
+        functionContributions.getFunctionRegistry()
+            .register(FUNCTION_NAME, new FullTextSearchSQLFunction(FUNCTION_NAME));
     }
 
 }

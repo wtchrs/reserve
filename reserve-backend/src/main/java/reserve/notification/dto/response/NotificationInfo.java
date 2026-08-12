@@ -1,13 +1,12 @@
 package reserve.notification.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import reserve.notification.domain.Notification;
 import reserve.notification.domain.NotificationStatus;
 import reserve.notification.domain.ResourceType;
-
-import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
 @Getter
@@ -28,19 +27,12 @@ public class NotificationInfo {
     @Schema(description = "Time of notification", example = "2021-07-01T00:00:00")
     private final LocalDateTime notifiedTime;
 
-    @Schema(description = "Status of notification (READ, UNREAD)",
-            example = "READ")
+    @Schema(description = "Status of notification (READ, UNREAD)", example = "READ")
     private final NotificationStatus status;
 
     public static NotificationInfo from(Notification notification) {
-        return new NotificationInfo(
-                notification.getId(),
-                notification.getResourceType(),
-                notification.getResourceId(),
-                notification.getMessage(),
-                notification.getCreatedAt(),
-                notification.getStatus()
-        );
+        return new NotificationInfo(notification.getId(), notification.getResourceType(), notification.getResourceId(),
+                notification.getMessage(), notification.getCreatedAt(), notification.getStatus());
     }
 
 }

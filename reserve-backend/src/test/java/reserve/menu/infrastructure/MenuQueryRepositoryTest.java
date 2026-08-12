@@ -1,5 +1,7 @@
 package reserve.menu.infrastructure;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,8 +13,6 @@ import reserve.store.domain.Store;
 import reserve.store.infrastructure.StoreRepository;
 import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
@@ -31,7 +31,9 @@ class MenuQueryRepositoryTest {
     MenuQueryRepository menuQueryRepository;
 
     User user1, user2;
+
     Store store;
+
     Menu menu;
 
     @BeforeEach
@@ -39,7 +41,8 @@ class MenuQueryRepositoryTest {
         user1 = userRepository.save(new User("user1", "password", "hello", "description"));
         user2 = userRepository.save(new User("user2", "password", "world", "description"));
         store = storeRepository.save(new Store(user1, "Pasta", "address", "Pasta only"));
-        menu = menuRepository.save(new Menu(store, "Spaghetti Aglio e Olio", 1000, "Spaghetti with garlic and olive oil"));
+        menu = menuRepository
+            .save(new Menu(store, "Spaghetti Aglio e Olio", 1000, "Spaghetti with garlic and olive oil"));
     }
 
     @Test

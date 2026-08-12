@@ -1,11 +1,10 @@
 package reserve.user.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDate;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import reserve.user.domain.User;
-
-import java.time.LocalDate;
 
 @RequiredArgsConstructor
 @Getter
@@ -24,12 +23,8 @@ public class UserInfoResponse {
     private final LocalDate signUpDate;
 
     public static UserInfoResponse from(User user) {
-        return new UserInfoResponse(
-                user.getUsername(),
-                user.getNickname(),
-                user.getDescription(),
-                user.getCreatedAt().toLocalDate()
-        );
+        return new UserInfoResponse(user.getUsername(), user.getNickname(), user.getDescription(),
+                user.getCreatedAt().toLocalDate());
     }
 
 }

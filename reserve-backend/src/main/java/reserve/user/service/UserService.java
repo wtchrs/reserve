@@ -9,11 +9,11 @@ import reserve.global.exception.ErrorCode;
 import reserve.global.exception.ResourceNotFoundException;
 import reserve.signup.infrastructure.PasswordEncoder;
 import reserve.user.domain.User;
-import reserve.user.infrastructure.UserRepository;
 import reserve.user.dto.request.PasswordUpdateRequest;
 import reserve.user.dto.request.UserDeleteRequest;
 import reserve.user.dto.request.UserUpdateRequest;
 import reserve.user.dto.response.UserInfoResponse;
+import reserve.user.infrastructure.UserRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -26,14 +26,14 @@ public class UserService {
     @Transactional(readOnly = true)
     public UserInfoResponse getUserInfo(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
+            .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
         return UserInfoResponse.from(user);
     }
 
     @Transactional
     public void update(Long userId, UserUpdateRequest userUpdateRequest) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AuthenticationException(ErrorCode.INVALID_SIGN_IN_INFO));
+            .orElseThrow(() -> new AuthenticationException(ErrorCode.INVALID_SIGN_IN_INFO));
         if (StringUtils.hasText(userUpdateRequest.getNickname())) {
             user.setNickname(userUpdateRequest.getNickname());
         }
@@ -45,7 +45,7 @@ public class UserService {
     @Transactional
     public void updatePassword(Long userId, PasswordUpdateRequest passwordUpdateRequest) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AuthenticationException(ErrorCode.INVALID_SIGN_IN_INFO));
+            .orElseThrow(() -> new AuthenticationException(ErrorCode.INVALID_SIGN_IN_INFO));
         if (!passwordEncoder.matches(passwordUpdateRequest.getOldPassword(), user.getPasswordHash())) {
             throw new AuthenticationException(ErrorCode.WRONG_PASSWORD);
         }
@@ -57,7 +57,7 @@ public class UserService {
     @Transactional
     public void delete(Long userId, UserDeleteRequest userDeleteRequest) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AuthenticationException(ErrorCode.INVALID_SIGN_IN_INFO));
+            .orElseThrow(() -> new AuthenticationException(ErrorCode.INVALID_SIGN_IN_INFO));
         if (!passwordEncoder.matches(userDeleteRequest.getPassword(), user.getPasswordHash())) {
             throw new AuthenticationException(ErrorCode.WRONG_PASSWORD);
         }

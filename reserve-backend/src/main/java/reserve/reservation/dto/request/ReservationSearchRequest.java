@@ -2,20 +2,19 @@ package reserve.reservation.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
+import java.time.LocalDate;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import reserve.global.validation.NullOrNotEmpty;
-
-import java.time.LocalDate;
 
 @NoArgsConstructor
 @Getter
 @Setter
 public class ReservationSearchRequest {
 
-    @Schema(description = "Type of search (REGISTRANT, CUSTOMER)",
-            example = "REGISTRANT", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Type of search (REGISTRANT, CUSTOMER)", example = "REGISTRANT",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "Type required.")
     private SearchType type;
 
@@ -28,7 +27,9 @@ public class ReservationSearchRequest {
     private LocalDate date;
 
     public enum SearchType {
+
         REGISTRANT, CUSTOMER
+
     }
 
 }

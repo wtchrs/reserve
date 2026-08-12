@@ -1,5 +1,9 @@
 package reserve.menu.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
+import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,11 +21,6 @@ import reserve.menu.infrastructure.MenuQueryRepository;
 import reserve.menu.infrastructure.MenuRepository;
 import reserve.store.domain.Store;
 import reserve.store.infrastructure.StoreRepository;
-
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class MenuServiceTest {
@@ -72,13 +71,8 @@ class MenuServiceTest {
     @Test
     @DisplayName("Testing menu information retrieval")
     void testMenuInfoRetrieval() {
-        MenuInfoResponse response = new MenuInfoResponse(
-                1L,
-                1L,
-                "Spaghetti Aglio e Olio",
-                1000,
-                "Spaghetti with garlic and olive oil"
-        );
+        MenuInfoResponse response = new MenuInfoResponse(1L, 1L, "Spaghetti Aglio e Olio", 1000,
+                "Spaghetti with garlic and olive oil");
         Mockito.when(menuRepository.findResponseById(1L)).thenReturn(Optional.of(response));
 
         MenuInfoResponse result = menuService.getMenuInfo(1L);
@@ -89,36 +83,19 @@ class MenuServiceTest {
     @Test
     @DisplayName("Testing all menus of store retrieval")
     void testStoreMenusRetrieval() {
-        MenuInfoResponse response1 = new MenuInfoResponse(
-                1L,
-                1L,
-                "Spaghetti Aglio e Olio",
-                1000,
-                "Spaghetti with garlic and olive oil"
-        );
-        MenuInfoResponse response2 = new MenuInfoResponse(
-                2L,
-                1L,
-                "Spaghetti Carbonara",
-                1200,
-                "Spaghetti with bacon, eggs, and cheese"
-        );
-        MenuInfoResponse response3 = new MenuInfoResponse(
-                3L,
-                1L,
-                "Spaghetti Bolognese",
-                1200,
-                "Spaghetti with meat sauce"
-        );
+        MenuInfoResponse response1 = new MenuInfoResponse(1L, 1L, "Spaghetti Aglio e Olio", 1000,
+                "Spaghetti with garlic and olive oil");
+        MenuInfoResponse response2 = new MenuInfoResponse(2L, 1L, "Spaghetti Carbonara", 1200,
+                "Spaghetti with bacon, eggs, and cheese");
+        MenuInfoResponse response3 = new MenuInfoResponse(3L, 1L, "Spaghetti Bolognese", 1200,
+                "Spaghetti with meat sauce");
 
         Mockito.when(menuRepository.findResponsesByStoreId(1L)).thenReturn(List.of(response1, response2, response3));
 
         MenuInfoListResponse result = menuService.getStoreMenus(1L);
 
         assertEquals(3, result.getCount());
-        Assertions.assertThat(result.getResults())
-                .extracting(MenuInfoResponse::getMenuId)
-                .containsExactly(1L, 2L, 3L);
+        Assertions.assertThat(result.getResults()).extracting(MenuInfoResponse::getMenuId).containsExactly(1L, 2L, 3L);
     }
 
     @Test

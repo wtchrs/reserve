@@ -25,56 +25,42 @@ import reserve.reservation.service.ReservationManageService;
 public class ReservationManageController {
 
     private final ReservationManageService reservationManageService;
+
     private final NotificationService notificationService;
 
     @PostMapping("/{reservationId}/cancel")
-    @Operation(
-            summary = "Cancel reservation",
-            description = "Cancel reservation by reservation ID",
-            operationId = "1_cancel"
-    )
+    @Operation(summary = "Cancel reservation", description = "Cancel reservation by reservation ID",
+            operationId = "1_cancel")
     @ApiResponses(@ApiResponse(responseCode = "200", description = "Successfully canceled"))
     @ApiErrorCodeResponses(@ApiErrorCodeResponse(responseCode = "404", errorCode = ErrorCode.RESERVATION_NOT_FOUND))
-    public void cancel(
-            @Authentication AuthInfo authInfo,
-            @PathVariable("reservationId") @Schema(description = "ID of reservation", example = "1") Long reservationId
-    ) {
+    public void cancel(@Authentication AuthInfo authInfo,
+            @PathVariable("reservationId") @Schema(description = "ID of reservation",
+                    example = "1") Long reservationId) {
         reservationManageService.cancel(authInfo.getUserId(), reservationId);
-        notificationService.notifyReservation(
-                reservationId,
-                "Reservation has been cancelled.",
-                "Customer has cancelled the reservation."
-        );
+        notificationService.notifyReservation(reservationId, "Reservation has been cancelled.",
+                "Customer has cancelled the reservation.");
     }
 
     @PostMapping("/{reservationId}/start")
-    @Operation(
-            summary = "Start service",
-            description = "Change reservation status to 'In Service' by reservation ID",
-            operationId = "2_startService"
-    )
+    @Operation(summary = "Start service", description = "Change reservation status to 'In Service' by reservation ID",
+            operationId = "2_startService")
     @ApiResponses(@ApiResponse(responseCode = "200", description = "Successfully started"))
     @ApiErrorCodeResponses(@ApiErrorCodeResponse(responseCode = "404", errorCode = ErrorCode.RESERVATION_NOT_FOUND))
-    public void startService(
-            @Authentication AuthInfo authInfo,
-            @PathVariable("reservationId") @Schema(description = "ID of reservation", example = "1") Long reservationId
-    ) {
+    public void startService(@Authentication AuthInfo authInfo,
+            @PathVariable("reservationId") @Schema(description = "ID of reservation",
+                    example = "1") Long reservationId) {
         reservationManageService.startService(authInfo.getUserId(), reservationId);
         notificationService.notifyReservation(reservationId, "Service has been started.");
     }
 
     @PostMapping("/{reservationId}/complete")
-    @Operation(
-            summary = "Complete service",
-            description = "Change reservation status to 'Completed' by reservation ID",
-            operationId = "3_complete"
-    )
+    @Operation(summary = "Complete service", description = "Change reservation status to 'Completed' by reservation ID",
+            operationId = "3_complete")
     @ApiResponses(@ApiResponse(responseCode = "200", description = "Successfully completed"))
     @ApiErrorCodeResponses(@ApiErrorCodeResponse(responseCode = "404", errorCode = ErrorCode.RESERVATION_NOT_FOUND))
-    public void complete(
-            @Authentication AuthInfo authInfo,
-            @PathVariable("reservationId") @Schema(description = "ID of reservation", example = "1") Long reservationId
-    ) {
+    public void complete(@Authentication AuthInfo authInfo,
+            @PathVariable("reservationId") @Schema(description = "ID of reservation",
+                    example = "1") Long reservationId) {
         reservationManageService.complete(authInfo.getUserId(), reservationId);
         notificationService.notifyReservation(reservationId, "Service has been completed.");
     }

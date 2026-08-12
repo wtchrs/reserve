@@ -26,27 +26,17 @@ public class SignInController {
 
     private final SignInService signInService;
 
-    public SignInController(
-            @Value("${application.security.jwt.refreshTokenExpire}") int refreshTokenExpire,
-            SignInService signInService
-    ) {
+    public SignInController(@Value("${application.security.jwt.refreshTokenExpire}") int refreshTokenExpire,
+            SignInService signInService) {
         this.refreshTokenExpire = refreshTokenExpire;
         this.signInService = signInService;
     }
 
     @PostMapping("/sign-in")
-    @Operation(
-            summary = "Sign in",
-            description = "Sign in",
-            operationId = "1_signIn"
-    )
-    @ApiResponses(@ApiResponse(
-            responseCode = "200", description = "Successfully signed in",
-            headers = {
-                    @Header(name = "Authorization", description = "Bearer access token"),
-                    @Header(name = "Set-Cookie", description = "Refresh token cookie with name 'refresh'")
-            }
-    ))
+    @Operation(summary = "Sign in", description = "Sign in", operationId = "1_signIn")
+    @ApiResponses(@ApiResponse(responseCode = "200", description = "Successfully signed in",
+            headers = { @Header(name = "Authorization", description = "Bearer access token"),
+                    @Header(name = "Set-Cookie", description = "Refresh token cookie with name 'refresh'") }))
     @ApiErrorCodeResponses(@ApiErrorCodeResponse(responseCode = "401", errorCode = ErrorCode.WRONG_CREDENTIAL))
     public void signIn(@RequestBody @Validated SignInRequest signInRequest, HttpServletResponse response) {
         SignInToken signInToken = signInService.signIn(signInRequest);
@@ -55,26 +45,14 @@ public class SignInController {
     }
 
     @PostMapping("/token-refresh")
-    @Operation(
-            summary = "Refresh access token",
-            description = "Refresh access token",
-            operationId = "2_refreshAccessToken"
-    )
-    @ApiResponses(@ApiResponse(
-            responseCode = "200", description = "Successfully refreshed",
-            headers = {
-                    @Header(name = "Authorization", description = "Bearer access token"),
-                    @Header(name = "Set-Cookie", description = "New refresh token cookie with name 'refresh'")
-            }
-    ))
-    @ApiErrorCodeResponses({
-            @ApiErrorCodeResponse(responseCode = "401", errorCode = ErrorCode.EXPIRED_REFRESH_TOKEN),
-            @ApiErrorCodeResponse(responseCode = "401", errorCode = ErrorCode.INVALID_REFRESH_TOKEN)
-    })
-    public void refreshAccessToken(
-            @CookieValue("refresh") Cookie refreshCookie,
-            HttpServletResponse response
-    ) {
+    @Operation(summary = "Refresh access token", description = "Refresh access token",
+            operationId = "2_refreshAccessToken")
+    @ApiResponses(@ApiResponse(responseCode = "200", description = "Successfully refreshed",
+            headers = { @Header(name = "Authorization", description = "Bearer access token"),
+                    @Header(name = "Set-Cookie", description = "New refresh token cookie with name 'refresh'") }))
+    @ApiErrorCodeResponses({ @ApiErrorCodeResponse(responseCode = "401", errorCode = ErrorCode.EXPIRED_REFRESH_TOKEN),
+            @ApiErrorCodeResponse(responseCode = "401", errorCode = ErrorCode.INVALID_REFRESH_TOKEN) })
+    public void refreshAccessToken(@CookieValue("refresh") Cookie refreshCookie, HttpServletResponse response) {
         String refreshTokenValue = refreshCookie.getValue();
         SignInToken signInToken = signInService.refreshAccessToken(refreshTokenValue);
         response.setHeader("Authorization", signInToken.getAccessToken());
@@ -91,11 +69,7 @@ public class SignInController {
     }
 
     @PostMapping("/sign-out")
-    @Operation(
-            summary = "Sign out",
-            description = "Sign out",
-            operationId = "3_signOut"
-    )
+    @Operation(summary = "Sign out", description = "Sign out", operationId = "3_signOut")
     @ApiResponses(@ApiResponse(responseCode = "200", description = "Successfully signed out"))
     public void signOut(@CookieValue("refresh") Cookie refreshCookie, HttpServletResponse response) {
         signInService.signOut(refreshCookie.getValue());

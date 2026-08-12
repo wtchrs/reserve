@@ -1,5 +1,6 @@
 package reserve.reservation.service;
 
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,8 +10,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reserve.reservation.domain.Reservation;
 import reserve.reservation.infrastructure.ReservationRepository;
-
-import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationManageServiceTest {

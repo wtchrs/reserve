@@ -1,6 +1,7 @@
 package reserve.reservation.domain;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,8 +11,6 @@ import reserve.global.exception.ErrorCode;
 import reserve.global.exception.ReservationStatusException;
 import reserve.store.domain.Store;
 import reserve.user.domain.User;
-
-import java.time.LocalDate;
 
 @Entity
 @Table(name = "reservations")

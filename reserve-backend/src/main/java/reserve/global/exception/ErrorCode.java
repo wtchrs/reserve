@@ -17,12 +17,10 @@ public enum ErrorCode {
     INVALID_SIGN_IN_INFO(103, "Sign-in information is invalid."),
     INVALID_REFRESH_TOKEN(104, "The refresh token is invalid."),
 
-    WRONG_CREDENTIAL(110, "Username or password is incorrect."),
-    WRONG_PASSWORD(111, "Password is incorrect."),
+    WRONG_CREDENTIAL(110, "Username or password is incorrect."), WRONG_PASSWORD(111, "Password is incorrect."),
     SIGN_IN_REQUIRED(112, "Please sign in to continue."),
 
-    EXPIRED_ACCESS_TOKEN(120, "Access token is expired."),
-    EXPIRED_REFRESH_TOKEN(121, "Refresh token is expired."),
+    EXPIRED_ACCESS_TOKEN(120, "Access token is expired."), EXPIRED_REFRESH_TOKEN(121, "Refresh token is expired."),
 
     // 2xx: Wrong request.
     INVALID_REQUEST(200, "Request is invalid."),
@@ -31,10 +29,8 @@ public enum ErrorCode {
     RESERVATION_CANNOT_COMPLETE(213, "Failed to complete the reservation as it is not in service."),
 
     // 3xx: Not found errors.
-    USER_NOT_FOUND(301, "User does not exist."),
-    STORE_NOT_FOUND(302, "Store does not exist."),
-    MENU_NOT_FOUND(303, "Menu does not exist."),
-    RESERVATION_NOT_FOUND(304, "Reservation does not exist."),
+    USER_NOT_FOUND(301, "User does not exist."), STORE_NOT_FOUND(302, "Store does not exist."),
+    MENU_NOT_FOUND(303, "Menu does not exist."), RESERVATION_NOT_FOUND(304, "Reservation does not exist."),
     NOTIFICATION_NOT_FOUND(305, "Notification does not exist."),
 
     // 4xx: Access denied errors.

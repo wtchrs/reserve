@@ -1,6 +1,11 @@
 package reserve.menu.representation;
 
+import static org.hamcrest.Matchers.contains;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -19,14 +24,8 @@ import reserve.menu.service.MenuService;
 import reserve.signin.dto.SignInToken;
 import reserve.signin.infrastructure.JwtProvider;
 
-import java.util.List;
-
-import static org.hamcrest.Matchers.contains;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 @WebMvcTest(MenuController.class)
-@Import({JwtProvider.class, TimeConfig.class})
+@Import({ JwtProvider.class, TimeConfig.class })
 class MenuControllerWebMvcTest {
 
     @Autowired
@@ -54,25 +53,18 @@ class MenuControllerWebMvcTest {
 
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(userId));
 
-        Mockito.when(menuService.create(
-                Mockito.eq(userId),
-                Mockito.eq(storeId),
-                Mockito.argThat(
-                        arg -> arg.getName().equals(menuCreateRequest.getName()) &&
-                               arg.getPrice() == menuCreateRequest.getPrice() &&
-                               arg.getDescription().equals(menuCreateRequest.getDescription())
-                )
-        )).thenReturn(100L);
+        Mockito.when(menuService.create(Mockito.eq(userId), Mockito.eq(storeId),
+                Mockito.argThat(arg -> arg.getName().equals(menuCreateRequest.getName())
+                        && arg.getPrice() == menuCreateRequest.getPrice()
+                        && arg.getDescription().equals(menuCreateRequest.getDescription()))))
+            .thenReturn(100L);
 
-        mockMvc.perform(
-                post("/v1/stores/{storeId}/menus", storeId)
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(menuCreateRequest))
-        ).andExpectAll(
-                status().isCreated(),
-                header().string("Location", "/v1/menus/100")
-        );
+        mockMvc
+            .perform(post("/v1/stores/{storeId}/menus", storeId)
+                .header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(menuCreateRequest)))
+            .andExpectAll(status().isCreated(), header().string("Location", "/v1/menus/100"));
     }
 
     @Test
@@ -81,63 +73,42 @@ class MenuControllerWebMvcTest {
         Long storeId = 10L;
         Long menuId = 100L;
 
-        MenuInfoResponse response = new MenuInfoResponse(
-                menuId,
-                storeId,
-                "Aglio e Olio",
-                10000,
-                "Spaghetti with garlic and olive oil"
-        );
+        MenuInfoResponse response = new MenuInfoResponse(menuId, storeId, "Aglio e Olio", 10000,
+                "Spaghetti with garlic and olive oil");
 
         Mockito.when(menuService.getMenuInfo(menuId)).thenReturn(response);
 
-        mockMvc.perform(
-                get("/v1/menus/{menuId}", menuId)
-        ).andExpectAll(
-                status().isOk(),
-                jsonPath("$.menuId").value(response.getMenuId()),
-                jsonPath("$.storeId").value(response.getStoreId()),
-                jsonPath("$.name").value(response.getName()),
-                jsonPath("$.price").value(response.getPrice()),
-                jsonPath("$.description").value(response.getDescription())
-        );
+        mockMvc.perform(get("/v1/menus/{menuId}", menuId))
+            .andExpectAll(status().isOk(), jsonPath("$.menuId").value(response.getMenuId()),
+                    jsonPath("$.storeId").value(response.getStoreId()), jsonPath("$.name").value(response.getName()),
+                    jsonPath("$.price").value(response.getPrice()),
+                    jsonPath("$.description").value(response.getDescription()));
     }
 
     @Test
     @DisplayName("Testing GET /v1/stores/{storeId}/menus endpoint")
     void testGetStoreMenusEndpoint() throws Exception {
         Long storeId = 10L;
-        MenuInfoResponse menu1 =
-                new MenuInfoResponse(100L, storeId, "Aglio e Olio", 10000, "Spaghetti with garlic and olive oil");
-        MenuInfoResponse menu2 =
-                new MenuInfoResponse(101L, storeId, "Carbonara", 12000, "Spaghetti with bacon, eggs, and cheese");
+        MenuInfoResponse menu1 = new MenuInfoResponse(100L, storeId, "Aglio e Olio", 10000,
+                "Spaghetti with garlic and olive oil");
+        MenuInfoResponse menu2 = new MenuInfoResponse(101L, storeId, "Carbonara", 12000,
+                "Spaghetti with bacon, eggs, and cheese");
         MenuInfoResponse menu3 = new MenuInfoResponse(102L, storeId, "Bolognese", 12000, "Spaghetti with meat sauce");
 
         Mockito.when(menuService.getStoreMenus(storeId))
-                .thenReturn(MenuInfoListResponse.from(List.of(menu1, menu2, menu3)));
+            .thenReturn(MenuInfoListResponse.from(List.of(menu1, menu2, menu3)));
 
-        mockMvc.perform(
-                get("/v1/stores/{storeId}/menus", storeId)
-        ).andExpectAll(
-                status().isOk(),
-                jsonPath("$.count").value(3),
-                jsonPath("$.results[*].menuId").value(contains(
-                        menu1.getMenuId().intValue(),
-                        menu2.getMenuId().intValue(),
-                        menu3.getMenuId().intValue()
-                )),
-                jsonPath("$.results[*].storeId").value(contains(
-                        menu1.getStoreId().intValue(),
-                        menu2.getStoreId().intValue(),
-                        menu3.getStoreId().intValue()
-                )),
-                jsonPath("$.results[*].name")
-                        .value(contains(menu1.getName(), menu2.getName(), menu3.getName())),
-                jsonPath("$.results[*].price")
+        mockMvc.perform(get("/v1/stores/{storeId}/menus", storeId))
+            .andExpectAll(status().isOk(), jsonPath("$.count").value(3),
+                    jsonPath("$.results[*].menuId").value(contains(menu1.getMenuId().intValue(),
+                            menu2.getMenuId().intValue(), menu3.getMenuId().intValue())),
+                    jsonPath("$.results[*].storeId").value(contains(menu1.getStoreId().intValue(),
+                            menu2.getStoreId().intValue(), menu3.getStoreId().intValue())),
+                    jsonPath("$.results[*].name").value(contains(menu1.getName(), menu2.getName(), menu3.getName())),
+                    jsonPath("$.results[*].price")
                         .value(contains(menu1.getPrice(), menu2.getPrice(), menu3.getPrice())),
-                jsonPath("$.results[*].description")
-                        .value(contains(menu1.getDescription(), menu2.getDescription(), menu3.getDescription()))
-        );
+                    jsonPath("$.results[*].description")
+                        .value(contains(menu1.getDescription(), menu2.getDescription(), menu3.getDescription())));
     }
 
     @Test
@@ -152,20 +123,16 @@ class MenuControllerWebMvcTest {
 
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(userId));
 
-        mockMvc.perform(put("/v1/menus/{menuId}", menuId)
-                                .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                                .contentType("application/json")
-                                .content(objectMapper.writeValueAsString(menuUpdateRequest))
-        ).andExpect(status().isOk());
+        mockMvc
+            .perform(put("/v1/menus/{menuId}", menuId).header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(menuUpdateRequest)))
+            .andExpect(status().isOk());
 
-        Mockito.verify(menuService).update(
-                Mockito.eq(userId),
-                Mockito.eq(menuId),
-                Mockito.argThat(
-                        arg -> arg.getName().equals(menuUpdateRequest.getName()) &&
-                               arg.getPrice().equals(menuUpdateRequest.getPrice())
-                )
-        );
+        Mockito.verify(menuService)
+            .update(Mockito.eq(userId), Mockito.eq(menuId),
+                    Mockito.argThat(arg -> arg.getName().equals(menuUpdateRequest.getName())
+                            && arg.getPrice().equals(menuUpdateRequest.getPrice())));
     }
 
     @Test
@@ -176,10 +143,10 @@ class MenuControllerWebMvcTest {
 
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(userId));
 
-        mockMvc.perform(
-                delete("/v1/menus/{menuId}", menuId)
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-        ).andExpect(status().isOk());
+        mockMvc
+            .perform(delete("/v1/menus/{menuId}", menuId).header("Authorization",
+                    "Bearer " + signInToken.getAccessToken()))
+            .andExpect(status().isOk());
 
         Mockito.verify(menuService).delete(userId, menuId);
     }

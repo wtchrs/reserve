@@ -1,5 +1,9 @@
 package reserve.signin.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.time.Clock;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,15 +23,11 @@ import reserve.signup.infrastructure.Pbkdf2PasswordEncoder;
 import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
 
-import java.time.Clock;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 @ExtendWith(MockitoExtension.class)
 class SignInServiceTest {
 
     final String ACCESS_TOKEN_SECRET = "1234567890123456789012345678901234567890123456789012345678901234";
+
     final String REFRESH_TOKEN_SECRET = "9876543210987654321098765432109876543210987654321098765432109876";
 
     @Mock
@@ -40,7 +40,8 @@ class SignInServiceTest {
     PasswordEncoder passwordEncoder = new Pbkdf2PasswordEncoder();
 
     @Spy
-    JwtProvider jwtProvider = new JwtProvider(ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET, 600, 604800, Clock.systemUTC());
+    JwtProvider jwtProvider = new JwtProvider(ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET, 600, 604800,
+            Clock.systemUTC());
 
     SignInService signInService;
 
@@ -63,11 +64,9 @@ class SignInServiceTest {
         SignInToken signInToken = signInService.signIn(signInRequest);
 
         assertNotNull(signInToken.getAccessToken());
-        Mockito.verify(refreshTokenRepository).save(Mockito.argThat(
-                refreshToken -> refreshToken.getTokenValue().equals(signInToken.getRefreshToken()) &&
-                                refreshToken.getUserId().equals(1L) &&
-                                refreshToken.getExpiration() == 604800
-        ));
+        Mockito.verify(refreshTokenRepository)
+            .save(Mockito.argThat(refreshToken -> refreshToken.getTokenValue().equals(signInToken.getRefreshToken())
+                    && refreshToken.getUserId().equals(1L) && refreshToken.getExpiration() == 604800));
     }
 
     @Test

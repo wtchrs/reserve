@@ -4,7 +4,7 @@ public abstract class HexUtils {
 
     private static final char[] DIGIT = "0123456789ABCDEF".toCharArray();
 
-    public static String bytesToHex(byte[] ...bytes) {
+    public static String bytesToHex(byte[]... bytes) {
         int totalLength = 0;
         for (byte[] arr : bytes) {
             totalLength += arr.length;

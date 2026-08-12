@@ -1,5 +1,8 @@
 package reserve.reservation.presentation;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -15,11 +18,8 @@ import reserve.reservation.service.ReservationManageService;
 import reserve.signin.dto.SignInToken;
 import reserve.signin.infrastructure.JwtProvider;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(ReservationManageController.class)
-@Import({JwtProvider.class, TimeConfig.class})
+@Import({ JwtProvider.class, TimeConfig.class })
 class ReservationManageControllerWebMvcTest {
 
     @Autowired
@@ -44,17 +44,14 @@ class ReservationManageControllerWebMvcTest {
 
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(userId));
 
-        mockMvc.perform(
-                post(urlTemplate, reservationId)
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-        ).andExpect(status().isOk());
+        mockMvc
+            .perform(post(urlTemplate, reservationId).header("Authorization", "Bearer " + signInToken.getAccessToken()))
+            .andExpect(status().isOk());
 
         Mockito.verify(reservationManageService, Mockito.times(1)).cancel(userId, reservationId);
-        Mockito.verify(notificationService, Mockito.times(1)).notifyReservation(
-                reservationId,
-                "Reservation has been cancelled.",
-                "Customer has cancelled the reservation."
-        );
+        Mockito.verify(notificationService, Mockito.times(1))
+            .notifyReservation(reservationId, "Reservation has been cancelled.",
+                    "Customer has cancelled the reservation.");
     }
 
     @Test
@@ -67,14 +64,13 @@ class ReservationManageControllerWebMvcTest {
 
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(userId));
 
-        mockMvc.perform(
-                post(urlTemplate, reservationId)
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-        ).andExpect(status().isOk());
+        mockMvc
+            .perform(post(urlTemplate, reservationId).header("Authorization", "Bearer " + signInToken.getAccessToken()))
+            .andExpect(status().isOk());
 
         Mockito.verify(reservationManageService, Mockito.times(1)).startService(userId, reservationId);
         Mockito.verify(notificationService, Mockito.times(1))
-                .notifyReservation(reservationId, "Service has been started.");
+            .notifyReservation(reservationId, "Service has been started.");
     }
 
     @Test
@@ -87,14 +83,13 @@ class ReservationManageControllerWebMvcTest {
 
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(userId));
 
-        mockMvc.perform(
-                post(urlTemplate, reservationId)
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-        ).andExpect(status().isOk());
+        mockMvc
+            .perform(post(urlTemplate, reservationId).header("Authorization", "Bearer " + signInToken.getAccessToken()))
+            .andExpect(status().isOk());
 
         Mockito.verify(reservationManageService, Mockito.times(1)).complete(userId, reservationId);
         Mockito.verify(notificationService, Mockito.times(1))
-                .notifyReservation(reservationId, "Service has been completed.");
+            .notifyReservation(reservationId, "Service has been completed.");
     }
 
 }

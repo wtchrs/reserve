@@ -8,9 +8,13 @@ import lombok.RequiredArgsConstructor;
 public class MenuInfoResponse {
 
     private final Long menuId;
+
     private final Long storeId;
+
     private final String name;
+
     private final int price;
+
     private final String description;
 
 }

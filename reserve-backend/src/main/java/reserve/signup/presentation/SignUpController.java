@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -17,8 +18,6 @@ import reserve.global.swagger.annotation.ApiErrorCodeResponses;
 import reserve.signup.dto.request.SignUpRequest;
 import reserve.signup.service.SignUpService;
 
-import java.net.URI;
-
 @RestController
 @RequestMapping("/v1/sign-up")
 @RequiredArgsConstructor
@@ -28,11 +27,7 @@ public class SignUpController {
     private final SignUpService signUpService;
 
     @PostMapping
-    @Operation(
-            summary = "Sign up",
-            description = "Sign up",
-            operationId = "1_signUp"
-    )
+    @Operation(summary = "Sign up", description = "Sign up", operationId = "1_signUp")
     @ApiResponses(@ApiResponse(responseCode = "201", description = "Successfully signed up"))
     @ApiErrorCodeResponses(@ApiErrorCodeResponse(responseCode = "409", errorCode = ErrorCode.USERNAME_DUPLICATE))
     public ResponseEntity<Void> signUp(@RequestBody @Validated SignUpRequest signUpRequest) {

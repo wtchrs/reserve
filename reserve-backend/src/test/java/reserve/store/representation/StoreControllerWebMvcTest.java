@@ -1,6 +1,10 @@
 package reserve.store.representation;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +25,8 @@ import reserve.store.dto.response.StoreInfoListResponse;
 import reserve.store.dto.response.StoreInfoResponse;
 import reserve.store.service.StoreService;
 
-import java.util.List;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 @WebMvcTest(StoreController.class)
-@Import({JwtProvider.class, TimeConfig.class})
+@Import({ JwtProvider.class, TimeConfig.class })
 class StoreControllerWebMvcTest {
 
     @Autowired
@@ -52,45 +51,31 @@ class StoreControllerWebMvcTest {
 
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(1L));
 
-        Mockito.when(storeService.create(
-                Mockito.eq(1L),
-                Mockito.argThat(
-                        request -> "Store name".equals(request.getName()) &&
-                                   "City, Street, Zipcode".equals(request.getAddress()) &&
-                                   "Store description".equals(request.getDescription())
-                )
-        )).thenReturn(10L);
+        Mockito.when(storeService.create(Mockito.eq(1L),
+                Mockito.argThat(request -> "Store name".equals(request.getName())
+                        && "City, Street, Zipcode".equals(request.getAddress())
+                        && "Store description".equals(request.getDescription()))))
+            .thenReturn(10L);
 
-        mockMvc.perform(
-                post("/v1/stores")
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(storeCreateRequest))
-        ).andExpectAll(
-                status().isCreated(),
-                header().string("Location", "/v1/stores/10"),
-                content().string("")
-        );
+        mockMvc
+            .perform(post("/v1/stores").header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(storeCreateRequest)))
+            .andExpectAll(status().isCreated(), header().string("Location", "/v1/stores/10"), content().string(""));
     }
 
     @Test
     @DisplayName("Testing GET /v1/stores/{id} endpoint")
     void testGetStoreInfoEndpoint() throws Exception {
-        Mockito.when(storeService.getStoreInfo(10L)).thenReturn(
-                new StoreInfoResponse(10L, "username", "Store name", "City, Street, Zipcode", "Store description")
-        );
+        Mockito.when(storeService.getStoreInfo(10L))
+            .thenReturn(
+                    new StoreInfoResponse(10L, "username", "Store name", "City, Street, Zipcode", "Store description"));
 
-        mockMvc.perform(
-                get("/v1/stores/{id}", 10L)
-        ).andExpectAll(
-                status().isOk(),
-                content().contentType("application/json"),
-                jsonPath("$.storeId").value(10L),
-                jsonPath("$.registrant").value("username"),
-                jsonPath("$.name").value("Store name"),
-                jsonPath("$.address").value("City, Street, Zipcode"),
-                jsonPath("$.description").value("Store description")
-        );
+        mockMvc.perform(get("/v1/stores/{id}", 10L))
+            .andExpectAll(status().isOk(), content().contentType("application/json"), jsonPath("$.storeId").value(10L),
+                    jsonPath("$.registrant").value("username"), jsonPath("$.name").value("Store name"),
+                    jsonPath("$.address").value("City, Street, Zipcode"),
+                    jsonPath("$.description").value("Store description"));
     }
 
     @Test
@@ -99,32 +84,19 @@ class StoreControllerWebMvcTest {
         List<StoreInfoResponse> storeInfoResponses = List.of(
                 new StoreInfoResponse(1L, "username", "Pasta", "address", "Pasta only"),
                 new StoreInfoResponse(2L, "username", "Pizza", "address", "Pizza and Pasta"),
-                new StoreInfoResponse(3L, "username", "Hamburger", "pasta street", "Hamburger")
-        );
+                new StoreInfoResponse(3L, "username", "Hamburger", "pasta street", "Hamburger"));
 
-        Mockito.when(storeService.search(
-                Mockito.argThat(
-                        request -> "username".equals(request.getRegistrant()) &&
-                                   "pasta".equals(request.getQuery())
-                ),
-                Mockito.any()
-        )).thenReturn(StoreInfoListResponse.from(new PageImpl<>(storeInfoResponses, PageRequest.of(0, 20), 3)));
+        Mockito
+            .when(storeService.search(Mockito
+                .argThat(request -> "username".equals(request.getRegistrant()) && "pasta".equals(request.getQuery())),
+                    Mockito.any()))
+            .thenReturn(StoreInfoListResponse.from(new PageImpl<>(storeInfoResponses, PageRequest.of(0, 20), 3)));
 
-        mockMvc.perform(
-                get("/v1/stores")
-                        .param("registrant", "username")
-                        .param("query", "pasta")
-        ).andExpectAll(
-                status().isOk(),
-                jsonPath("$.count").value(3),
-                jsonPath("$.pageSize").value(20),
-                jsonPath("$.pageNumber").value(0),
-                jsonPath("$.hasNext").value(false),
-                jsonPath("$.results.length()").value(3),
-                jsonPath("$.results[0].name").value("Pasta"),
-                jsonPath("$.results[1].name").value("Pizza"),
-                jsonPath("$.results[2].name").value("Hamburger")
-        );
+        mockMvc.perform(get("/v1/stores").param("registrant", "username").param("query", "pasta"))
+            .andExpectAll(status().isOk(), jsonPath("$.count").value(3), jsonPath("$.pageSize").value(20),
+                    jsonPath("$.pageNumber").value(0), jsonPath("$.hasNext").value(false),
+                    jsonPath("$.results.length()").value(3), jsonPath("$.results[0].name").value("Pasta"),
+                    jsonPath("$.results[1].name").value("Pizza"), jsonPath("$.results[2].name").value("Hamburger"));
     }
 
     @Test
@@ -137,22 +109,17 @@ class StoreControllerWebMvcTest {
 
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(1L));
 
-        mockMvc.perform(
-                put("/v1/stores/{id}", 10L)
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(storeUpdateRequest))
-        ).andExpect(status().isOk());
+        mockMvc
+            .perform(put("/v1/stores/{id}", 10L).header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(storeUpdateRequest)))
+            .andExpect(status().isOk());
 
-        Mockito.verify(storeService).update(
-                Mockito.eq(1L),
-                Mockito.eq(10L),
-                Mockito.argThat(
-                        request -> "New name".equals(request.getName()) &&
-                                   "New address".equals(request.getAddress()) &&
-                                   "New description".equals(request.getDescription())
-                )
-        );
+        Mockito.verify(storeService)
+            .update(Mockito.eq(1L), Mockito.eq(10L),
+                    Mockito.argThat(request -> "New name".equals(request.getName())
+                            && "New address".equals(request.getAddress())
+                            && "New description".equals(request.getDescription())));
     }
 
     @Test
@@ -160,11 +127,10 @@ class StoreControllerWebMvcTest {
     void testDeleteEndpoint() throws Exception {
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(1L));
 
-        mockMvc.perform(
-                delete("/v1/stores/{id}", 10L)
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-                        .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk());
+        mockMvc
+            .perform(delete("/v1/stores/{id}", 10L).header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
 
         Mockito.verify(storeService).delete(1L, 10L);
     }

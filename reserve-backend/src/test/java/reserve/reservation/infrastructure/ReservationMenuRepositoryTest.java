@@ -1,5 +1,9 @@
 package reserve.reservation.infrastructure;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.time.LocalDate;
+import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,11 +18,6 @@ import reserve.store.domain.Store;
 import reserve.store.infrastructure.StoreRepository;
 import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
-
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
@@ -52,8 +51,8 @@ class ReservationMenuRepositoryTest {
     @Test
     @DisplayName("Testing reservation menu retrieval by reservation id")
     void testReservationMenuRetrievalByReservationId() {
-        List<ReservationMenuResponse> responses =
-                reservationMenuRepository.findResponsesByReservationId(reservation.getId());
+        List<ReservationMenuResponse> responses = reservationMenuRepository
+            .findResponsesByReservationId(reservation.getId());
 
         assertEquals(3, responses.size());
         Assertions.assertThat(responses).extracting("name").containsExactly("menuName1", "menuName2", "menuName3");

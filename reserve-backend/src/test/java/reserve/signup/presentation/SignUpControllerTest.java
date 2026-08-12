@@ -1,5 +1,7 @@
 package reserve.signup.presentation;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
@@ -13,8 +15,6 @@ import reserve.global.BaseRestAssuredTest;
 import reserve.signup.dto.request.SignUpRequest;
 import reserve.signup.infrastructure.PasswordEncoder;
 import reserve.user.infrastructure.UserRepository;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class SignUpControllerTest extends BaseRestAssuredTest {
 
@@ -45,20 +45,21 @@ class SignUpControllerTest extends BaseRestAssuredTest {
 
         String payload = objectMapper.writeValueAsString(signUpRequest);
 
-        RestAssured
-                .given(spec).body(payload).contentType("application/json")
-                .relaxedHTTPSValidation()
-                .when().post("/v1/sign-up")
-                .then().statusCode(201).header("Location", "/v1/users/username");
+        RestAssured.given(spec)
+            .body(payload)
+            .contentType("application/json")
+            .relaxedHTTPSValidation()
+            .when()
+            .post("/v1/sign-up")
+            .then()
+            .statusCode(201)
+            .header("Location", "/v1/users/username");
 
-        userRepository.findByUsername("username").ifPresentOrElse(
-                user -> {
-                    assertEquals("username", user.getUsername());
-                    assertTrue(passwordEncoder.matches("password", user.getPasswordHash()));
-                    assertEquals("nickname", user.getNickname());
-                },
-                () -> fail("User not found")
-        );
+        userRepository.findByUsername("username").ifPresentOrElse(user -> {
+            assertEquals("username", user.getUsername());
+            assertTrue(passwordEncoder.matches("password", user.getPasswordHash()));
+            assertEquals("nickname", user.getNickname());
+        }, () -> fail("User not found"));
     }
 
 }

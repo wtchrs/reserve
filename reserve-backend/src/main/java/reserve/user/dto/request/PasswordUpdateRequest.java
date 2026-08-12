@@ -15,10 +15,8 @@ import reserve.signup.infrastructure.validator.PasswordConfirmationCheck;
 @NoArgsConstructor
 @Getter
 @Setter
-@PasswordConfirmationCheck(
-        targetClass = PasswordUpdateRequest.class,
-        message = "Not matched new password and new password confirmation."
-)
+@PasswordConfirmationCheck(targetClass = PasswordUpdateRequest.class,
+        message = "Not matched new password and new password confirmation.")
 public class PasswordUpdateRequest {
 
     @Schema(description = "Current password", example = "password1234", requiredMode = RequiredMode.REQUIRED)
@@ -31,11 +29,8 @@ public class PasswordUpdateRequest {
     @Password
     private String newPassword;
 
-    @Schema(
-            description = "New password confirmation",
-            example = "newPassword1234",
-            requiredMode = RequiredMode.REQUIRED
-    )
+    @Schema(description = "New password confirmation", example = "newPassword1234",
+            requiredMode = RequiredMode.REQUIRED)
     @NotNull(message = "New password confirmation required.")
     @Confirmation
     private String confirmation;

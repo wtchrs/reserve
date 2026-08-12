@@ -2,14 +2,15 @@ package reserve.signup.infrastructure.validator;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
 public class PasswordConfirmationValidator implements ConstraintValidator<PasswordConfirmationCheck, Object> {
 
     private String message;
+
     private Field passwordField;
+
     private Field confirmationField;
 
     @Override
@@ -38,8 +39,8 @@ public class PasswordConfirmationValidator implements ConstraintValidator<Passwo
         if (passwordValue == null || !passwordValue.equals(confirmationValue)) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(message)
-                    .addPropertyNode(confirmationField.getName())
-                    .addConstraintViolation();
+                .addPropertyNode(confirmationField.getName())
+                .addConstraintViolation();
             return false;
         }
         return true;
@@ -52,7 +53,8 @@ public class PasswordConfirmationValidator implements ConstraintValidator<Passwo
 
         try {
             return (String) field.get(value);
-        } catch (IllegalAccessException e) {
+        }
+        catch (IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
     }

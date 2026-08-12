@@ -11,9 +11,11 @@ import lombok.RequiredArgsConstructor;
 public class AuthInfo {
 
     private static final AuthInfo GUEST_PLACEHOLDER = new AuthInfo(0L, AuthType.GUEST);
+
     private static final AuthInfo EXPIRED_PLACEHOLDER = new AuthInfo(0L, AuthType.GUEST);
 
     private final Long userId;
+
     private final AuthType authType;
 
     public static AuthInfo guest() {

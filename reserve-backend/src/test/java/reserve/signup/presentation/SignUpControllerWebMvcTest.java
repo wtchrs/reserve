@@ -1,5 +1,9 @@
 package reserve.signup.presentation;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,12 +20,8 @@ import reserve.signin.infrastructure.JwtProvider;
 import reserve.signup.dto.request.SignUpRequest;
 import reserve.signup.service.SignUpService;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(SignUpController.class)
-@Import({JwtProvider.class, TimeConfig.class})
+@Import({ JwtProvider.class, TimeConfig.class })
 class SignUpControllerWebMvcTest {
 
     @Autowired
@@ -42,14 +42,12 @@ class SignUpControllerWebMvcTest {
         signUpRequest.setPasswordConfirmation("password");
         signUpRequest.setNickname("nickname");
 
-        mockMvc.perform(
-                MockMvcRequestBuilders.post("/v1/sign-up")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(signUpRequest))
-        ).andExpectAll(
-                status().isCreated(),
-                header().stringValues("Location", "/v1/users/" + signUpRequest.getUsername())
-        );
+        mockMvc
+            .perform(MockMvcRequestBuilders.post("/v1/sign-up")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(signUpRequest)))
+            .andExpectAll(status().isCreated(),
+                    header().stringValues("Location", "/v1/users/" + signUpRequest.getUsername()));
 
         Mockito.verify(signUpService, data -> {
             SignUpRequest request = data.getAllInvocations().get(0).getArgument(0);

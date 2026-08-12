@@ -1,13 +1,12 @@
 package reserve.store.infrastructure;
 
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import reserve.store.domain.Store;
 import reserve.store.dto.response.StoreInfoResponse;
-
-import java.util.Optional;
 
 public interface StoreRepository extends JpaRepository<Store, Long> {
 
@@ -16,12 +15,12 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
     Optional<Store> findByIdAndUserId(Long storeId, Long userId);
 
     @Query("""
-           SELECT new reserve.store.dto.response.StoreInfoResponse(
-               store.id, store.user.username, store.name, store.address, store.description
-           )
-           FROM Store store
-           WHERE store.id = :storeId
-           """)
+            SELECT new reserve.store.dto.response.StoreInfoResponse(
+                store.id, store.user.username, store.name, store.address, store.description
+            )
+            FROM Store store
+            WHERE store.id = :storeId
+            """)
     Optional<StoreInfoResponse> findResponseById(@Param("storeId") Long storeId);
 
     @Override

@@ -24,7 +24,9 @@ import reserve.user.infrastructure.UserRepository;
 public class StoreService {
 
     private final StoreRepository storeRepository;
+
     private final StoreQueryRepository storeQueryRepository;
+
     private final UserRepository userRepository;
 
     @Transactional
@@ -32,19 +34,15 @@ public class StoreService {
         if (!userRepository.existsById(userId)) {
             throw new AuthenticationException(ErrorCode.INVALID_SIGN_IN_INFO);
         }
-        Store store = storeRepository.save(new Store(
-                userRepository.getReferenceById(userId),
-                storeCreateRequest.getName(),
-                storeCreateRequest.getAddress(),
-                storeCreateRequest.getDescription()
-        ));
+        Store store = storeRepository.save(new Store(userRepository.getReferenceById(userId),
+                storeCreateRequest.getName(), storeCreateRequest.getAddress(), storeCreateRequest.getDescription()));
         return store.getId();
     }
 
     @Transactional(readOnly = true)
     public StoreInfoResponse getStoreInfo(Long storeId) {
         return storeRepository.findResponseById(storeId)
-                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.STORE_NOT_FOUND));
+            .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.STORE_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)
@@ -56,7 +54,7 @@ public class StoreService {
     @Transactional
     public void update(Long userId, Long storeId, StoreUpdateRequest storeUpdateRequest) {
         Store store = storeRepository.findByIdAndUserId(storeId, userId)
-                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.STORE_NOT_FOUND));
+            .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.STORE_NOT_FOUND));
         if (StringUtils.hasText(storeUpdateRequest.getName())) {
             store.setName(storeUpdateRequest.getName());
         }

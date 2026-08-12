@@ -1,5 +1,8 @@
 package reserve.reservation.service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,19 +26,20 @@ import reserve.reservation.infrastructure.ReservationRepository;
 import reserve.store.infrastructure.StoreRepository;
 import reserve.user.infrastructure.UserRepository;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+
     private final ReservationQueryRepository reservationQueryRepository;
+
     private final ReservationMenuRepository reservationMenuRepository;
+
     private final MenuRepository menuRepository;
+
     private final StoreRepository storeRepository;
+
     private final UserRepository userRepository;
 
     @Transactional
@@ -46,23 +50,23 @@ public class ReservationService {
         if (!storeRepository.existsById(reservationCreateRequest.getStoreId())) {
             throw new ResourceNotFoundException(ErrorCode.STORE_NOT_FOUND);
         }
-        Reservation reservation = reservationRepository.save(new Reservation(
-                userRepository.getReferenceById(userId),
+        Reservation reservation = reservationRepository.save(new Reservation(userRepository.getReferenceById(userId),
                 storeRepository.getReferenceById(reservationCreateRequest.getStoreId()),
-                reservationCreateRequest.getDate(),
-                reservationCreateRequest.getHour()
-        ));
+                reservationCreateRequest.getDate(), reservationCreateRequest.getHour()));
         Map<Long, Menu> menuMap = getMenuMap(reservationCreateRequest);
-        List<ReservationMenu> reservationMenuList = reservationCreateRequest.getMenus().stream()
-                .map(req -> createReservationMenu(reservation, menuMap.get(req.getMenuId()), req.getQuantity()))
-                .toList();
+        List<ReservationMenu> reservationMenuList = reservationCreateRequest.getMenus()
+            .stream()
+            .map(req -> createReservationMenu(reservation, menuMap.get(req.getMenuId()), req.getQuantity()))
+            .toList();
         reservationMenuRepository.saveAll(reservationMenuList);
         return reservation.getId();
     }
 
     private Map<Long, Menu> getMenuMap(ReservationCreateRequest reservationCreateRequest) {
-        List<Long> menuIdList =
-                reservationCreateRequest.getMenus().stream().map(ReservationMenuCreateRequest::getMenuId).toList();
+        List<Long> menuIdList = reservationCreateRequest.getMenus()
+            .stream()
+            .map(ReservationMenuCreateRequest::getMenuId)
+            .toList();
         return menuRepository.findAllById(menuIdList).stream().collect(Collectors.toMap(Menu::getId, m -> m));
     }
 
@@ -76,7 +80,7 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public ReservationInfoResponse getReservationInfo(Long userId, Long reservationId) {
         return reservationRepository.findResponseByIdAndUserId(reservationId, userId)
-                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND));
+            .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND));
     }
 
     @Transactional
@@ -89,33 +93,29 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public ReservationInfoListResponse search(
-            Long userId,
-            ReservationSearchRequest reservationSearchRequest,
-            Pageable pageable
-    ) {
+    public ReservationInfoListResponse search(Long userId, ReservationSearchRequest reservationSearchRequest,
+            Pageable pageable) {
         if (!userRepository.existsById(userId)) {
             throw new AuthenticationException(ErrorCode.INVALID_SIGN_IN_INFO);
         }
-        Page<ReservationInfoResponse> result =
-                reservationQueryRepository.findResponsesBySearch(userId, reservationSearchRequest, pageable);
+        Page<ReservationInfoResponse> result = reservationQueryRepository.findResponsesBySearch(userId,
+                reservationSearchRequest, pageable);
         return ReservationInfoListResponse.from(result);
     }
 
     @Transactional
     public void update(Long userId, Long reservationId, ReservationUpdateRequest reservationUpdateRequest) {
         Reservation reservation = reservationRepository.findByIdAndUserId(reservationId, userId)
-                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND));
+            .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND));
         reservation.setDate(reservationUpdateRequest.getDate());
         reservation.setHour(reservationUpdateRequest.getHour());
     }
 
     @Transactional
     public void cancel(Long userId, Long reservationId) {
-        reservationRepository
-                .findByIdAndUserId(reservationId, userId)
-                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND))
-                .cancel();
+        reservationRepository.findByIdAndUserId(reservationId, userId)
+            .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND))
+            .cancel();
     }
 
 }

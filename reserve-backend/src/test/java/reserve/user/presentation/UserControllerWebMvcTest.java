@@ -1,6 +1,9 @@
 package reserve.user.presentation;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -19,12 +22,8 @@ import reserve.user.dto.request.UserUpdateRequest;
 import reserve.user.dto.response.UserInfoResponse;
 import reserve.user.service.UserService;
 
-import java.time.LocalDate;
-
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 @WebMvcTest(UserController.class)
-@Import({JwtProvider.class, TimeConfig.class})
+@Import({ JwtProvider.class, TimeConfig.class })
 class UserControllerWebMvcTest {
 
     @Autowired
@@ -45,16 +44,11 @@ class UserControllerWebMvcTest {
         UserInfoResponse value = new UserInfoResponse("username", "nickname", "description", LocalDate.of(2024, 1, 1));
         Mockito.when(userService.getUserInfo("username")).thenReturn(value);
 
-        mockMvc.perform(
-                MockMvcRequestBuilders.get("/v1/users/{username}", "username")
-        ).andExpectAll(
-                status().isOk(),
-                content().contentType("application/json"),
-                jsonPath("$.username").value("username"),
-                jsonPath("$.nickname").value("nickname"),
-                jsonPath("$.description").value("description"),
-                jsonPath("$.signUpDate").value(LocalDate.of(2024, 1, 1).toString())
-        );
+        mockMvc.perform(MockMvcRequestBuilders.get("/v1/users/{username}", "username"))
+            .andExpectAll(status().isOk(), content().contentType("application/json"),
+                    jsonPath("$.username").value("username"), jsonPath("$.nickname").value("nickname"),
+                    jsonPath("$.description").value("description"),
+                    jsonPath("$.signUpDate").value(LocalDate.of(2024, 1, 1).toString()));
     }
 
     @Test
@@ -66,17 +60,16 @@ class UserControllerWebMvcTest {
 
         String accessToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(1L)).getAccessToken();
 
-        mockMvc.perform(
-                MockMvcRequestBuilders.put("/v1/users")
-                        .content(objectMapper.writeValueAsString(userUpdateRequest))
-                        .contentType("application/json")
-                        .header("Authorization", "Bearer " + accessToken)
-        ).andExpect(status().isOk());
+        mockMvc
+            .perform(MockMvcRequestBuilders.put("/v1/users")
+                .content(objectMapper.writeValueAsString(userUpdateRequest))
+                .contentType("application/json")
+                .header("Authorization", "Bearer " + accessToken))
+            .andExpect(status().isOk());
 
-        Mockito.verify(userService).update(Mockito.eq(1L), Mockito.argThat(
-                request -> request.getNickname().equals("newNickname") &&
-                           request.getDescription().equals("newDescription")
-        ));
+        Mockito.verify(userService)
+            .update(Mockito.eq(1L), Mockito.argThat(request -> request.getNickname().equals("newNickname")
+                    && request.getDescription().equals("newDescription")));
     }
 
     @Test
@@ -89,18 +82,18 @@ class UserControllerWebMvcTest {
 
         String accessToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(1L)).getAccessToken();
 
-        mockMvc.perform(
-                MockMvcRequestBuilders.put("/v1/users/password")
-                        .content(objectMapper.writeValueAsString(passwordUpdateRequest))
-                        .contentType("application/json")
-                        .header("Authorization", "Bearer " + accessToken)
-        ).andExpect(status().isOk());
+        mockMvc
+            .perform(MockMvcRequestBuilders.put("/v1/users/password")
+                .content(objectMapper.writeValueAsString(passwordUpdateRequest))
+                .contentType("application/json")
+                .header("Authorization", "Bearer " + accessToken))
+            .andExpect(status().isOk());
 
-        Mockito.verify(userService).updatePassword(Mockito.eq(1L), Mockito.argThat(
-                request -> request.getOldPassword().equals("password") &&
-                           request.getNewPassword().equals("newPassword") &&
-                           request.getConfirmation().equals("newPassword")
-        ));
+        Mockito.verify(userService)
+            .updatePassword(Mockito.eq(1L),
+                    Mockito.argThat(request -> request.getOldPassword().equals("password")
+                            && request.getNewPassword().equals("newPassword")
+                            && request.getConfirmation().equals("newPassword")));
     }
 
     @Test
@@ -111,16 +104,15 @@ class UserControllerWebMvcTest {
 
         String accessToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(1L)).getAccessToken();
 
-        mockMvc.perform(
-                MockMvcRequestBuilders.delete("/v1/users")
-                        .content(objectMapper.writeValueAsString(userDeleteRequest))
-                        .contentType("application/json")
-                        .header("Authorization", "Bearer " + accessToken)
-        ).andExpect(status().isOk());
+        mockMvc
+            .perform(MockMvcRequestBuilders.delete("/v1/users")
+                .content(objectMapper.writeValueAsString(userDeleteRequest))
+                .contentType("application/json")
+                .header("Authorization", "Bearer " + accessToken))
+            .andExpect(status().isOk());
 
-        Mockito.verify(userService).delete(Mockito.eq(1L), Mockito.argThat(
-                request -> request.getPassword().equals("password")
-        ));
+        Mockito.verify(userService)
+            .delete(Mockito.eq(1L), Mockito.argThat(request -> request.getPassword().equals("password")));
     }
 
 }

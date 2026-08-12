@@ -1,12 +1,11 @@
 package reserve.reservation.infrastructure;
 
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import reserve.reservation.domain.Reservation;
 import reserve.reservation.dto.response.ReservationInfoResponse;
-
-import java.util.Optional;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -14,24 +13,20 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     Optional<Reservation> findByIdAndUserId(@Param("reservationId") Long reservationId, @Param("userId") Long userId);
 
     @Query("SELECT r FROM Reservation r WHERE r.id = :reservationId and r.store.user.id = :userId")
-    Optional<Reservation> findByIdAndStoreUserId(
-            @Param("reservationId") Long reservationId, @Param("userId") Long userId
-    );
+    Optional<Reservation> findByIdAndStoreUserId(@Param("reservationId") Long reservationId,
+            @Param("userId") Long userId);
 
     @Query("SELECT r.store.user.id FROM Reservation r WHERE r.id = :reservationId")
     Optional<Long> findStoreUserIdById(@Param("reservationId") Long reservationId);
 
-    @Query(
-            """
+    @Query("""
             SELECT new reserve.reservation.dto.response.ReservationInfoResponse(
                 r.id, r.store.id, r.store.user.username, r.user.username, r.date, r.hour
             )
             FROM Reservation r
             WHERE r.id = :reservationId and (r.user.id = :userId or r.store.user.id = :userId)
             """)
-    Optional<ReservationInfoResponse> findResponseByIdAndUserId(
-            @Param("reservationId") Long reservationId,
-            @Param("userId") Long userId
-    );
+    Optional<ReservationInfoResponse> findResponseByIdAndUserId(@Param("reservationId") Long reservationId,
+            @Param("userId") Long userId);
 
 }

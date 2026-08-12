@@ -22,26 +22,23 @@ import reserve.user.infrastructure.UserRepository;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
+
     private final UserRepository userRepository;
+
     private final ReservationRepository reservationRepository;
+
     private final ReservationQueryRepository reservationQueryRepository;
 
     @Transactional
     public void notifyReservation(Long reservationId, String message, String registrantMessage) {
         ReservationForNotifyDto reservationForNotifyDto = reservationQueryRepository.findForNotifyById(reservationId)
-                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND));
-        notificationRepository.save(new Notification(
-                userRepository.getReferenceById(reservationForNotifyDto.getUserId()),
-                ResourceType.RESERVATION,
-                reservationId,
-                message
-        ));
-        notificationRepository.save(new Notification(
-                userRepository.getReferenceById(reservationForNotifyDto.getRegistrantId()),
-                ResourceType.RESERVATION,
-                reservationId,
-                registrantMessage
-        ));
+            .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND));
+        notificationRepository
+            .save(new Notification(userRepository.getReferenceById(reservationForNotifyDto.getUserId()),
+                    ResourceType.RESERVATION, reservationId, message));
+        notificationRepository
+            .save(new Notification(userRepository.getReferenceById(reservationForNotifyDto.getRegistrantId()),
+                    ResourceType.RESERVATION, reservationId, registrantMessage));
     }
 
     @Transactional
@@ -51,8 +48,8 @@ public class NotificationService {
 
     @Transactional(readOnly = true)
     public NotificationInfoListResponse getUserNotifications(Long userId, Pageable pageable) {
-        Page<Notification> notificationPage =
-                notificationRepository.findAllByUserIdOrderByCreatedAtDesc(userId, pageable);
+        Page<Notification> notificationPage = notificationRepository.findAllByUserIdOrderByCreatedAtDesc(userId,
+                pageable);
         Page<NotificationInfo> dtoPage = notificationPage.map(NotificationInfo::from);
         return NotificationInfoListResponse.from(dtoPage);
     }

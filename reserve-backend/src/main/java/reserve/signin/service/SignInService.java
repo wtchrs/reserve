@@ -8,10 +8,10 @@ import reserve.global.exception.RefreshTokenException;
 import reserve.global.exception.WrongCredentialException;
 import reserve.signin.domain.RefreshToken;
 import reserve.signin.domain.TokenDetails;
-import reserve.signin.infrastructure.RefreshTokenRepository;
 import reserve.signin.dto.SignInToken;
 import reserve.signin.dto.request.SignInRequest;
 import reserve.signin.infrastructure.JwtProvider;
+import reserve.signin.infrastructure.RefreshTokenRepository;
 import reserve.signup.infrastructure.PasswordEncoder;
 import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
@@ -22,18 +22,16 @@ public class SignInService {
     private final int refreshTokenExpiration;
 
     private final UserRepository userRepository;
+
     private final RefreshTokenRepository refreshTokenRepository;
 
     private final PasswordEncoder passwordEncoder;
+
     private final JwtProvider jwtProvider;
 
-    public SignInService(
-            @Value("${application.security.jwt.refreshTokenExpire}") int refreshTokenExpiration,
-            UserRepository userRepository,
-            RefreshTokenRepository refreshTokenRepository,
-            PasswordEncoder passwordEncoder,
-            JwtProvider jwtProvider
-    ) {
+    public SignInService(@Value("${application.security.jwt.refreshTokenExpire}") int refreshTokenExpiration,
+            UserRepository userRepository, RefreshTokenRepository refreshTokenRepository,
+            PasswordEncoder passwordEncoder, JwtProvider jwtProvider) {
         this.refreshTokenExpiration = refreshTokenExpiration;
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
@@ -44,7 +42,7 @@ public class SignInService {
     @Transactional(readOnly = true)
     public SignInToken signIn(SignInRequest signInRequest) {
         User user = userRepository.findByUsername(signInRequest.getUsername())
-                .orElseThrow(() -> new WrongCredentialException(ErrorCode.WRONG_CREDENTIAL));
+            .orElseThrow(() -> new WrongCredentialException(ErrorCode.WRONG_CREDENTIAL));
         if (!passwordEncoder.matches(signInRequest.getPassword(), user.getPasswordHash())) {
             throw new WrongCredentialException(ErrorCode.WRONG_CREDENTIAL);
         }
@@ -57,10 +55,10 @@ public class SignInService {
 
     public SignInToken refreshAccessToken(String refreshTokenValue) {
         RefreshToken refreshToken = refreshTokenRepository.findById(refreshTokenValue)
-                .orElseThrow(() -> new RefreshTokenException(ErrorCode.EXPIRED_REFRESH_TOKEN));
+            .orElseThrow(() -> new RefreshTokenException(ErrorCode.EXPIRED_REFRESH_TOKEN));
         Long userId = refreshToken.getUserId();
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RefreshTokenException(ErrorCode.INVALID_REFRESH_TOKEN));
+            .orElseThrow(() -> new RefreshTokenException(ErrorCode.INVALID_REFRESH_TOKEN));
         TokenDetails tokenDetails = new TokenDetails(user.getId().toString(), user.getUsername(), user.getNickname());
         SignInToken signInToken = jwtProvider.generateSignInToken(tokenDetails);
         // Refresh token rotation.

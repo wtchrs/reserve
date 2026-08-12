@@ -1,5 +1,10 @@
 package reserve.store.service;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,12 +26,6 @@ import reserve.store.infrastructure.StoreQueryRepository;
 import reserve.store.infrastructure.StoreRepository;
 import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
-
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class StoreServiceTest {
@@ -53,10 +52,8 @@ class StoreServiceTest {
         Mockito.when(userRepository.existsById(1L)).thenReturn(true);
         Mockito.when(storeRepository.save(Mockito.any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        try (MockedConstruction<Store> ignored = Mockito.mockConstruction(
-                Store.class,
-                (mock, context) -> Mockito.when(mock.getId()).thenReturn(1L)
-        )) {
+        try (MockedConstruction<Store> ignored = Mockito.mockConstruction(Store.class,
+                (mock, context) -> Mockito.when(mock.getId()).thenReturn(1L))) {
             // Created store id
             Long result = storeService.create(1L, storeCreateRequest);
 
@@ -82,12 +79,10 @@ class StoreServiceTest {
         Pageable pageable = PageRequest.of(0, 20);
 
         StoreInfoResponse storeInfo1 = new StoreInfoResponse(1L, "username", "Pasta", "address", "Pasta");
-        StoreInfoResponse storeInfo2 =
-                new StoreInfoResponse(1L, "username", "Italian", "address", "Steak and pasta");
-        StoreInfoResponse storeInfo3 =
-                new StoreInfoResponse(1L, "username", "Pizza", "address", "Pizza and pasta");
+        StoreInfoResponse storeInfo2 = new StoreInfoResponse(1L, "username", "Italian", "address", "Steak and pasta");
+        StoreInfoResponse storeInfo3 = new StoreInfoResponse(1L, "username", "Pizza", "address", "Pizza and pasta");
         Mockito.when(storeQueryRepository.findResponsesBySearch(storeSearchRequest, pageable))
-                .thenReturn(new PageImpl<>(List.of(storeInfo1, storeInfo2, storeInfo3), pageable, 3));
+            .thenReturn(new PageImpl<>(List.of(storeInfo1, storeInfo2, storeInfo3), pageable, 3));
 
         StoreInfoListResponse response = storeService.search(storeSearchRequest, pageable);
 

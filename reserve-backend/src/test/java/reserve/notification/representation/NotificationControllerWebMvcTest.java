@@ -1,6 +1,13 @@
 package reserve.notification.representation;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -22,16 +29,8 @@ import reserve.notification.service.NotificationService;
 import reserve.signin.dto.SignInToken;
 import reserve.signin.infrastructure.JwtProvider;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(NotificationController.class)
-@Import({JwtProvider.class, TimeConfig.class})
+@Import({ JwtProvider.class, TimeConfig.class })
 class NotificationControllerWebMvcTest {
 
     @Autowired
@@ -54,49 +53,24 @@ class NotificationControllerWebMvcTest {
 
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(userId));
 
-        NotificationInfo notification1 = new NotificationInfo(
-                userId,
-                ResourceType.RESERVATION,
-                resourceId,
-                "message1",
-                LocalDateTime.now(),
-                NotificationStatus.UNREAD
-        );
-        NotificationInfo notification2 = new NotificationInfo(
-                userId,
-                ResourceType.RESERVATION,
-                resourceId,
-                "message2",
-                LocalDateTime.now(),
-                NotificationStatus.UNREAD
-        );
-        NotificationInfo notification3 = new NotificationInfo(
-                userId,
-                ResourceType.RESERVATION,
-                resourceId,
-                "message3",
-                LocalDateTime.now(),
-                NotificationStatus.UNREAD
-        );
+        NotificationInfo notification1 = new NotificationInfo(userId, ResourceType.RESERVATION, resourceId, "message1",
+                LocalDateTime.now(), NotificationStatus.UNREAD);
+        NotificationInfo notification2 = new NotificationInfo(userId, ResourceType.RESERVATION, resourceId, "message2",
+                LocalDateTime.now(), NotificationStatus.UNREAD);
+        NotificationInfo notification3 = new NotificationInfo(userId, ResourceType.RESERVATION, resourceId, "message3",
+                LocalDateTime.now(), NotificationStatus.UNREAD);
 
-        NotificationInfoListResponse response = NotificationInfoListResponse.from(new PageImpl<>(
-                List.of(notification3, notification2, notification1),
-                PageRequest.of(0, 20),
-                3
-        ));
+        NotificationInfoListResponse response = NotificationInfoListResponse
+            .from(new PageImpl<>(List.of(notification3, notification2, notification1), PageRequest.of(0, 20), 3));
 
         Mockito.when(notificationService.getUserNotifications(Mockito.eq(userId), Mockito.any(Pageable.class)))
-                .thenReturn(response);
+            .thenReturn(response);
 
-        mockMvc.perform(
-                get("/v1/notifications").header("Authorization", "Bearer " + signInToken.getAccessToken())
-        ).andExpectAll(
-                status().isOk(),
-                jsonPath("$.count").value(3),
-                jsonPath("$.results[2].message").value("message1"),
-                jsonPath("$.results[1].message").value("message2"),
-                jsonPath("$.results[0].message").value("message3")
-        );
+        mockMvc.perform(get("/v1/notifications").header("Authorization", "Bearer " + signInToken.getAccessToken()))
+            .andExpectAll(status().isOk(), jsonPath("$.count").value(3),
+                    jsonPath("$.results[2].message").value("message1"),
+                    jsonPath("$.results[1].message").value("message2"),
+                    jsonPath("$.results[0].message").value("message3"));
     }
 
     @Test
@@ -107,10 +81,10 @@ class NotificationControllerWebMvcTest {
 
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(userId));
 
-        mockMvc.perform(
-                post("/v1/notifications/{notificationId}/read", notificationId)
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-        ).andExpect(status().isOk());
+        mockMvc
+            .perform(post("/v1/notifications/{notificationId}/read", notificationId).header("Authorization",
+                    "Bearer " + signInToken.getAccessToken()))
+            .andExpect(status().isOk());
 
         Mockito.verify(notificationService).readNotification(userId, notificationId);
     }
@@ -122,10 +96,10 @@ class NotificationControllerWebMvcTest {
 
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(userId));
 
-        mockMvc.perform(
-                post("/v1/notifications/read-all")
-                        .header("Authorization", "Bearer " + signInToken.getAccessToken())
-        ).andExpect(status().isOk());
+        mockMvc
+            .perform(post("/v1/notifications/read-all").header("Authorization",
+                    "Bearer " + signInToken.getAccessToken()))
+            .andExpect(status().isOk());
 
         Mockito.verify(notificationService).readAllNotifications(userId);
     }

@@ -1,5 +1,7 @@
 package reserve.store.infrastructure;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,8 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import reserve.store.domain.Store;
 import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional

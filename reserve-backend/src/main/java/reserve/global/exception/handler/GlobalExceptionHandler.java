@@ -1,6 +1,7 @@
 package reserve.global.exception.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.validation.FieldError;
@@ -16,28 +17,20 @@ import reserve.global.exception.*;
 import reserve.global.exception.dto.ParameterError;
 import reserve.global.exception.dto.ValidationErrorResponse;
 
-import java.util.List;
-
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex,
-            HttpHeaders headers,
-            HttpStatusCode status,
-            WebRequest request
-    ) {
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+            HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         List<FieldError> fieldErrors = ex.getBindingResult().getFieldErrors();
         List<ParameterError> paramErrors = fieldErrors.stream().map(ParameterError::from).toList();
         HttpServletRequest nativeRequest = ((HttpServletRequest) ((ServletWebRequest) request).getNativeRequest());
         log.warn("Request URL: {}, Error message: {}", nativeRequest.getRequestURL(), ex.getMessage(), ex);
-        return ResponseEntity.badRequest().body(new ValidationErrorResponse(
-                ErrorCode.INVALID_REQUEST.getCode(),
-                ErrorCode.INVALID_REQUEST.getMessage(),
-                paramErrors
-        ));
+        return ResponseEntity.badRequest()
+            .body(new ValidationErrorResponse(ErrorCode.INVALID_REQUEST.getCode(),
+                    ErrorCode.INVALID_REQUEST.getMessage(), paramErrors));
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)

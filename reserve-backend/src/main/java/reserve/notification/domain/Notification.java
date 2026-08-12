@@ -5,7 +5,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import reserve.global.entity.BaseEntity;
-import reserve.reservation.domain.Reservation;
 import reserve.user.domain.User;
 
 @Entity

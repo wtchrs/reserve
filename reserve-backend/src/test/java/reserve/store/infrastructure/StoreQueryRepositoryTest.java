@@ -1,5 +1,7 @@
 package reserve.store.infrastructure;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,8 +19,6 @@ import reserve.store.dto.request.StoreSearchRequest;
 import reserve.store.dto.response.StoreInfoResponse;
 import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class StoreQueryRepositoryTest {
@@ -67,11 +67,9 @@ class StoreQueryRepositoryTest {
         assertEquals(3, response.getTotalElements());
         response.forEach(storeInfoResponse -> {
             assertEquals("user1", storeInfoResponse.getRegistrant());
-            assertTrue(
-                    storeInfoResponse.getName().toLowerCase().contains("pasta") ||
-                    storeInfoResponse.getDescription().toLowerCase().contains("pasta") ||
-                    storeInfoResponse.getAddress().toLowerCase().contains("pasta")
-            );
+            assertTrue(storeInfoResponse.getName().toLowerCase().contains("pasta")
+                    || storeInfoResponse.getDescription().toLowerCase().contains("pasta")
+                    || storeInfoResponse.getAddress().toLowerCase().contains("pasta"));
         });
     }
 

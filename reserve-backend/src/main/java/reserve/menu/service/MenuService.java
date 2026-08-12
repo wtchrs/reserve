@@ -30,19 +30,15 @@ public class MenuService {
         if (!storeRepository.existsByIdAndUserId(storeId, userId)) {
             throw new ResourceNotFoundException(ErrorCode.STORE_NOT_FOUND);
         }
-        Menu menu = menuRepository.save(new Menu(
-                storeRepository.getReferenceById(storeId),
-                menuCreateRequest.getName(),
-                menuCreateRequest.getPrice(),
-                menuCreateRequest.getDescription()
-        ));
+        Menu menu = menuRepository.save(new Menu(storeRepository.getReferenceById(storeId), menuCreateRequest.getName(),
+                menuCreateRequest.getPrice(), menuCreateRequest.getDescription()));
         return menu.getId();
     }
 
     @Transactional(readOnly = true)
     public MenuInfoResponse getMenuInfo(Long menuId) {
         return menuRepository.findResponseById(menuId)
-                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.MENU_NOT_FOUND));
+            .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.MENU_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)
@@ -53,7 +49,7 @@ public class MenuService {
     @Transactional
     public void update(Long userId, Long menuId, MenuUpdateRequest menuUpdateRequest) {
         Menu menu = menuRepository.findById(menuId)
-                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.MENU_NOT_FOUND));
+            .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.MENU_NOT_FOUND));
         if (!menuQueryRepository.hasAccessToMenu(menuId, userId)) {
             throw new InvalidAccessException(ErrorCode.ACCESS_DENIED);
         }

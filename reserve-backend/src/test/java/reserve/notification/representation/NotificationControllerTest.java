@@ -1,6 +1,10 @@
 package reserve.notification.representation;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.*;
+
 import io.restassured.RestAssured;
+import java.time.LocalDate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,11 +24,6 @@ import reserve.store.infrastructure.StoreRepository;
 import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
 
-import java.time.LocalDate;
-
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.*;
-
 class NotificationControllerTest extends BaseRestAssuredTest {
 
     @Autowired
@@ -43,6 +42,7 @@ class NotificationControllerTest extends BaseRestAssuredTest {
     NotificationRepository notificationRepository;
 
     User user;
+
     Notification notification1, notification2, notification3;
 
     @BeforeEach
@@ -50,26 +50,15 @@ class NotificationControllerTest extends BaseRestAssuredTest {
         user = userRepository.save(new User("user", "password", "nickname", "description"));
         User registrant = userRepository.save(new User("registrant", "password", "nickname", "description"));
         Store store = storeRepository.save(new Store(registrant, "store", "address", "description"));
-        Reservation reservation = reservationRepository.save(new Reservation(user, store, LocalDate.now().plusDays(7), 12));
+        Reservation reservation = reservationRepository
+            .save(new Reservation(user, store, LocalDate.now().plusDays(7), 12));
 
-        notification1 = notificationRepository.save(new Notification(
-                user,
-                ResourceType.RESERVATION,
-                reservation.getId(),
-                "message1"
-        ));
-        notification2 = notificationRepository.save(new Notification(
-                user,
-                ResourceType.RESERVATION,
-                reservation.getId(),
-                "message2"
-        ));
-        notification3 = notificationRepository.save(new Notification(
-                user,
-                ResourceType.RESERVATION,
-                reservation.getId(),
-                "message3"
-        ));
+        notification1 = notificationRepository
+            .save(new Notification(user, ResourceType.RESERVATION, reservation.getId(), "message1"));
+        notification2 = notificationRepository
+            .save(new Notification(user, ResourceType.RESERVATION, reservation.getId(), "message2"));
+        notification3 = notificationRepository
+            .save(new Notification(user, ResourceType.RESERVATION, reservation.getId(), "message3"));
     }
 
     @AfterEach
@@ -85,22 +74,23 @@ class NotificationControllerTest extends BaseRestAssuredTest {
     void testGetUserNotificationsEndpoint() {
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user));
 
-        RestAssured
-                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
-                .relaxedHTTPSValidation()
-                .when().get("/v1/notifications")
-                .then()
-                .statusCode(200)
-                .body("count", equalTo(3))
-                .body("pageSize", equalTo(20))
-                .body("pageNumber", equalTo(0))
-                .body("hasNext", equalTo(false))
-                .body("results[2].notificationId", equalTo(notification1.getId().intValue()))
-                .body("results[2].message", equalTo("message1"))
-                .body("results[1].notificationId", equalTo(notification2.getId().intValue()))
-                .body("results[1].message", equalTo("message2"))
-                .body("results[0].notificationId", equalTo(notification3.getId().intValue()))
-                .body("results[0].message", equalTo("message3"));
+        RestAssured.given(spec)
+            .header("Authorization", "Bearer " + signInToken.getAccessToken())
+            .relaxedHTTPSValidation()
+            .when()
+            .get("/v1/notifications")
+            .then()
+            .statusCode(200)
+            .body("count", equalTo(3))
+            .body("pageSize", equalTo(20))
+            .body("pageNumber", equalTo(0))
+            .body("hasNext", equalTo(false))
+            .body("results[2].notificationId", equalTo(notification1.getId().intValue()))
+            .body("results[2].message", equalTo("message1"))
+            .body("results[1].notificationId", equalTo(notification2.getId().intValue()))
+            .body("results[1].message", equalTo("message2"))
+            .body("results[0].notificationId", equalTo(notification3.getId().intValue()))
+            .body("results[0].message", equalTo("message3"));
     }
 
     @Test
@@ -108,25 +98,23 @@ class NotificationControllerTest extends BaseRestAssuredTest {
     void testReadNotificationEndpoint() {
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user));
 
-        RestAssured
-                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
-                .relaxedHTTPSValidation()
-                .when().post("/v1/notifications/{notificationId}/read", notification1.getId())
-                .then()
-                .statusCode(200);
+        RestAssured.given(spec)
+            .header("Authorization", "Bearer " + signInToken.getAccessToken())
+            .relaxedHTTPSValidation()
+            .when()
+            .post("/v1/notifications/{notificationId}/read", notification1.getId())
+            .then()
+            .statusCode(200);
 
-        notificationRepository.findById(notification1.getId()).ifPresentOrElse(
-                notification -> assertTrue(notification.isStatusRead()),
-                () -> fail("Notification not found")
-        );
-        notificationRepository.findById(notification2.getId()).ifPresentOrElse(
-                notification -> assertFalse(notification.isStatusRead()),
-                () -> fail("Notification not found")
-        );
-        notificationRepository.findById(notification3.getId()).ifPresentOrElse(
-                notification -> assertFalse(notification.isStatusRead()),
-                () -> fail("Notification not found")
-        );
+        notificationRepository.findById(notification1.getId())
+            .ifPresentOrElse(notification -> assertTrue(notification.isStatusRead()),
+                    () -> fail("Notification not found"));
+        notificationRepository.findById(notification2.getId())
+            .ifPresentOrElse(notification -> assertFalse(notification.isStatusRead()),
+                    () -> fail("Notification not found"));
+        notificationRepository.findById(notification3.getId())
+            .ifPresentOrElse(notification -> assertFalse(notification.isStatusRead()),
+                    () -> fail("Notification not found"));
     }
 
     @Test
@@ -134,25 +122,23 @@ class NotificationControllerTest extends BaseRestAssuredTest {
     void testReadAllNotificationsEndpoint() {
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user));
 
-        RestAssured
-                .given(spec).header("Authorization", "Bearer " + signInToken.getAccessToken())
-                .relaxedHTTPSValidation()
-                .when().post("/v1/notifications/read-all")
-                .then()
-                .statusCode(200);
+        RestAssured.given(spec)
+            .header("Authorization", "Bearer " + signInToken.getAccessToken())
+            .relaxedHTTPSValidation()
+            .when()
+            .post("/v1/notifications/read-all")
+            .then()
+            .statusCode(200);
 
-        notificationRepository.findById(notification1.getId()).ifPresentOrElse(
-                notification -> assertTrue(notification.isStatusRead()),
-                () -> fail("Notification not found")
-        );
-        notificationRepository.findById(notification2.getId()).ifPresentOrElse(
-                notification -> assertTrue(notification.isStatusRead()),
-                () -> fail("Notification not found")
-        );
-        notificationRepository.findById(notification3.getId()).ifPresentOrElse(
-                notification -> assertTrue(notification.isStatusRead()),
-                () -> fail("Notification not found")
-        );
+        notificationRepository.findById(notification1.getId())
+            .ifPresentOrElse(notification -> assertTrue(notification.isStatusRead()),
+                    () -> fail("Notification not found"));
+        notificationRepository.findById(notification2.getId())
+            .ifPresentOrElse(notification -> assertTrue(notification.isStatusRead()),
+                    () -> fail("Notification not found"));
+        notificationRepository.findById(notification3.getId())
+            .ifPresentOrElse(notification -> assertTrue(notification.isStatusRead()),
+                    () -> fail("Notification not found"));
     }
 
 }

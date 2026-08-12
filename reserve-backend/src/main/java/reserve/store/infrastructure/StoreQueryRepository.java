@@ -1,5 +1,7 @@
 package reserve.store.infrastructure;
 
+import static reserve.store.domain.QStore.*;
+
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.Projections;
@@ -7,6 +9,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -16,10 +19,6 @@ import org.springframework.util.StringUtils;
 import reserve.store.dto.request.StoreSearchRequest;
 import reserve.store.dto.response.StoreInfoResponse;
 
-import java.util.List;
-
-import static reserve.store.domain.QStore.*;
-
 @Repository
 public class StoreQueryRepository {
 
@@ -27,10 +26,7 @@ public class StoreQueryRepository {
 
     private final JPAQueryFactory queryFactory;
 
-    public StoreQueryRepository(
-            @Value("${application.matchThreshold}") double matchThreshold,
-            EntityManager em
-    ) {
+    public StoreQueryRepository(@Value("${application.matchThreshold}") double matchThreshold, EntityManager em) {
         this.matchThreshold = matchThreshold;
         this.queryFactory = new JPAQueryFactory(em);
     }
@@ -40,32 +36,21 @@ public class StoreQueryRepository {
         condition.and(registrantUsernameCondition(storeSearchRequest.getRegistrant()));
         condition.and(queryStringCondition(storeSearchRequest.getQuery()));
 
-        List<StoreInfoResponse> content = queryFactory
-                .select(getStoreInfoResponseProjection())
-                .from(store)
-                .where(condition)
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
+        List<StoreInfoResponse> content = queryFactory.select(getStoreInfoResponseProjection())
+            .from(store)
+            .where(condition)
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
 
-        Long count = queryFactory
-                .select(store.count())
-                .from(store)
-                .where(condition)
-                .fetchOne();
+        Long count = queryFactory.select(store.count()).from(store).where(condition).fetchOne();
 
         return new PageImpl<>(content, pageable, count);
     }
 
     private static ConstructorExpression<StoreInfoResponse> getStoreInfoResponseProjection() {
-        return Projections.constructor(
-                StoreInfoResponse.class,
-                store.id,
-                store.user.username,
-                store.name,
-                store.address,
-                store.description
-        );
+        return Projections.constructor(StoreInfoResponse.class, store.id, store.user.username, store.name,
+                store.address, store.description);
     }
 
     private static BooleanExpression registrantUsernameCondition(String registrant) {
@@ -77,9 +62,8 @@ public class StoreQueryRepository {
 
     private BooleanExpression queryStringCondition(String query) {
         if (StringUtils.hasText(query)) {
-            return Expressions
-                    .numberTemplate(Double.class, "fulltext_search(name, address, description, {0})", query)
-                    .gt(matchThreshold);
+            return Expressions.numberTemplate(Double.class, "fulltext_search(name, address, description, {0})", query)
+                .gt(matchThreshold);
         }
         return null;
     }

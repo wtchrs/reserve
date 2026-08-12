@@ -1,17 +1,19 @@
 package reserve.signup.infrastructure;
 
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.security.spec.KeySpec;
 import java.util.Arrays;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 
 public class Pbkdf2PasswordEncoder implements PasswordEncoder {
 
     public static final int DEFAULT_ITERATIONS = 65536;
+
     public static final int DEFAULT_HASH_LENGTH = 256;
+
     public static final int DEFAULT_SALT_LENGTH = 20;
 
     private final int iterations, hashLength, saltLength;
@@ -65,7 +67,8 @@ public class Pbkdf2PasswordEncoder implements PasswordEncoder {
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
             SecretKey secretKey = factory.generateSecret(keySpec);
             return secretKey.getEncoded();
-        } catch (GeneralSecurityException e) {
+        }
+        catch (GeneralSecurityException e) {
             throw new IllegalStateException(e);
         }
     }
