@@ -1,17 +1,26 @@
 package reserve.signin.presentation;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import reserve.global.exception.ErrorCode;
+import reserve.global.swagger.annotation.ApiErrorCodeResponse;
+import reserve.global.swagger.annotation.ApiErrorCodeResponses;
 import reserve.signin.dto.SignInToken;
 import reserve.signin.dto.request.SignInRequest;
 import reserve.signin.service.SignInService;
 
 @RestController
 @RequestMapping("/v1")
-public class SignInController implements SignInOperations {
+@Tag(name = "Sign In", description = "Sign in API")
+public class SignInController {
 
     private final int refreshTokenExpire;
 
@@ -26,7 +35,19 @@ public class SignInController implements SignInOperations {
     }
 
     @PostMapping("/sign-in")
-    @Override
+    @Operation(
+            summary = "Sign in",
+            description = "Sign in",
+            operationId = "1_signIn"
+    )
+    @ApiResponses(@ApiResponse(
+            responseCode = "200", description = "Successfully signed in",
+            headers = {
+                    @Header(name = "Authorization", description = "Bearer access token"),
+                    @Header(name = "Set-Cookie", description = "Refresh token cookie with name 'refresh'")
+            }
+    ))
+    @ApiErrorCodeResponses(@ApiErrorCodeResponse(responseCode = "401", errorCode = ErrorCode.WRONG_CREDENTIAL))
     public void signIn(@RequestBody @Validated SignInRequest signInRequest, HttpServletResponse response) {
         SignInToken signInToken = signInService.signIn(signInRequest);
         response.setHeader("Authorization", signInToken.getAccessToken());
@@ -34,7 +55,22 @@ public class SignInController implements SignInOperations {
     }
 
     @PostMapping("/token-refresh")
-    @Override
+    @Operation(
+            summary = "Refresh access token",
+            description = "Refresh access token",
+            operationId = "2_refreshAccessToken"
+    )
+    @ApiResponses(@ApiResponse(
+            responseCode = "200", description = "Successfully refreshed",
+            headers = {
+                    @Header(name = "Authorization", description = "Bearer access token"),
+                    @Header(name = "Set-Cookie", description = "New refresh token cookie with name 'refresh'")
+            }
+    ))
+    @ApiErrorCodeResponses({
+            @ApiErrorCodeResponse(responseCode = "401", errorCode = ErrorCode.EXPIRED_REFRESH_TOKEN),
+            @ApiErrorCodeResponse(responseCode = "401", errorCode = ErrorCode.INVALID_REFRESH_TOKEN)
+    })
     public void refreshAccessToken(
             @CookieValue("refresh") Cookie refreshCookie,
             HttpServletResponse response
@@ -55,7 +91,12 @@ public class SignInController implements SignInOperations {
     }
 
     @PostMapping("/sign-out")
-    @Override
+    @Operation(
+            summary = "Sign out",
+            description = "Sign out",
+            operationId = "3_signOut"
+    )
+    @ApiResponses(@ApiResponse(responseCode = "200", description = "Successfully signed out"))
     public void signOut(@CookieValue("refresh") Cookie refreshCookie, HttpServletResponse response) {
         signInService.signOut(refreshCookie.getValue());
         // delete cookie
