@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
-import reserve.global.BaseRestAssuredTest;
+import reserve.support.BaseRestAssuredTest;
 import reserve.signin.dto.request.SignInRequest;
 import reserve.signin.infrastructure.JwtProvider;
 import reserve.signin.infrastructure.RefreshTokenRepository;

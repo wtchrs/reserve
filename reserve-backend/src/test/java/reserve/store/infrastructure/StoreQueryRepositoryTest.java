@@ -8,24 +8,19 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.Commit;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-import reserve.global.TestcontainersConfig;
+import reserve.support.IntegrationTest;
 import reserve.store.domain.Store;
 import reserve.store.dto.request.StoreSearchRequest;
 import reserve.store.dto.response.StoreInfoResponse;
 import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@Import(TestcontainersConfig.class)
+@IntegrationTest
 class StoreQueryRepositoryTest {
 
     @Autowired

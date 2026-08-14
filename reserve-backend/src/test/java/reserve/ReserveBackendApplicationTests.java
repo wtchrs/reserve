@@ -1,14 +1,9 @@
 package reserve;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
-import reserve.global.TestcontainersConfig;
+import reserve.support.IntegrationTest;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@Import(TestcontainersConfig.class)
+@IntegrationTest
 class ReserveBackendApplicationTests {
 
     @Test

@@ -13,7 +13,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import reserve.global.TestUtils;
+import reserve.support.TestUtils;
 import reserve.global.config.TimeConfig;
 import reserve.signin.infrastructure.JwtProvider;
 import reserve.user.dto.request.PasswordUpdateRequest;

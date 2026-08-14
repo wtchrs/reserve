@@ -1,6 +1,5 @@
-package reserve.global;
+package reserve.support;
 
-import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
@@ -9,15 +8,10 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
 
 @Slf4j
-@Import(TestcontainersConfig.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
+@HttpIntegrationTest
 public abstract class BaseRestAssuredTest {
 
     protected RequestSpecification spec;
@@ -26,15 +20,12 @@ public abstract class BaseRestAssuredTest {
     int port;
 
     @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
-
-    @BeforeEach
     void setUpSpec() {
-        spec = new RequestSpecBuilder().setPort(port).setBaseUri("http://localhost").build();
-        RestAssured.filters(RequestLoggingFilter.logRequestTo(createRedirectedPrintStream("Request:\n")),
-                ResponseLoggingFilter.logResponseTo(createRedirectedPrintStream("Response:\n")));
+        spec = new RequestSpecBuilder().setBaseUri("http://localhost")
+            .setPort(port)
+            .addFilter(RequestLoggingFilter.logRequestTo(createRedirectedPrintStream("Request:\n")))
+            .addFilter(ResponseLoggingFilter.logResponseTo(createRedirectedPrintStream("Response:\n")))
+            .build();
     }
 
     private PrintStream createRedirectedPrintStream(String prefix) {

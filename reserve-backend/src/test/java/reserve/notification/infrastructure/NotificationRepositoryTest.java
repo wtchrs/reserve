@@ -7,14 +7,11 @@ import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-import reserve.global.TestcontainersConfig;
+import reserve.support.IntegrationTest;
 import reserve.notification.domain.Notification;
 import reserve.notification.domain.ResourceType;
 import reserve.reservation.infrastructure.ReservationRepository;
@@ -22,9 +19,7 @@ import reserve.store.infrastructure.StoreRepository;
 import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@Import(TestcontainersConfig.class)
+@IntegrationTest
 @Transactional
 class NotificationRepositoryTest {
 

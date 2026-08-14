@@ -12,7 +12,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import reserve.global.TestUtils;
+import reserve.support.TestUtils;
 import reserve.signin.domain.RefreshToken;
 import reserve.signin.dto.SignInToken;
 import reserve.signin.dto.request.SignInRequest;

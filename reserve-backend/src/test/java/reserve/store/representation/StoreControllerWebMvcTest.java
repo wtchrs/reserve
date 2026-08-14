@@ -15,7 +15,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import reserve.global.TestUtils;
+import reserve.support.TestUtils;
 import reserve.global.config.TimeConfig;
 import reserve.signin.dto.SignInToken;
 import reserve.signin.infrastructure.JwtProvider;

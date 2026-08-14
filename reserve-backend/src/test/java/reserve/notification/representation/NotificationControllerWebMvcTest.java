@@ -19,7 +19,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.MockMvc;
-import reserve.global.TestUtils;
+import reserve.support.TestUtils;
 import reserve.global.config.TimeConfig;
 import reserve.notification.domain.NotificationStatus;
 import reserve.notification.domain.ResourceType;

@@ -1,4 +1,4 @@
-package reserve.global;
+package reserve.support;
 
 import java.time.Clock;
 import java.time.Duration;

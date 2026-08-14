@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.web.servlet.MockMvc;
-import reserve.global.TestUtils;
+import reserve.support.TestUtils;
 import reserve.global.config.TimeConfig;
 import reserve.notification.service.NotificationService;
 import reserve.reservation.dto.request.ReservationCreateRequest;

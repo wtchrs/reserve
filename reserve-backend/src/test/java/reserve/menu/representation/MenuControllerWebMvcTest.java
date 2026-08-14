@@ -14,7 +14,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
-import reserve.global.TestUtils;
+import reserve.support.TestUtils;
 import reserve.global.config.TimeConfig;
 import reserve.menu.dto.request.MenuCreateRequest;
 import reserve.menu.dto.request.MenuUpdateRequest;

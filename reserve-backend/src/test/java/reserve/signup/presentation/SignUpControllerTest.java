@@ -11,7 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Commit;
-import reserve.global.BaseRestAssuredTest;
+import reserve.support.BaseRestAssuredTest;
 import reserve.signup.dto.request.SignUpRequest;
 import reserve.signup.infrastructure.PasswordEncoder;
 import reserve.user.infrastructure.UserRepository;

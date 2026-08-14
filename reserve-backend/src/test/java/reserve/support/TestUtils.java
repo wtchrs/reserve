@@ -1,4 +1,4 @@
-package reserve.global;
+package reserve.support;
 
 import reserve.signin.domain.TokenDetails;
 import reserve.user.domain.User;
