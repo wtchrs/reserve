@@ -189,9 +189,20 @@ openssl pkcs12 -export \
 
 ### Test
 
+You don't need to run MySQL and Redis manually. Testcontainers automatically starts the required containers using a container runtime such as Docker or Podman.
+
+You also don't need to generate a TLS/SSL certificate in the test profile because SSL is disabled in that profile. The REST Assured integration tests access the APIs over HTTP rather than HTTPS.
+
 ```bash
 ./gradlew test
 ```
+
+> [!NOTE]
+> If Testcontainers reports an unsupported Docker API version, specify a version supported by your container runtime in `~/.docker-java.properties`. For example:
+>
+> ```properties
+> api.version=1.44
+> ```
 
 ### Launch the spring server
 
