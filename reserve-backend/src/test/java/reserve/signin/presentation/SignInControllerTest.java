@@ -68,7 +68,6 @@ class SignInControllerTest extends BaseRestAssuredTest {
         Response response = RestAssured.given(spec)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .body(payload)
-            .relaxedHTTPSValidation()
             .when()
             .post("/v1/sign-in");
 
@@ -94,7 +93,6 @@ class SignInControllerTest extends BaseRestAssuredTest {
         String refreshToken = RestAssured.given(spec)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .body(payload)
-            .relaxedHTTPSValidation()
             .when()
             .post("/v1/sign-in")
             .getCookie("refresh");
@@ -106,11 +104,7 @@ class SignInControllerTest extends BaseRestAssuredTest {
             throw new RuntimeException(e);
         }
 
-        Response response = RestAssured.given(spec)
-            .cookie("refresh", refreshToken)
-            .relaxedHTTPSValidation()
-            .when()
-            .post("/v1/token-refresh");
+        Response response = RestAssured.given(spec).cookie("refresh", refreshToken).when().post("/v1/token-refresh");
 
         response.then().statusCode(200);
 
@@ -136,7 +130,6 @@ class SignInControllerTest extends BaseRestAssuredTest {
         Response response = RestAssured.given(spec)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .body(payload)
-            .relaxedHTTPSValidation()
             .when()
             .post("/v1/sign-in");
 
@@ -148,7 +141,6 @@ class SignInControllerTest extends BaseRestAssuredTest {
         Response response1 = RestAssured.given(spec)
             .header("Authorization", "Bearer " + accessToken)
             .cookie("refresh", refreshToken)
-            .relaxedHTTPSValidation()
             .when()
             .post("/v1/sign-out");
 

@@ -48,7 +48,6 @@ class SignUpControllerTest extends BaseRestAssuredTest {
         RestAssured.given(spec)
             .body(payload)
             .contentType("application/json")
-            .relaxedHTTPSValidation()
             .when()
             .post("/v1/sign-up")
             .then()

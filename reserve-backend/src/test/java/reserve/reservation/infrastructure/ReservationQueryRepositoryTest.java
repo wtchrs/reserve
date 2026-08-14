@@ -8,11 +8,14 @@ import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.Commit;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import reserve.global.TestcontainersConfig;
 import reserve.reservation.domain.Reservation;
 import reserve.reservation.dto.request.ReservationSearchRequest;
 import reserve.reservation.dto.response.ReservationInfoResponse;
@@ -22,6 +25,8 @@ import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
 
 @SpringBootTest
+@ActiveProfiles("test")
+@Import(TestcontainersConfig.class)
 @Transactional
 class ReservationQueryRepositoryTest {
 

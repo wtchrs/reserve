@@ -76,7 +76,6 @@ class NotificationControllerTest extends BaseRestAssuredTest {
 
         RestAssured.given(spec)
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
-            .relaxedHTTPSValidation()
             .when()
             .get("/v1/notifications")
             .then()
@@ -100,7 +99,6 @@ class NotificationControllerTest extends BaseRestAssuredTest {
 
         RestAssured.given(spec)
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
-            .relaxedHTTPSValidation()
             .when()
             .post("/v1/notifications/{notificationId}/read", notification1.getId())
             .then()
@@ -124,7 +122,6 @@ class NotificationControllerTest extends BaseRestAssuredTest {
 
         RestAssured.given(spec)
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
-            .relaxedHTTPSValidation()
             .when()
             .post("/v1/notifications/read-all")
             .then()

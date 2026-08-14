@@ -38,6 +38,7 @@ out/
 
 ### Spring Setting File ###
 src/*/resources/application*.yml
+!src/test/resources/application-test.yml
 
 ### Docker ###
 docker/*

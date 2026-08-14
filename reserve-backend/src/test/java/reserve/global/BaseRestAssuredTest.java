@@ -11,9 +11,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 
 @Slf4j
+@Import(TestcontainersConfig.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 public abstract class BaseRestAssuredTest {
 
     protected RequestSpecification spec;
@@ -28,7 +32,7 @@ public abstract class BaseRestAssuredTest {
 
     @BeforeEach
     void setUpSpec() {
-        spec = new RequestSpecBuilder().setPort(port).setBaseUri("https://localhost").build();
+        spec = new RequestSpecBuilder().setPort(port).setBaseUri("http://localhost").build();
         RestAssured.filters(RequestLoggingFilter.logRequestTo(createRedirectedPrintStream("Request:\n")),
                 ResponseLoggingFilter.logResponseTo(createRedirectedPrintStream("Response:\n")));
     }

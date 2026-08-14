@@ -91,7 +91,6 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         // Cancel the ready reservation
         RestAssured.given(spec)
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
-            .relaxedHTTPSValidation()
             .when()
             .post(CANCEL_ENDPOINT_URL_TEMPLATE, ready.getId())
             .then()
@@ -108,7 +107,6 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         // Cancel the in-service reservation
         RestAssured.given(spec)
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
-            .relaxedHTTPSValidation()
             .when()
             .post(CANCEL_ENDPOINT_URL_TEMPLATE, inService.getId())
             .then()
@@ -126,7 +124,6 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         // Cancel the completed reservation
         RestAssured.given(spec)
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
-            .relaxedHTTPSValidation()
             .when()
             .post(CANCEL_ENDPOINT_URL_TEMPLATE, completed.getId())
             .then()
@@ -143,7 +140,6 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         // Cancel the cancelled reservation
         RestAssured.given(spec)
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
-            .relaxedHTTPSValidation()
             .when()
             .post(CANCEL_ENDPOINT_URL_TEMPLATE, cancelled.getId())
             .then()
@@ -159,7 +155,6 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         // Start the ready reservation
         RestAssured.given(spec)
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
-            .relaxedHTTPSValidation()
             .when()
             .post(START_ENDPOINT_URL_TEMPLATE, ready.getId())
             .then()
@@ -175,7 +170,6 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         // Start the in-service reservation
         RestAssured.given(spec)
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
-            .relaxedHTTPSValidation()
             .when()
             .post(START_ENDPOINT_URL_TEMPLATE, inService.getId())
             .then()
@@ -192,7 +186,6 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         // Start the completed reservation
         RestAssured.given(spec)
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
-            .relaxedHTTPSValidation()
             .when()
             .post(START_ENDPOINT_URL_TEMPLATE, completed.getId())
             .then()
@@ -210,7 +203,6 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         // Start the cancelled reservation
         RestAssured.given(spec)
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
-            .relaxedHTTPSValidation()
             .when()
             .post(START_ENDPOINT_URL_TEMPLATE, cancelled.getId())
             .then()
@@ -228,7 +220,6 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         // Complete the ready reservation
         RestAssured.given(spec)
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
-            .relaxedHTTPSValidation()
             .when()
             .post(COMPLETE_ENDPOINT_URL_TEMPLATE, ready.getId())
             .then()
@@ -246,7 +237,6 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         // Complete the in-service reservation
         RestAssured.given(spec)
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
-            .relaxedHTTPSValidation()
             .when()
             .post(COMPLETE_ENDPOINT_URL_TEMPLATE, inService.getId())
             .then()
@@ -262,7 +252,6 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         // Complete the completed reservation
         RestAssured.given(spec)
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
-            .relaxedHTTPSValidation()
             .when()
             .post(COMPLETE_ENDPOINT_URL_TEMPLATE, completed.getId())
             .then()
@@ -279,7 +268,6 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
         // Complete the cancelled reservation
         RestAssured.given(spec)
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
-            .relaxedHTTPSValidation()
             .when()
             .post(COMPLETE_ENDPOINT_URL_TEMPLATE, cancelled.getId())
             .then()

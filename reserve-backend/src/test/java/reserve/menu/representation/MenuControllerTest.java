@@ -82,7 +82,6 @@ class MenuControllerTest extends BaseRestAssuredTest {
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .body(payload)
-            .relaxedHTTPSValidation()
             .when()
             .post("/v1/stores/{storeId}/menus", store.getId());
 
@@ -104,7 +103,6 @@ class MenuControllerTest extends BaseRestAssuredTest {
         Menu menu = menuRepository.save(new Menu(store, "Aglio e Olio", 10000, "Spaghetti with garlic and olive oil"));
 
         RestAssured.given(spec)
-            .relaxedHTTPSValidation()
             .when()
             .get("/v1/menus/{menuId}", menu.getId())
             .then()
@@ -124,7 +122,6 @@ class MenuControllerTest extends BaseRestAssuredTest {
         Menu menu3 = menuRepository.save(new Menu(store, "Bolognese", 12000, "Spaghetti with meat sauce"));
 
         RestAssured.given(spec)
-            .relaxedHTTPSValidation()
             .when()
             .get("/v1/stores/{storeId}/menus", store.getId())
             .then()
@@ -157,7 +154,6 @@ class MenuControllerTest extends BaseRestAssuredTest {
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .body(payload)
-            .relaxedHTTPSValidation()
             .when()
             .put("/v1/menus/{menuId}", menu1.getId())
             .then()
@@ -179,7 +175,6 @@ class MenuControllerTest extends BaseRestAssuredTest {
 
         RestAssured.given(spec)
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
-            .relaxedHTTPSValidation()
             .when()
             .delete("/v1/menus/{menuId}", menu1.getId())
             .then()

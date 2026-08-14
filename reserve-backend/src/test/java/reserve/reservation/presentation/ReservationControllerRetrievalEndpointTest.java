@@ -87,7 +87,6 @@ class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user1));
         RestAssured.given(spec)
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
-            .relaxedHTTPSValidation()
             .when()
             .get("/v1/reservations/{reservationId}", reservation.getId())
             .then()
@@ -107,7 +106,6 @@ class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user2));
         RestAssured.given(spec)
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
-            .relaxedHTTPSValidation()
             .when()
             .get("/v1/reservations/{reservationId}", reservation.getId())
             .then()
@@ -124,7 +122,6 @@ class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user3));
         RestAssured.given(spec)
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
-            .relaxedHTTPSValidation()
             .when()
             .get("/v1/reservations/{reservationId}", reservation.getId())
             .then()
@@ -146,7 +143,6 @@ class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user1));
         RestAssured.given(spec)
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
-            .relaxedHTTPSValidation()
             .when()
             .get("/v1/reservations/{reservationId}/menus", reservation.getId())
             .then()
@@ -176,7 +172,6 @@ class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user2));
         RestAssured.given(spec)
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
-            .relaxedHTTPSValidation()
             .when()
             .get("/v1/reservations/{reservationId}/menus", reservation.getId())
             .then()
@@ -197,7 +192,6 @@ class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user3));
         RestAssured.given(spec)
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
-            .relaxedHTTPSValidation()
             .when()
             .get("/v1/reservations/{reservationId}/menus", reservation.getId())
             .then()
@@ -226,7 +220,6 @@ class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
             .param("type", ReservationSearchRequest.SearchType.CUSTOMER.toString())
             .param("query", "pasta")
             .param("date", LocalDate.now().plusDays(7).toString())
-            .relaxedHTTPSValidation()
             .when()
             .get("/v1/reservations")
             .then()

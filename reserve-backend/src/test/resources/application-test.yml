@@ -1,0 +1,13 @@
+server:
+  ssl:
+    enabled: false
+
+logging:
+  level:
+    root: warn
+    sql: warn
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate

@@ -108,7 +108,6 @@ class ReservationControllerTest extends BaseRestAssuredTest {
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .body(payload)
-            .relaxedHTTPSValidation()
             .when()
             .post("/v1/reservations")
             .then()
@@ -137,7 +136,6 @@ class ReservationControllerTest extends BaseRestAssuredTest {
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .body(payload)
-            .relaxedHTTPSValidation()
             .when()
             .put("/v1/reservations/{reservationId}", reservation.getId())
             .then()
@@ -159,7 +157,6 @@ class ReservationControllerTest extends BaseRestAssuredTest {
 
         RestAssured.given(spec)
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
-            .relaxedHTTPSValidation()
             .when()
             .post("/v1/reservations/{reservationId}/cancel", reservation.getId())
             .then()
