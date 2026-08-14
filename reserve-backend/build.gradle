@@ -96,12 +96,18 @@ jacocoTestReport {
 
 // Formatter config
 
+def generatedDir = file(generated).toPath().toAbsolutePath().normalize()
+
 tasks.withType(io.spring.javaformat.gradle.tasks.Format).configureEach {
-    exclude 'main/generated/**'
+    exclude { element ->
+        element.file.toPath().toAbsolutePath().normalize().startsWith(generatedDir)
+    }
 }
 
 tasks.withType(io.spring.javaformat.gradle.tasks.CheckFormat).configureEach {
-    exclude 'main/generated/**'
+    exclude { element ->
+        element.file.toPath().toAbsolutePath().normalize().startsWith(generatedDir)
+    }
 }
 
 // QueryDsl config
