@@ -5,12 +5,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
-import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.Commit;
 import reserve.support.BaseRestAssuredTest;
 import reserve.signup.dto.request.SignUpRequest;
 import reserve.signup.infrastructure.PasswordEncoder;
@@ -26,13 +23,6 @@ class SignUpControllerTest extends BaseRestAssuredTest {
 
     @Autowired
     UserRepository userRepository;
-
-    @Transactional
-    @Commit
-    @AfterEach
-    void tearDown() {
-        userRepository.deleteAll();
-    }
 
     @Test
     @DisplayName("[Integration] Testing POST /v1/sign-up endpoint")

@@ -70,16 +70,6 @@ class ReservationControllerTest extends BaseRestAssuredTest {
         store2 = storeRepository.save(new Store(user2, "Pizza", "address", "description"));
     }
 
-    @AfterEach
-    void tearDown() {
-        notificationRepository.deleteAll();
-        reservationMenuRepository.deleteAll();
-        reservationRepository.deleteAll();
-        menuRepository.deleteAll();
-        storeRepository.deleteAll();
-        userRepository.deleteAll();
-    }
-
     @Test
     @DisplayName("[Integration] Testing POST /v1/reservations endpoint")
     void testCreateEndpoint() throws JsonProcessingException {

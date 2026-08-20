@@ -12,7 +12,7 @@ import java.lang.annotation.*;
 @Documented
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@Import(TestcontainersConfig.class)
+@Import({ TestcontainersConfig.class, TestStateCleaner.class })
 public @interface HttpIntegrationTest {
 
 }

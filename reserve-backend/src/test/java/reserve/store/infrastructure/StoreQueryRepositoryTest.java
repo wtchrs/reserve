@@ -8,6 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,10 +18,12 @@ import reserve.support.IntegrationTest;
 import reserve.store.domain.Store;
 import reserve.store.dto.request.StoreSearchRequest;
 import reserve.store.dto.response.StoreInfoResponse;
+import reserve.support.TestStateCleaner;
 import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
 
 @IntegrationTest
+@Import(TestStateCleaner.class)
 class StoreQueryRepositoryTest {
 
     @Autowired
@@ -32,6 +35,12 @@ class StoreQueryRepositoryTest {
     @Autowired
     StoreQueryRepository storeQueryRepository;
 
+    @Autowired
+    TestStateCleaner testStateCleaner;
+
+    /**
+     * This data setup method commits the changes to update the full-text index.
+     */
     @Transactional
     @Commit
     @BeforeEach
@@ -49,9 +58,8 @@ class StoreQueryRepositoryTest {
     @Transactional
     @Commit
     @AfterEach
-    void tearDown() {
-        storeRepository.deleteAll();
-        userRepository.deleteAll();
+    void cleanUp() {
+        testStateCleaner.cleanUp();
     }
 
     @Test
@@ -62,6 +70,7 @@ class StoreQueryRepositoryTest {
         Mockito.when(request.getQuery()).thenReturn("pasta");
         Pageable pageable = PageRequest.of(0, 20);
 
+        // Committed data is required to use the full-text index.
         Page<StoreInfoResponse> response = storeQueryRepository.findResponsesBySearch(request, pageable);
 
         assertEquals(3, response.getTotalElements());

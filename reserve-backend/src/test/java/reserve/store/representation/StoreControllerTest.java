@@ -6,12 +6,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
-import javax.sql.DataSource;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
 import reserve.support.BaseRestAssuredTest;
 import reserve.support.TestUtils;
 import reserve.signin.dto.SignInToken;
@@ -24,9 +22,6 @@ import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
 
 class StoreControllerTest extends BaseRestAssuredTest {
-
-    @Autowired
-    DataSource dataSource;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -45,13 +40,6 @@ class StoreControllerTest extends BaseRestAssuredTest {
     @BeforeEach
     void setUp() {
         user = userRepository.save(new User("username", "password", "nickname", "StoreControllerTest.setUp()"));
-    }
-
-    @AfterEach
-    void tearDown() {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-        jdbcTemplate.update("DELETE FROM stores");
-        jdbcTemplate.update("DELETE FROM users");
     }
 
     @Test

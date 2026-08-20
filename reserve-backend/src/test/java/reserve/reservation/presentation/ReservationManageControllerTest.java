@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.equalTo;
 import io.restassured.RestAssured;
 import java.time.LocalDate;
 import javax.sql.DataSource;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -73,14 +72,6 @@ class ReservationManageControllerTest extends BaseRestAssuredTest {
 
         cancelled = reservationRepository.save(new Reservation(user, store, LocalDate.now().plusDays(7), 12));
         jdbcTemplate.update("UPDATE reservations SET status = 'CANCELLED' WHERE reservation_id = ?", cancelled.getId());
-    }
-
-    @AfterEach
-    void tearDown() {
-        notificationRepository.deleteAll();
-        reservationRepository.deleteAll();
-        storeRepository.deleteAll();
-        userRepository.deleteAll();
     }
 
     @Test

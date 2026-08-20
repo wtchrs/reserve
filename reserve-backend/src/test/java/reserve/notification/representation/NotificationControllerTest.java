@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import io.restassured.RestAssured;
 import java.time.LocalDate;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -59,14 +58,6 @@ class NotificationControllerTest extends BaseRestAssuredTest {
             .save(new Notification(user, ResourceType.RESERVATION, reservation.getId(), "message2"));
         notification3 = notificationRepository
             .save(new Notification(user, ResourceType.RESERVATION, reservation.getId(), "message3"));
-    }
-
-    @AfterEach
-    void tearDown() {
-        notificationRepository.deleteAll();
-        reservationRepository.deleteAll();
-        storeRepository.deleteAll();
-        userRepository.deleteAll();
     }
 
     @Test

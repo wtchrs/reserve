@@ -3,10 +3,8 @@ package reserve.reservation.presentation;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import java.time.LocalDate;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,9 +27,6 @@ import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
 
 class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
-
-    @Autowired
-    ObjectMapper objectMapper;
 
     @Autowired
     JwtProvider jwtProvider;
@@ -65,16 +60,6 @@ class ReservationControllerRetrievalEndpointTest extends BaseRestAssuredTest {
         user3 = userRepository.save(new User("user3", "password", "foo", "ReservationControllerTest.setUp()"));
         store1 = storeRepository.save(new Store(user1, "Pasta", "address", "description"));
         store2 = storeRepository.save(new Store(user2, "Pizza", "address", "description"));
-    }
-
-    @AfterEach
-    void tearDown() {
-        notificationRepository.deleteAll();
-        reservationMenuRepository.deleteAll();
-        reservationRepository.deleteAll();
-        menuRepository.deleteAll();
-        storeRepository.deleteAll();
-        userRepository.deleteAll();
     }
 
     @Test

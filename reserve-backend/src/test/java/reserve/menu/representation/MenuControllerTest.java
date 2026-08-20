@@ -7,14 +7,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import javax.sql.DataSource;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
 import reserve.support.BaseRestAssuredTest;
 import reserve.support.TestUtils;
 import reserve.menu.domain.Menu;
@@ -29,9 +26,6 @@ import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
 
 class MenuControllerTest extends BaseRestAssuredTest {
-
-    @Autowired
-    DataSource dataSource;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -56,14 +50,6 @@ class MenuControllerTest extends BaseRestAssuredTest {
     void setUp() {
         user = userRepository.save(new User("username", "password", "nickname", "description"));
         store = storeRepository.save(new Store(user, "Italian Restaurant", "address", "Pasta and Pizza"));
-    }
-
-    @AfterEach
-    void tearDown() {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-        jdbcTemplate.update("DELETE FROM menus");
-        jdbcTemplate.update("DELETE FROM stores");
-        jdbcTemplate.update("DELETE FROM users");
     }
 
     @Test

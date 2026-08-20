@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import java.util.concurrent.TimeUnit;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,13 +46,6 @@ class SignInControllerTest extends BaseRestAssuredTest {
     @Commit
     void setUp() {
         user = userRepository.save(new User("username", passwordEncoder.encode("password"), "nickname", "description"));
-    }
-
-    @AfterEach
-    @Transactional
-    @Commit
-    void tearDown() {
-        userRepository.deleteAll();
     }
 
     @Test

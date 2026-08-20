@@ -6,18 +6,24 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import reserve.support.IntegrationTest;
 import reserve.signin.domain.RefreshToken;
+import reserve.support.RedisCleaner;
 
 @IntegrationTest
+@Import(RedisCleaner.class)
 class RefreshTokenRepositoryTest {
 
     @Autowired
     RefreshTokenRepository refreshTokenRepository;
 
+    @Autowired
+    RedisCleaner redisCleaner;
+
     @AfterEach
-    void tearDown() {
-        refreshTokenRepository.deleteAll();
+    void cleanUp() {
+        redisCleaner.cleanUp();
     }
 
     @Test
