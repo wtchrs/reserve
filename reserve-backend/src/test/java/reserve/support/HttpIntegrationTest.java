@@ -3,6 +3,7 @@ package reserve.support;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.lang.annotation.*;
 
@@ -12,7 +13,8 @@ import java.lang.annotation.*;
 @Documented
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@Import({ TestcontainersConfig.class, TestStateCleaner.class })
+@ContextConfiguration(initializers = TestcontainerInitializer.class)
+@Import(TestStateCleaner.class)
 public @interface HttpIntegrationTest {
 
 }
