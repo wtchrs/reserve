@@ -35,7 +35,8 @@ public class StoreService {
             throw new AuthenticationException(ErrorCode.INVALID_SIGN_IN_INFO);
         }
         Store store = storeRepository.save(new Store(userRepository.getReferenceById(userId),
-                storeCreateRequest.getName(), storeCreateRequest.getAddress(), storeCreateRequest.getDescription()));
+                storeCreateRequest.getName(), storeCreateRequest.getAddress(), storeCreateRequest.getDescription(),
+                storeCreateRequest.getCapacity()));
         return store.getId();
     }
 
@@ -63,6 +64,9 @@ public class StoreService {
         }
         if (StringUtils.hasText(storeUpdateRequest.getDescription())) {
             store.setDescription(storeUpdateRequest.getDescription());
+        }
+        if (storeUpdateRequest.getCapacity() != null) {
+            store.setCapacity(storeUpdateRequest.getCapacity());
         }
     }
 

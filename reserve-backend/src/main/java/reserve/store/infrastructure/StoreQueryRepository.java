@@ -50,7 +50,7 @@ public class StoreQueryRepository {
 
     private static ConstructorExpression<StoreInfoResponse> getStoreInfoResponseProjection() {
         return Projections.constructor(StoreInfoResponse.class, store.id, store.user.username, store.name,
-                store.address, store.description);
+                store.address, store.description, store.capacity);
     }
 
     private static BooleanExpression registrantUsernameCondition(String registrant) {

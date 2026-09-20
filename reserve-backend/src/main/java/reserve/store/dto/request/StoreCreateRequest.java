@@ -1,6 +1,7 @@
 package reserve.store.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,5 +23,10 @@ public class StoreCreateRequest {
     @Schema(description = "Description of the store", example = "store description")
     @NotEmpty(message = "Description required.")
     private String description;
+
+    @Schema(description = "Capacity of the store's each slot. `-1` means no capacity limitation.",
+            examples = { "-1", "0", "5" }, defaultValue = "-1")
+    @Min(value = -1, message = "Capacity must equal to or larger than -1.")
+    private Integer capacity;
 
 }

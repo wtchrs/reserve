@@ -16,7 +16,7 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
 
     @Query("""
             SELECT new reserve.store.dto.response.StoreInfoResponse(
-                store.id, store.user.username, store.name, store.address, store.description
+                store.id, store.user.username, store.name, store.address, store.description, store.capacity
             )
             FROM Store store
             WHERE store.id = :storeId

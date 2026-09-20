@@ -65,7 +65,7 @@ class StoreServiceTest {
     @Test
     @DisplayName("Testing retrieval of store information")
     void testStoreInfoRetrieval() {
-        StoreInfoResponse response = new StoreInfoResponse(1L, "username", "name", "address", "description");
+        StoreInfoResponse response = new StoreInfoResponse(1L, "username", "name", "address", "description", -1);
         Mockito.when(storeRepository.findResponseById(1L)).thenReturn(Optional.of(response));
 
         StoreInfoResponse result = storeService.getStoreInfo(1L);
@@ -78,9 +78,10 @@ class StoreServiceTest {
         StoreSearchRequest storeSearchRequest = Mockito.mock(StoreSearchRequest.class);
         Pageable pageable = PageRequest.of(0, 20);
 
-        StoreInfoResponse storeInfo1 = new StoreInfoResponse(1L, "username", "Pasta", "address", "Pasta");
-        StoreInfoResponse storeInfo2 = new StoreInfoResponse(1L, "username", "Italian", "address", "Steak and pasta");
-        StoreInfoResponse storeInfo3 = new StoreInfoResponse(1L, "username", "Pizza", "address", "Pizza and pasta");
+        StoreInfoResponse storeInfo1 = new StoreInfoResponse(1L, "username", "Pasta", "address", "Pasta", -1);
+        StoreInfoResponse storeInfo2 = new StoreInfoResponse(1L, "username", "Italian", "address", "Steak and pasta",
+                -1);
+        StoreInfoResponse storeInfo3 = new StoreInfoResponse(1L, "username", "Pizza", "address", "Pizza and pasta", -1);
         Mockito.when(storeQueryRepository.findResponsesBySearch(storeSearchRequest, pageable))
             .thenReturn(new PageImpl<>(List.of(storeInfo1, storeInfo2, storeInfo3), pageable, 3));
 
@@ -104,12 +105,14 @@ class StoreServiceTest {
         Mockito.when(storeUpdateRequest.getName()).thenReturn("newName");
         Mockito.when(storeUpdateRequest.getAddress()).thenReturn("newAddress");
         Mockito.when(storeUpdateRequest.getDescription()).thenReturn("newDescription");
+        Mockito.when(storeUpdateRequest.getCapacity()).thenReturn(10);
 
         storeService.update(1L, 1L, storeUpdateRequest);
 
         Mockito.verify(store).setName("newName");
         Mockito.verify(store).setAddress("newAddress");
         Mockito.verify(store).setDescription("newDescription");
+        Mockito.verify(store).setCapacity(10);
     }
 
     @Test
@@ -120,6 +123,31 @@ class StoreServiceTest {
         storeService.delete(1L, 1L);
 
         Mockito.verify(storeRepository).deleteById(1L);
+    }
+
+    @Test
+    void updatesCapacity_whenRequestHasNonNullCapacity() {
+        Store store = new Store(Mockito.mock(User.class), "name", "address", "description", 5);
+        Mockito.when(storeRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(store));
+
+        StoreUpdateRequest storeUpdateRequest = Mockito.spy(new StoreUpdateRequest());
+        storeUpdateRequest.setCapacity(10);
+
+        storeService.update(1L, 1L, storeUpdateRequest);
+
+        assertEquals(10, store.getCapacity());
+    }
+
+    @Test
+    void preservesCapacity_whenRequestHasNullCapacity() {
+        Store store = Mockito.spy(new Store(Mockito.mock(User.class), "name", "address", "description"));
+        Mockito.when(storeRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(store));
+
+        StoreUpdateRequest storeUpdateRequest = Mockito.spy(new StoreUpdateRequest());
+
+        storeService.update(1L, 1L, storeUpdateRequest);
+
+        Mockito.verify(store, Mockito.never()).setCapacity(Mockito.any());
     }
 
 }

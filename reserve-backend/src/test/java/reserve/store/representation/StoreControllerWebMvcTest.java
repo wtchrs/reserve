@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
 import reserve.support.TestUtils;
 import reserve.global.config.TimeConfig;
 import reserve.signin.dto.SignInToken;
@@ -68,8 +69,8 @@ class StoreControllerWebMvcTest {
     @DisplayName("Testing GET /v1/stores/{id} endpoint")
     void testGetStoreInfoEndpoint() throws Exception {
         Mockito.when(storeService.getStoreInfo(10L))
-            .thenReturn(
-                    new StoreInfoResponse(10L, "username", "Store name", "City, Street, Zipcode", "Store description"));
+            .thenReturn(new StoreInfoResponse(10L, "username", "Store name", "City, Street, Zipcode",
+                    "Store description", -1));
 
         mockMvc.perform(get("/v1/stores/{id}", 10L))
             .andExpectAll(status().isOk(), content().contentType("application/json"), jsonPath("$.storeId").value(10L),
@@ -82,9 +83,9 @@ class StoreControllerWebMvcTest {
     @DisplayName("Testing GET /v1/stores endpoint")
     void testSearchEndpoint() throws Exception {
         List<StoreInfoResponse> storeInfoResponses = List.of(
-                new StoreInfoResponse(1L, "username", "Pasta", "address", "Pasta only"),
-                new StoreInfoResponse(2L, "username", "Pizza", "address", "Pizza and Pasta"),
-                new StoreInfoResponse(3L, "username", "Hamburger", "pasta street", "Hamburger"));
+                new StoreInfoResponse(1L, "username", "Pasta", "address", "Pasta only", -1),
+                new StoreInfoResponse(2L, "username", "Pizza", "address", "Pizza and Pasta", -1),
+                new StoreInfoResponse(3L, "username", "Hamburger", "pasta street", "Hamburger", -1));
 
         Mockito
             .when(storeService.search(Mockito
@@ -133,6 +134,77 @@ class StoreControllerWebMvcTest {
             .andExpect(status().isOk());
 
         Mockito.verify(storeService).delete(1L, 10L);
+    }
+
+    void verifyStoreCreationWithCapacity(int capacity, ResultMatcher... matchers) throws Exception {
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(1L));
+
+        StoreCreateRequest storeCreateRequest = new StoreCreateRequest();
+        storeCreateRequest.setName("Store name");
+        storeCreateRequest.setAddress("City, Street, Zipcode");
+        storeCreateRequest.setDescription("Store description");
+        storeCreateRequest.setCapacity(capacity);
+
+        Mockito.when(storeService.create(Mockito.eq(1L), Mockito.any())).thenReturn(10L);
+
+        mockMvc
+            .perform(post("/v1/stores").header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(storeCreateRequest)))
+            .andExpectAll(matchers);
+    }
+
+    @Test
+    void returnsCreated_whenCreateCapacityIsAtLeastMinusOne() throws Exception {
+        verifyStoreCreationWithCapacity(-1, status().isCreated(), header().string("Location", "/v1/stores/10"),
+                content().string(""));
+        verifyStoreCreationWithCapacity(0, status().isCreated(), header().string("Location", "/v1/stores/10"),
+                content().string(""));
+        verifyStoreCreationWithCapacity(1, status().isCreated(), header().string("Location", "/v1/stores/10"),
+                content().string(""));
+    }
+
+    @Test
+    void returnsOk_whenUpdateCapacityIsAtLeastMinusOne() throws Exception {
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(1L));
+
+        StoreUpdateRequest storeUpdateRequest = new StoreUpdateRequest();
+        storeUpdateRequest.setCapacity(-1);
+
+        mockMvc
+            .perform(put("/v1/stores/{id}", 10L).header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(storeUpdateRequest)))
+            .andExpect(status().isOk());
+
+        Mockito.verify(storeService, Mockito.only()).update(Mockito.eq(1L), Mockito.eq(10L), Mockito.any());
+    }
+
+    @Test
+    void returnsBadRequest_whenCreateCapacityIsBelowMinusOne() throws Exception {
+        verifyStoreCreationWithCapacity(-2, status().isBadRequest(), content().json("""
+                {
+                  "errorCode": 200,
+                  "message": "Request is invalid.",
+                  "invalidParams": [{"name":"capacity","reason":"Capacity must equal to or larger than -1."}]
+                }
+                """));
+    }
+
+    @Test
+    void returnsBadRequest_whenUpdateCapacityIsBelowMinusOne() throws Exception {
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(1L));
+
+        StoreUpdateRequest storeUpdateRequest = new StoreUpdateRequest();
+        storeUpdateRequest.setCapacity(-2);
+
+        mockMvc
+            .perform(put("/v1/stores/{id}", 10L).header("Authorization", "Bearer " + signInToken.getAccessToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(storeUpdateRequest)))
+            .andExpect(status().isBadRequest());
+
+        Mockito.verify(storeService, Mockito.never()).update(Mockito.any(), Mockito.any(), Mockito.any());
     }
 
 }

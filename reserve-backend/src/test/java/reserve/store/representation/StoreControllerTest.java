@@ -49,12 +49,13 @@ class StoreControllerTest extends BaseRestAssuredTest {
         storeCreateRequest.setName("Store name");
         storeCreateRequest.setAddress("City, Street, Zipcode");
         storeCreateRequest.setDescription("StoreControllerTest.testCreateEndpoint()");
+        storeCreateRequest.setCapacity(5);
 
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user));
 
         String payload = objectMapper.writeValueAsString(storeCreateRequest);
 
-        RestAssured.given(spec)
+        String locationHeader = RestAssured.given(spec)
             .header("Authorization", "Bearer " + signInToken.getAccessToken())
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .body(payload)
@@ -62,9 +63,48 @@ class StoreControllerTest extends BaseRestAssuredTest {
             .post("/v1/stores")
             .then()
             .statusCode(201)
-            .header("Location", Matchers.startsWith("/v1/stores/"));
+            .header("Location", Matchers.startsWith("/v1/stores/"))
+            .extract()
+            .header("Location");
+
+        long createdId = Long.parseLong(locationHeader.substring(locationHeader.lastIndexOf("/") + 1));
 
         assertEquals(1, storeRepository.count());
+        storeRepository.findByIdAndUserId(createdId, user.getId()).ifPresentOrElse(created -> {
+            assertEquals(storeCreateRequest.getName(), created.getName());
+            assertEquals(storeCreateRequest.getAddress(), created.getAddress());
+            assertEquals(storeCreateRequest.getDescription(), created.getDescription());
+            assertEquals(storeCreateRequest.getCapacity(), created.getCapacity());
+        }, () -> fail("Store not found"));
+    }
+
+    @Test
+    void createsWithDefaultCapacity_whenCapacityIsNull() throws JsonProcessingException {
+        StoreCreateRequest storeCreateRequest = new StoreCreateRequest();
+        storeCreateRequest.setName("Store name");
+        storeCreateRequest.setAddress("City, Street, Zipcode");
+        storeCreateRequest.setDescription("StoreControllerTest.testCreateEndpoint()");
+        // Default capacity is -1.
+
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user));
+
+        String payload = objectMapper.writeValueAsString(storeCreateRequest);
+
+        String locationHeader = RestAssured.given(spec)
+            .header("Authorization", "Bearer " + signInToken.getAccessToken())
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .body(payload)
+            .when()
+            .post("/v1/stores")
+            .then()
+            .statusCode(201)
+            .header("Location", Matchers.startsWith("/v1/stores/"))
+            .extract()
+            .header("Location");
+
+        long createdId = Long.parseLong(locationHeader.substring(locationHeader.lastIndexOf("/") + 1));
+        storeRepository.findByIdAndUserId(createdId, user.getId())
+            .ifPresentOrElse(created -> assertEquals(-1, created.getCapacity()), () -> fail("Store not found"));
     }
 
     @Test
@@ -123,6 +163,7 @@ class StoreControllerTest extends BaseRestAssuredTest {
         storeUpdateRequest.setName("New name");
         storeUpdateRequest.setAddress("New address");
         storeUpdateRequest.setDescription("New description");
+        storeUpdateRequest.setCapacity(10);
 
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user));
 
@@ -141,6 +182,40 @@ class StoreControllerTest extends BaseRestAssuredTest {
             assertEquals("New name", updatedStore.getName());
             assertEquals("New address", updatedStore.getAddress());
             assertEquals("New description", updatedStore.getDescription());
+            assertEquals(10, updatedStore.getCapacity());
+        }, () -> fail("Store not found"));
+    }
+
+    @Test
+    void preservesCapacity_whenCapacityIsNull() throws JsonProcessingException {
+        Store store = storeRepository.save(
+                new Store(user, "Store name", "City, Street, Zipcode", "StoreControllerTest.testUpdateEndpoint()", 5));
+        int initialCapacity = storeRepository.findById(store.getId()).orElseThrow().getCapacity();
+
+        StoreUpdateRequest storeUpdateRequest = new StoreUpdateRequest();
+        storeUpdateRequest.setName("New name");
+        storeUpdateRequest.setAddress("New address");
+        storeUpdateRequest.setDescription("New description");
+        // storeUpdateRequest.capacity is null.
+
+        SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(user));
+
+        String payload = objectMapper.writeValueAsString(storeUpdateRequest);
+
+        RestAssured.given(spec)
+            .header("Authorization", "Bearer " + signInToken.getAccessToken())
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .body(payload)
+            .when()
+            .put("/v1/stores/{storeId}", store.getId())
+            .then()
+            .statusCode(200);
+
+        storeRepository.findById(store.getId()).ifPresentOrElse(updatedStore -> {
+            assertEquals("New name", updatedStore.getName());
+            assertEquals("New address", updatedStore.getAddress());
+            assertEquals("New description", updatedStore.getDescription());
+            assertEquals(initialCapacity, updatedStore.getCapacity());
         }, () -> fail("Store not found"));
     }
 

@@ -23,4 +23,8 @@ public class StoreInfoResponse {
     @Schema(description = "Description of the store", example = "store description")
     private final String description;
 
+    @Schema(description = "Capacity of the store's each slot. `-1` means no capacity limitation.",
+            examples = { "-1", "0", "5" }, defaultValue = "-1")
+    private final Integer capacity;
+
 }
