@@ -187,7 +187,7 @@ class ReservationServiceTest {
         Reservation reservation = new Reservation(Mockito.mock(), Mockito.mock(), oldDate, 1);
         Mockito.when(reservation.getStore().getId()).thenReturn(1L);
 
-        Mockito.when(reservationRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(reservation));
+        Mockito.when(reservationRepository.findByIdAndUserIdForUpdate(1L, 1L)).thenReturn(Optional.of(reservation));
         Mockito.when(reservationSlotRepository.tryAcquire(1L, request.getDate(), request.getHour())).thenReturn(true);
 
         reservationService.update(1L, 1L, request);
@@ -212,7 +212,7 @@ class ReservationServiceTest {
         Mockito.when(reservation.getHour()).thenReturn(13);
         Mockito.when(reservation.cancel()).thenReturn(true);
 
-        Mockito.when(reservationRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(reservation));
+        Mockito.when(reservationRepository.findByIdAndUserIdForUpdate(1L, 1L)).thenReturn(Optional.of(reservation));
 
         reservationService.cancel(1L, 1L);
 

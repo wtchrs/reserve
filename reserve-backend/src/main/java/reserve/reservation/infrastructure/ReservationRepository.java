@@ -1,7 +1,10 @@
 package reserve.reservation.infrastructure;
 
 import java.util.Optional;
+
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import reserve.reservation.domain.Reservation;
@@ -12,8 +15,18 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("SELECT r FROM Reservation r WHERE r.id = :reservationId and r.user.id = :userId")
     Optional<Reservation> findByIdAndUserId(@Param("reservationId") Long reservationId, @Param("userId") Long userId);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT r FROM Reservation r WHERE r.id = :reservationId and r.user.id = :userId")
+    Optional<Reservation> findByIdAndUserIdForUpdate(@Param("reservationId") Long reservationId,
+            @Param("userId") Long userId);
+
     @Query("SELECT r FROM Reservation r WHERE r.id = :reservationId and r.store.user.id = :userId")
     Optional<Reservation> findByIdAndStoreUserId(@Param("reservationId") Long reservationId,
+            @Param("userId") Long userId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT r FROM Reservation r WHERE r.id = :reservationId and r.store.user.id = :userId")
+    Optional<Reservation> findByIdAndStoreUserIdForUpdate(@Param("reservationId") Long reservationId,
             @Param("userId") Long userId);
 
     @Query("SELECT r.store.user.id FROM Reservation r WHERE r.id = :reservationId")

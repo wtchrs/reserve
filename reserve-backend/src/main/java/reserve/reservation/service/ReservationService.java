@@ -119,7 +119,7 @@ public class ReservationService {
 
     @Transactional
     public void update(Long userId, Long reservationId, ReservationUpdateRequest reservationUpdateRequest) {
-        Reservation reservation = reservationRepository.findByIdAndUserId(reservationId, userId)
+        Reservation reservation = reservationRepository.findByIdAndUserIdForUpdate(reservationId, userId)
             .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND));
 
         Long storeId = reservation.getStore().getId();
@@ -141,7 +141,7 @@ public class ReservationService {
 
     @Transactional
     public void cancel(Long userId, Long reservationId) {
-        Reservation reservation = reservationRepository.findByIdAndUserId(reservationId, userId)
+        Reservation reservation = reservationRepository.findByIdAndUserIdForUpdate(reservationId, userId)
             .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND));
         if (!reservation.cancel()) {
             return;

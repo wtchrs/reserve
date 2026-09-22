@@ -38,7 +38,8 @@ class ReservationManageServiceTest {
         Mockito.when(reservation.getHour()).thenReturn(13);
         Mockito.when(reservation.cancel()).thenReturn(true);
 
-        Mockito.when(reservationRepository.findByIdAndStoreUserId(1L, 1L)).thenReturn(Optional.of(reservation));
+        Mockito.when(reservationRepository.findByIdAndStoreUserIdForUpdate(1L, 1L))
+            .thenReturn(Optional.of(reservation));
 
         reservationManageService.cancel(1L, 1L);
 
