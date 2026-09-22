@@ -50,11 +50,15 @@ public class Reservation extends BaseEntity {
         this.hour = hour;
     }
 
-    public void cancel() {
+    public boolean cancel() {
         if (!status.equals(ReservationStatusType.READY) && !status.equals(ReservationStatusType.CANCELLED)) {
             throw new ReservationStatusException(ErrorCode.RESERVATION_CANNOT_CANCEL);
         }
+        if (status == ReservationStatusType.CANCELLED) {
+            return false;
+        }
         status = ReservationStatusType.CANCELLED;
+        return true;
     }
 
     public void start() {

@@ -7,6 +7,7 @@ import reserve.global.exception.ErrorCode;
 import reserve.global.exception.ResourceNotFoundException;
 import reserve.reservation.domain.Reservation;
 import reserve.reservation.infrastructure.ReservationRepository;
+import reserve.reservation.infrastructure.ReservationSlotRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -14,11 +15,16 @@ public class ReservationManageService {
 
     private final ReservationRepository reservationRepository;
 
+    private final ReservationSlotRepository reservationSlotRepository;
+
     @Transactional
     public void cancel(Long registrantId, Long reservationId) {
         Reservation reservation = reservationRepository.findByIdAndStoreUserId(reservationId, registrantId)
             .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND));
-        reservation.cancel();
+        if (!reservation.cancel()) {
+            return;
+        }
+        reservationSlotRepository.release(reservation.getStore().getId(), reservation.getDate(), reservation.getHour());
     }
 
     @Transactional

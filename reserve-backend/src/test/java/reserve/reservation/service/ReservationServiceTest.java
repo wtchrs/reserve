@@ -30,6 +30,7 @@ import reserve.reservation.dto.response.ReservationMenuResponse;
 import reserve.reservation.infrastructure.ReservationMenuRepository;
 import reserve.reservation.infrastructure.ReservationQueryRepository;
 import reserve.reservation.infrastructure.ReservationRepository;
+import reserve.reservation.infrastructure.ReservationSlotRepository;
 import reserve.store.domain.Store;
 import reserve.store.infrastructure.StoreRepository;
 import reserve.user.infrastructure.UserRepository;
@@ -47,6 +48,9 @@ class ReservationServiceTest {
     ReservationMenuRepository reservationMenuRepository;
 
     @Mock
+    ReservationSlotRepository reservationSlotRepository;
+
+    @Mock
     MenuRepository menuRepository;
 
     @Mock
@@ -58,52 +62,62 @@ class ReservationServiceTest {
     @InjectMocks
     ReservationService reservationService;
 
+    ReservationMenuCreateRequest createReservationMenuCreateRequest(Long menuId, int quantity) {
+        ReservationMenuCreateRequest request = new ReservationMenuCreateRequest();
+        request.setMenuId(menuId);
+        request.setQuantity(quantity);
+        return request;
+    }
+
+    Menu createMenuMock(Store store, ReservationMenuCreateRequest request) {
+        Menu menu = Mockito.mock(Menu.class);
+        Mockito.when(menu.getId()).thenReturn(request.getMenuId());
+        Mockito.when(menu.getStore()).thenReturn(store);
+        return menu;
+    }
+
     @Test
     @DisplayName("Testing reservation creation")
-    void testReservationCreation() throws Exception {
+    void testReservationCreation() {
+        ReservationMenuCreateRequest menuCreateRequest1 = createReservationMenuCreateRequest(10L, 1);
+        ReservationMenuCreateRequest menuCreateRequest2 = createReservationMenuCreateRequest(20L, 2);
+
         ReservationCreateRequest reservationCreateRequest = new ReservationCreateRequest();
         reservationCreateRequest.setStoreId(1L);
         reservationCreateRequest.setDate(LocalDate.now());
         reservationCreateRequest.setHour(1);
-
-        ReservationMenuCreateRequest menuCreateRequest1 = new ReservationMenuCreateRequest();
-        menuCreateRequest1.setMenuId(10L);
-        menuCreateRequest1.setQuantity(1);
-
-        ReservationMenuCreateRequest menuCreateRequest2 = new ReservationMenuCreateRequest();
-        menuCreateRequest2.setMenuId(20L);
-        menuCreateRequest2.setQuantity(2);
-
         reservationCreateRequest.setMenus(List.of(menuCreateRequest1, menuCreateRequest2));
-
-        Mockito.when(userRepository.existsById(1L)).thenReturn(true);
-        Mockito.when(storeRepository.existsById(1L)).thenReturn(true);
-        Mockito.when(reservationRepository.save(Mockito.any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         Store storeMock = Mockito.mock();
         Mockito.when(storeMock.getId()).thenReturn(1L);
 
+        Menu menuMock1 = createMenuMock(storeMock, menuCreateRequest1);
+        Menu menuMock2 = createMenuMock(storeMock, menuCreateRequest2);
+
+        Mockito.when(userRepository.existsById(1L)).thenReturn(true);
+        Mockito.when(storeRepository.existsById(1L)).thenReturn(true);
+
+        Mockito.when(reservationRepository.save(Mockito.any())).thenAnswer(invocation -> invocation.getArgument(0));
         Mockito.when(storeRepository.getReferenceById(1L)).thenReturn(storeMock);
 
-        Menu menuMock1 = Mockito.mock();
-        Mockito.when(menuMock1.getId()).thenReturn(10L);
-        Mockito.when(menuMock1.getStore()).thenReturn(storeMock);
-
-        Menu menuMock2 = Mockito.mock();
-        Mockito.when(menuMock2.getId()).thenReturn(20L);
-        Mockito.when(menuMock2.getStore()).thenReturn(storeMock);
-
         Mockito.when(menuRepository.findAllById(List.of(10L, 20L))).thenReturn(List.of(menuMock1, menuMock2));
+        Mockito
+            .when(reservationSlotRepository.tryAcquire(reservationCreateRequest.getStoreId(),
+                    reservationCreateRequest.getDate(), reservationCreateRequest.getHour()))
+            .thenReturn(true);
 
         try (MockedConstruction<Reservation> ignored = Mockito.mockConstruction(Reservation.class, (mock, context) -> {
             Mockito.when(mock.getId()).thenReturn(1L);
             Mockito.when(mock.getStore()).thenReturn((Store) context.arguments().get(1));
         })) {
             Long result = reservationService.create(1L, reservationCreateRequest);
-            assertEquals(result, 1L);
+            assertEquals(1L, result);
         }
 
         Mockito.verify(reservationMenuRepository, Mockito.times(1)).saveAll(Mockito.anyList());
+        Mockito.verify(reservationSlotRepository, Mockito.times(1))
+            .createIfAbsent(reservationCreateRequest.getStoreId(), reservationCreateRequest.getDate(),
+                    reservationCreateRequest.getHour());
     }
 
     @Test
@@ -163,31 +177,47 @@ class ReservationServiceTest {
     @Test
     @DisplayName("Testing reservation update functionality")
     void testReservationUpdating() {
-        LocalDate now = LocalDate.now();
-        LocalDate newDate = now.plusDays(1);
+        LocalDate oldDate = LocalDate.now();
+        LocalDate newDate = oldDate.plusDays(1);
 
-        ReservationUpdateRequest request = Mockito.mock(ReservationUpdateRequest.class);
-        Mockito.when(request.getDate()).thenReturn(newDate);
-        Mockito.when(request.getHour()).thenReturn(10);
+        ReservationUpdateRequest request = new ReservationUpdateRequest();
+        request.setDate(newDate);
+        request.setHour(10);
 
-        Reservation reservation = new Reservation(Mockito.mock(), Mockito.mock(), now, 1);
+        Reservation reservation = new Reservation(Mockito.mock(), Mockito.mock(), oldDate, 1);
+        Mockito.when(reservation.getStore().getId()).thenReturn(1L);
+
         Mockito.when(reservationRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(reservation));
+        Mockito.when(reservationSlotRepository.tryAcquire(1L, request.getDate(), request.getHour())).thenReturn(true);
 
         reservationService.update(1L, 1L, request);
 
-        assertEquals(newDate, reservation.getDate());
-        assertEquals(10, reservation.getHour());
+        assertEquals(request.getDate(), reservation.getDate());
+        assertEquals(request.getHour(), reservation.getHour());
+
+        Mockito.verify(reservationSlotRepository, Mockito.times(1))
+            .createIfAbsent(1L, request.getDate(), request.getHour());
+        Mockito.verify(reservationSlotRepository, Mockito.times(1)).release(1L, oldDate, 1);
     }
 
     @Test
     @DisplayName("Testing reservation deletion functionality")
     void testReservationDeletion() {
-        Reservation reservation = Mockito.mock(Reservation.class);
+        LocalDate date = LocalDate.of(2026, 1, 1);
+
+        Reservation reservation = Mockito.mock();
+        Mockito.when(reservation.getStore()).thenReturn(Mockito.mock());
+        Mockito.when(reservation.getStore().getId()).thenReturn(1L);
+        Mockito.when(reservation.getDate()).thenReturn(date);
+        Mockito.when(reservation.getHour()).thenReturn(13);
+        Mockito.when(reservation.cancel()).thenReturn(true);
+
         Mockito.when(reservationRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(reservation));
 
         reservationService.cancel(1L, 1L);
 
         Mockito.verify(reservation, Mockito.times(1)).cancel();
+        Mockito.verify(reservationSlotRepository, Mockito.times(1)).release(1L, date, 13);
     }
 
 }

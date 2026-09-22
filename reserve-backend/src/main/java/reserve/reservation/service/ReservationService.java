@@ -1,5 +1,6 @@
 package reserve.reservation.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reserve.global.exception.AuthenticationException;
 import reserve.global.exception.ErrorCode;
+import reserve.global.exception.ReservationStatusException;
 import reserve.global.exception.ResourceNotFoundException;
 import reserve.menu.domain.Menu;
 import reserve.menu.infrastructure.MenuRepository;
@@ -23,6 +25,7 @@ import reserve.reservation.dto.response.*;
 import reserve.reservation.infrastructure.ReservationMenuRepository;
 import reserve.reservation.infrastructure.ReservationQueryRepository;
 import reserve.reservation.infrastructure.ReservationRepository;
+import reserve.reservation.infrastructure.ReservationSlotRepository;
 import reserve.store.infrastructure.StoreRepository;
 import reserve.user.infrastructure.UserRepository;
 
@@ -36,6 +39,8 @@ public class ReservationService {
 
     private final ReservationMenuRepository reservationMenuRepository;
 
+    private final ReservationSlotRepository reservationSlotRepository;
+
     private final MenuRepository menuRepository;
 
     private final StoreRepository storeRepository;
@@ -44,15 +49,24 @@ public class ReservationService {
 
     @Transactional
     public Long create(Long userId, ReservationCreateRequest reservationCreateRequest) {
+        Long storeId = reservationCreateRequest.getStoreId();
+        LocalDate date = reservationCreateRequest.getDate();
+        int hour = reservationCreateRequest.getHour();
+
         if (!userRepository.existsById(userId)) {
             throw new AuthenticationException(ErrorCode.INVALID_SIGN_IN_INFO);
         }
-        if (!storeRepository.existsById(reservationCreateRequest.getStoreId())) {
+        if (!storeRepository.existsById(storeId)) {
             throw new ResourceNotFoundException(ErrorCode.STORE_NOT_FOUND);
         }
+        // Checks if the slot is acceptable.
+        reservationSlotRepository.createIfAbsent(storeId, date, hour);
+        if (!reservationSlotRepository.tryAcquire(storeId, date, hour)) {
+            throw new ReservationStatusException(ErrorCode.RESERVATION_SLOT_FULL);
+        }
+
         Reservation reservation = reservationRepository.save(new Reservation(userRepository.getReferenceById(userId),
-                storeRepository.getReferenceById(reservationCreateRequest.getStoreId()),
-                reservationCreateRequest.getDate(), reservationCreateRequest.getHour()));
+                storeRepository.getReferenceById(storeId), date, hour));
         Map<Long, Menu> menuMap = getMenuMap(reservationCreateRequest);
         List<ReservationMenu> reservationMenuList = reservationCreateRequest.getMenus()
             .stream()
@@ -107,15 +121,32 @@ public class ReservationService {
     public void update(Long userId, Long reservationId, ReservationUpdateRequest reservationUpdateRequest) {
         Reservation reservation = reservationRepository.findByIdAndUserId(reservationId, userId)
             .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND));
-        reservation.setDate(reservationUpdateRequest.getDate());
-        reservation.setHour(reservationUpdateRequest.getHour());
+
+        Long storeId = reservation.getStore().getId();
+        LocalDate newDate = reservationUpdateRequest.getDate();
+        int newHour = reservationUpdateRequest.getHour();
+
+        if (reservation.getDate().isEqual(newDate) && reservation.getHour() == newHour) {
+            return;
+        }
+
+        reservationSlotRepository.createIfAbsent(storeId, newDate, newHour);
+        if (!reservationSlotRepository.tryAcquire(storeId, newDate, newHour)) {
+            throw new ReservationStatusException(ErrorCode.RESERVATION_SLOT_FULL);
+        }
+        reservationSlotRepository.release(storeId, reservation.getDate(), reservation.getHour());
+        reservation.setDate(newDate);
+        reservation.setHour(newHour);
     }
 
     @Transactional
     public void cancel(Long userId, Long reservationId) {
-        reservationRepository.findByIdAndUserId(reservationId, userId)
-            .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND))
-            .cancel();
+        Reservation reservation = reservationRepository.findByIdAndUserId(reservationId, userId)
+            .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND));
+        if (!reservation.cancel()) {
+            return;
+        }
+        reservationSlotRepository.release(reservation.getStore().getId(), reservation.getDate(), reservation.getHour());
     }
 
 }

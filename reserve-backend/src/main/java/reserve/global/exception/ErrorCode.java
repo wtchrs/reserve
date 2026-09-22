@@ -38,6 +38,7 @@ public enum ErrorCode {
 
     // 5xx: Conflict errors.
     USERNAME_DUPLICATE(501, "Username already exists."),
+    RESERVATION_SLOT_FULL(511, "The requested reservation slot is full."),
 
     // 9xx: server errors.
     INTERNAL_SERVER_ERROR(900, "An internal server error has occurred. Please try again later.");
