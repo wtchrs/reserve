@@ -88,4 +88,14 @@ public abstract class ReservationIntegrationTestSupport extends BaseRestAssuredT
             .post("/v1/reservations/manage/{reservationId}/cancel", reservationId);
     }
 
+    protected Response startServiceReservationAsRegistrant(User registrant, Long reservationId) {
+        return authenticatedRequest(registrant).when()
+            .post("/v1/reservations/manage/{reservationId}/start", reservationId);
+    }
+
+    protected Response completeReservationAsRegistrant(User registrant, Long reservationId) {
+        return authenticatedRequest(registrant).when()
+            .post("/v1/reservations/manage/{reservationId}/complete", reservationId);
+    }
+
 }

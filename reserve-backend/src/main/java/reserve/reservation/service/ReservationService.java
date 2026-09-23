@@ -17,6 +17,7 @@ import reserve.menu.domain.Menu;
 import reserve.menu.infrastructure.MenuRepository;
 import reserve.reservation.domain.Reservation;
 import reserve.reservation.domain.ReservationMenu;
+import reserve.reservation.domain.ReservationStatusType;
 import reserve.reservation.dto.request.ReservationCreateRequest;
 import reserve.reservation.dto.request.ReservationMenuCreateRequest;
 import reserve.reservation.dto.request.ReservationSearchRequest;
@@ -121,6 +122,10 @@ public class ReservationService {
     public void update(Long userId, Long reservationId, ReservationUpdateRequest reservationUpdateRequest) {
         Reservation reservation = reservationRepository.findByIdAndUserIdForUpdate(reservationId, userId)
             .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND));
+
+        if (reservation.getStatus() != ReservationStatusType.READY) {
+            throw new ReservationStatusException(ErrorCode.RESERVATION_CANNOT_UPDATE);
+        }
 
         Long storeId = reservation.getStore().getId();
         LocalDate newDate = reservationUpdateRequest.getDate();

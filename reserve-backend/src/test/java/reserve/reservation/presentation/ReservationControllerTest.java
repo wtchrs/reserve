@@ -1,22 +1,23 @@
 package reserve.reservation.presentation;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import java.time.LocalDate;
 import java.util.List;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import reserve.support.BaseRestAssuredTest;
+import reserve.global.exception.ErrorCode;
+import reserve.reservation.support.ReservationIntegrationTestSupport;
 import reserve.support.TestUtils;
 import reserve.menu.domain.Menu;
 import reserve.menu.infrastructure.MenuRepository;
-import reserve.notification.infrastructure.NotificationRepository;
 import reserve.reservation.domain.Reservation;
 import reserve.reservation.domain.ReservationStatusType;
 import reserve.reservation.dto.request.ReservationCreateRequest;
@@ -25,19 +26,12 @@ import reserve.reservation.dto.request.ReservationUpdateRequest;
 import reserve.reservation.infrastructure.ReservationMenuRepository;
 import reserve.reservation.infrastructure.ReservationRepository;
 import reserve.signin.dto.SignInToken;
-import reserve.signin.infrastructure.JwtProvider;
 import reserve.store.domain.Store;
 import reserve.store.infrastructure.StoreRepository;
 import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
 
-class ReservationControllerTest extends BaseRestAssuredTest {
-
-    @Autowired
-    ObjectMapper objectMapper;
-
-    @Autowired
-    JwtProvider jwtProvider;
+class ReservationControllerTest extends ReservationIntegrationTestSupport {
 
     @Autowired
     UserRepository userRepository;
@@ -53,9 +47,6 @@ class ReservationControllerTest extends BaseRestAssuredTest {
 
     @Autowired
     ReservationMenuRepository reservationMenuRepository;
-
-    @Autowired
-    NotificationRepository notificationRepository;
 
     User user1, user2, user3;
 
@@ -135,6 +126,47 @@ class ReservationControllerTest extends BaseRestAssuredTest {
             assertEquals(LocalDate.now().plusDays(14), updatedReservation.getDate());
             assertEquals(14, updatedReservation.getHour());
         }, () -> fail("Reservation not found"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = ReservationStatusType.class, names = { "CANCELLED", "IN_SERVICE", "COMPLETED" })
+    void returnsConflict_whenNonReadyReservationIsUpdated(ReservationStatusType status) throws JsonProcessingException {
+        Menu menu = menuRepository.save(new Menu(store2, "Gorgonzola", 10000, "Gorgonzola pizza"));
+
+        // Create
+        ReservationCreateRequest createRequest = reservationCreateRequest(menu, store2);
+        String locationHeader = createReservation(user1, createRequest).then()
+            .statusCode(201)
+            .header("Location", Matchers.startsWith("/v1/reservations/"))
+            .extract()
+            .header("Location");
+        long reservationId = Long.parseLong(locationHeader.substring(locationHeader.lastIndexOf("/") + 1));
+
+        // Change status
+        if (status == ReservationStatusType.CANCELLED) {
+            cancelReservation(user1, reservationId).then().statusCode(200);
+        }
+        else if (status == ReservationStatusType.IN_SERVICE) {
+            startServiceReservationAsRegistrant(user2, reservationId).then().statusCode(200);
+        }
+        else if (status == ReservationStatusType.COMPLETED) {
+            startServiceReservationAsRegistrant(user2, reservationId).then().statusCode(200);
+            completeReservationAsRegistrant(user2, reservationId).then().statusCode(200);
+        }
+
+        // Fail to update non-ready reservation
+        ReservationUpdateRequest updateRequest = reservationUpdateRequest(LocalDate.of(2026, 1, 2), 14);
+        updateReservation(user1, reservationId, updateRequest).then()
+            .statusCode(409)
+            .body("code", equalTo(ErrorCode.RESERVATION_CANNOT_UPDATE.getCode()))
+            .body("message", equalTo(ErrorCode.RESERVATION_CANNOT_UPDATE.getMessage()));
+
+        reservationRepository.findById(reservationId)
+            .ifPresentOrElse(
+                    unchanged -> assertAll(() -> assertEquals(status, unchanged.getStatus()),
+                            () -> assertEquals(createRequest.getDate(), unchanged.getDate()),
+                            () -> assertEquals(createRequest.getHour(), unchanged.getHour())),
+                    () -> fail("Reservation should exist."));
     }
 
     @Test

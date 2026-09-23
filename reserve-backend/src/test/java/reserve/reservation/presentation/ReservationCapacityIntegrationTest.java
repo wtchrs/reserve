@@ -415,7 +415,7 @@ public class ReservationCapacityIntegrationTest extends ReservationIntegrationTe
     }
 
     @Test
-    void testUpdateConcurrently() throws JsonProcessingException {
+    void movesSlotCountOnce_whenUpdateRequestsAreConcurrent() throws JsonProcessingException {
         User user = userRepository.save(new User("user", "password", "hello", "ReservationControllerCapacityTest"));
         User customer = userRepository
             .save(new User("customer", "password", "world", "ReservationControllerCapacityTest"));
@@ -447,10 +447,12 @@ public class ReservationCapacityIntegrationTest extends ReservationIntegrationTe
 
             futures.forEach(f -> {
                 try {
-                    f.wait();
+                    f.get();
                 }
                 catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
+                    throw new RuntimeException(e);
+                } catch (ExecutionException e) {
                     throw new RuntimeException(e);
                 }
             });
