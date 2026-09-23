@@ -1,6 +1,6 @@
 # Reservation Slots
 
-The reservation slot table and store capacity column were introduced in the V7 migration to enforce
+The reservation slot table and store capacity column were introduced in the V7 and V8 migration to enforce
 each store's hourly reservation capacity safely when concurrent requests are made.
 
 ## Store capacity

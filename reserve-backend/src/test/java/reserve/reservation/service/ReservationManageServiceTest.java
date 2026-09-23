@@ -52,7 +52,8 @@ class ReservationManageServiceTest {
     @DisplayName("Testing start of reservation service")
     void restReservationStartService() {
         Reservation reservation = Mockito.mock(Reservation.class);
-        Mockito.when(reservationRepository.findByIdAndStoreUserIdForUpdate(1L, 1L)).thenReturn(Optional.of(reservation));
+        Mockito.when(reservationRepository.findByIdAndStoreUserIdForUpdate(1L, 1L))
+            .thenReturn(Optional.of(reservation));
 
         reservationManageService.startService(1L, 1L);
 
@@ -63,7 +64,8 @@ class ReservationManageServiceTest {
     @DisplayName("Testing completion of reservation")
     void testReservationCompletion() {
         Reservation reservation = Mockito.mock(Reservation.class);
-        Mockito.when(reservationRepository.findByIdAndStoreUserIdForUpdate(1L, 1L)).thenReturn(Optional.of(reservation));
+        Mockito.when(reservationRepository.findByIdAndStoreUserIdForUpdate(1L, 1L))
+            .thenReturn(Optional.of(reservation));
 
         reservationManageService.complete(1L, 1L);
 
