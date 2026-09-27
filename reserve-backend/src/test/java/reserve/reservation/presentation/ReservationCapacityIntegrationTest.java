@@ -2,12 +2,14 @@ package reserve.reservation.presentation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import reserve.global.exception.ErrorCode;
 import reserve.menu.domain.Menu;
 import reserve.menu.infrastructure.MenuRepository;
+import reserve.reservation.domain.Reservation;
 import reserve.reservation.dto.request.ReservationCreateRequest;
 import reserve.reservation.dto.request.ReservationUpdateRequest;
 import reserve.reservation.infrastructure.ReservationRepository;
@@ -19,7 +21,9 @@ import reserve.user.infrastructure.UserRepository;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
@@ -546,6 +550,20 @@ public class ReservationCapacityIntegrationTest extends ReservationIntegrationTe
                         getReservationSlotCount(store, createRequest1.getDate(), createRequest1.getHour())),
                 () -> assertEquals(numReservations,
                         getReservationSlotCount(store, createRequest2.getDate(), createRequest2.getHour())));
+
+        for (long id : slot1ReservationIds) {
+            reservationRepository.findById(id).ifPresentOrElse(r -> {
+                assertEquals(moveToSlot2.getDate(), r.getDate());
+                assertEquals(moveToSlot2.getHour(), r.getHour());
+            }, Assertions::fail);
+        }
+
+        for (long id : slot2ReservationIds) {
+            reservationRepository.findById(id).ifPresentOrElse(r -> {
+                assertEquals(moveToSlot1.getDate(), r.getDate());
+                assertEquals(moveToSlot1.getHour(), r.getHour());
+            }, Assertions::fail);
+        }
     }
 
 }
