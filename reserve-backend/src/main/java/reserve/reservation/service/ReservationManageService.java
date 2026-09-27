@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import reserve.global.exception.ErrorCode;
 import reserve.global.exception.ResourceNotFoundException;
 import reserve.reservation.domain.Reservation;
+import reserve.reservation.domain.ReservationSlotKey;
 import reserve.reservation.infrastructure.ReservationRepository;
 import reserve.reservation.infrastructure.ReservationSlotRepository;
 
@@ -24,7 +25,8 @@ public class ReservationManageService {
         if (!reservation.cancel()) {
             return;
         }
-        reservationSlotRepository.release(reservation.getStore().getId(), reservation.getDate(), reservation.getHour());
+        reservationSlotRepository.release(
+                new ReservationSlotKey(reservation.getStore().getId(), reservation.getDate(), reservation.getHour()));
     }
 
     @Transactional

@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import reserve.menu.domain.Menu;
 import reserve.menu.infrastructure.MenuRepository;
 import reserve.reservation.domain.Reservation;
+import reserve.reservation.domain.ReservationSlotKey;
 import reserve.reservation.dto.request.ReservationCreateRequest;
 import reserve.reservation.dto.request.ReservationMenuCreateRequest;
 import reserve.reservation.dto.request.ReservationSearchRequest;
@@ -100,11 +101,10 @@ class ReservationServiceTest {
         Mockito.when(reservationRepository.save(Mockito.any())).thenAnswer(invocation -> invocation.getArgument(0));
         Mockito.when(storeRepository.getReferenceById(1L)).thenReturn(storeMock);
 
+        ReservationSlotKey slotKey = new ReservationSlotKey(reservationCreateRequest.getStoreId(),
+                reservationCreateRequest.getDate(), reservationCreateRequest.getHour());
         Mockito.when(menuRepository.findAllById(List.of(10L, 20L))).thenReturn(List.of(menuMock1, menuMock2));
-        Mockito
-            .when(reservationSlotRepository.tryAcquire(reservationCreateRequest.getStoreId(),
-                    reservationCreateRequest.getDate(), reservationCreateRequest.getHour()))
-            .thenReturn(true);
+        Mockito.when(reservationSlotRepository.tryAcquire(slotKey)).thenReturn(true);
 
         try (MockedConstruction<Reservation> ignored = Mockito.mockConstruction(Reservation.class, (mock, context) -> {
             Mockito.when(mock.getId()).thenReturn(1L);
@@ -115,9 +115,7 @@ class ReservationServiceTest {
         }
 
         Mockito.verify(reservationMenuRepository, Mockito.times(1)).saveAll(Mockito.anyList());
-        Mockito.verify(reservationSlotRepository, Mockito.times(1))
-            .createIfAbsent(reservationCreateRequest.getStoreId(), reservationCreateRequest.getDate(),
-                    reservationCreateRequest.getHour());
+        Mockito.verify(reservationSlotRepository, Mockito.times(1)).createIfAbsent(slotKey);
     }
 
     @Test
@@ -187,17 +185,17 @@ class ReservationServiceTest {
         Reservation reservation = new Reservation(Mockito.mock(), Mockito.mock(), oldDate, 1);
         Mockito.when(reservation.getStore().getId()).thenReturn(1L);
 
+        ReservationSlotKey acquireSlotKey = new ReservationSlotKey(1L, request.getDate(), request.getHour());
         Mockito.when(reservationRepository.findByIdAndUserIdForUpdate(1L, 1L)).thenReturn(Optional.of(reservation));
-        Mockito.when(reservationSlotRepository.tryAcquire(1L, request.getDate(), request.getHour())).thenReturn(true);
+        Mockito.when(reservationSlotRepository.tryAcquire(acquireSlotKey)).thenReturn(true);
 
         reservationService.update(1L, 1L, request);
 
         assertEquals(request.getDate(), reservation.getDate());
         assertEquals(request.getHour(), reservation.getHour());
 
-        Mockito.verify(reservationSlotRepository, Mockito.times(1))
-            .createIfAbsent(1L, request.getDate(), request.getHour());
-        Mockito.verify(reservationSlotRepository, Mockito.times(1)).release(1L, oldDate, 1);
+        Mockito.verify(reservationSlotRepository, Mockito.times(1)).createIfAbsent(acquireSlotKey);
+        Mockito.verify(reservationSlotRepository, Mockito.times(1)).release(new ReservationSlotKey(1L, oldDate, 1));
     }
 
     @Test
@@ -217,7 +215,7 @@ class ReservationServiceTest {
         reservationService.cancel(1L, 1L);
 
         Mockito.verify(reservation, Mockito.times(1)).cancel();
-        Mockito.verify(reservationSlotRepository, Mockito.times(1)).release(1L, date, 13);
+        Mockito.verify(reservationSlotRepository, Mockito.times(1)).release(new ReservationSlotKey(1L, date, 13));
     }
 
 }

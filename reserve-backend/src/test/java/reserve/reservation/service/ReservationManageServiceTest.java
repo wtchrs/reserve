@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reserve.reservation.domain.Reservation;
+import reserve.reservation.domain.ReservationSlotKey;
 import reserve.reservation.infrastructure.ReservationRepository;
 import reserve.reservation.infrastructure.ReservationSlotRepository;
 import reserve.store.domain.Store;
@@ -45,7 +46,7 @@ class ReservationManageServiceTest {
 
         Mockito.verify(reservation, Mockito.times(1)).cancel();
         Mockito.verify(reservationSlotRepository, Mockito.times(1))
-            .release(store.getId(), reservation.getDate(), reservation.getHour());
+            .release(new ReservationSlotKey(store.getId(), reservation.getDate(), reservation.getHour()));
     }
 
     @Test

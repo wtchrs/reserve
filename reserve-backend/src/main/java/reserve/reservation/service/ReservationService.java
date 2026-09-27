@@ -17,6 +17,7 @@ import reserve.menu.domain.Menu;
 import reserve.menu.infrastructure.MenuRepository;
 import reserve.reservation.domain.Reservation;
 import reserve.reservation.domain.ReservationMenu;
+import reserve.reservation.domain.ReservationSlotKey;
 import reserve.reservation.domain.ReservationStatusType;
 import reserve.reservation.dto.request.ReservationCreateRequest;
 import reserve.reservation.dto.request.ReservationMenuCreateRequest;
@@ -49,8 +50,9 @@ public class ReservationService {
     private final UserRepository userRepository;
 
     private void trySlotAcquisition(Long storeId, LocalDate newDate, int newHour) {
-        reservationSlotRepository.createIfAbsent(storeId, newDate, newHour);
-        if (!reservationSlotRepository.tryAcquire(storeId, newDate, newHour)) {
+        ReservationSlotKey slotKey = new ReservationSlotKey(storeId, newDate, newHour);
+        reservationSlotRepository.createIfAbsent(slotKey);
+        if (!reservationSlotRepository.tryAcquire(slotKey)) {
             throw new ReservationStatusException(ErrorCode.RESERVATION_SLOT_FULL);
         }
     }
@@ -139,14 +141,16 @@ public class ReservationService {
             return;
         }
 
+        ReservationSlotKey slotKey = new ReservationSlotKey(storeId, reservation.getDate(), reservation.getHour());
+
         // Avoid DB deadlock by change the resource access order.
         if (newDate.isBefore(reservation.getDate())
                 || newDate.isEqual(reservation.getDate()) && newHour < reservation.getHour()) {
             trySlotAcquisition(storeId, newDate, newHour);
-            reservationSlotRepository.release(storeId, reservation.getDate(), reservation.getHour());
+            reservationSlotRepository.release(slotKey);
         }
         else {
-            reservationSlotRepository.release(storeId, reservation.getDate(), reservation.getHour());
+            reservationSlotRepository.release(slotKey);
             trySlotAcquisition(storeId, newDate, newHour);
         }
 
@@ -161,7 +165,8 @@ public class ReservationService {
         if (!reservation.cancel()) {
             return;
         }
-        reservationSlotRepository.release(reservation.getStore().getId(), reservation.getDate(), reservation.getHour());
+        reservationSlotRepository.release(
+                new ReservationSlotKey(reservation.getStore().getId(), reservation.getDate(), reservation.getHour()));
     }
 
 }
