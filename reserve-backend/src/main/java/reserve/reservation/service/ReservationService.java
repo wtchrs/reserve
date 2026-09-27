@@ -48,6 +48,13 @@ public class ReservationService {
 
     private final UserRepository userRepository;
 
+    private void trySlotAcquisition(Long storeId, LocalDate newDate, int newHour) {
+        reservationSlotRepository.createIfAbsent(storeId, newDate, newHour);
+        if (!reservationSlotRepository.tryAcquire(storeId, newDate, newHour)) {
+            throw new ReservationStatusException(ErrorCode.RESERVATION_SLOT_FULL);
+        }
+    }
+
     @Transactional
     public Long create(Long userId, ReservationCreateRequest reservationCreateRequest) {
         Long storeId = reservationCreateRequest.getStoreId();
@@ -61,10 +68,7 @@ public class ReservationService {
             throw new ResourceNotFoundException(ErrorCode.STORE_NOT_FOUND);
         }
         // Checks if the slot is acceptable.
-        reservationSlotRepository.createIfAbsent(storeId, date, hour);
-        if (!reservationSlotRepository.tryAcquire(storeId, date, hour)) {
-            throw new ReservationStatusException(ErrorCode.RESERVATION_SLOT_FULL);
-        }
+        trySlotAcquisition(storeId, date, hour);
 
         Reservation reservation = reservationRepository.save(new Reservation(userRepository.getReferenceById(userId),
                 storeRepository.getReferenceById(storeId), date, hour));
@@ -135,11 +139,17 @@ public class ReservationService {
             return;
         }
 
-        reservationSlotRepository.createIfAbsent(storeId, newDate, newHour);
-        if (!reservationSlotRepository.tryAcquire(storeId, newDate, newHour)) {
-            throw new ReservationStatusException(ErrorCode.RESERVATION_SLOT_FULL);
+        // Avoid DB deadlock by change the resource access order.
+        if (newDate.isBefore(reservation.getDate())
+                || newDate.isEqual(reservation.getDate()) && newHour < reservation.getHour()) {
+            trySlotAcquisition(storeId, newDate, newHour);
+            reservationSlotRepository.release(storeId, reservation.getDate(), reservation.getHour());
         }
-        reservationSlotRepository.release(storeId, reservation.getDate(), reservation.getHour());
+        else {
+            reservationSlotRepository.release(storeId, reservation.getDate(), reservation.getHour());
+            trySlotAcquisition(storeId, newDate, newHour);
+        }
+
         reservation.setDate(newDate);
         reservation.setHour(newHour);
     }

@@ -23,8 +23,7 @@ import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ReservationCapacityIntegrationTest extends ReservationIntegrationTestSupport {
 
@@ -452,7 +451,8 @@ public class ReservationCapacityIntegrationTest extends ReservationIntegrationTe
                 catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     throw new RuntimeException(e);
-                } catch (ExecutionException e) {
+                }
+                catch (ExecutionException e) {
                     throw new RuntimeException(e);
                 }
             });
@@ -463,6 +463,115 @@ public class ReservationCapacityIntegrationTest extends ReservationIntegrationTe
 
         assertEquals(0, getReservationSlotCount(store, createRequest.getDate(), createRequest.getHour()));
         assertEquals(1, getReservationSlotCount(store, updateRequest.getDate(), updateRequest.getHour()));
+    }
+
+    @Test
+    void completesUpdatesAndPreservesSlotCounts_whenReservationsMoveBetweenTwoSlotsConcurrently() {
+        final int numReservations = 10;
+
+        User user = userRepository.save(new User("user", "password", "hello", "ReservationControllerCapacityTest"));
+        User customer = userRepository
+            .save(new User("customer", "password", "world", "ReservationControllerCapacityTest"));
+        Store store = storeRepository.save(new Store(user, "store", "address", "description", -1));
+        Menu menu = menuRepository.save(new Menu(store, "menu", 1000, "menu"));
+
+        // Create
+        ReservationCreateRequest createRequest1 = reservationCreateRequest(menu, store, LocalDate.of(2026, 1, 1), 12);
+        long[] reservationIdsInSlot1 = IntStream.range(0, numReservations).mapToLong(i -> {
+            String locationHeader;
+            try {
+                locationHeader = createReservation(customer, createRequest1).then()
+                    .statusCode(201)
+                    .header("Location", Matchers.startsWith("/v1/reservations/"))
+                    .extract()
+                    .header("Location");
+            }
+            catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+            return Long.parseLong(locationHeader.substring(locationHeader.lastIndexOf("/") + 1));
+        }).toArray();
+
+        ReservationCreateRequest createRequest2 = reservationCreateRequest(menu, store, LocalDate.of(2026, 1, 2), 14);
+        long[] reservationIdsInSlot2 = IntStream.range(0, numReservations).mapToLong(i -> {
+            String locationHeader;
+            try {
+                locationHeader = createReservation(customer, createRequest2).then()
+                    .statusCode(201)
+                    .header("Location", Matchers.startsWith("/v1/reservations/"))
+                    .extract()
+                    .header("Location");
+            }
+            catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+            return Long.parseLong(locationHeader.substring(locationHeader.lastIndexOf("/") + 1));
+        }).toArray();
+
+        // Update concurrently
+        ReservationUpdateRequest updateRequest1 = reservationUpdateRequest(createRequest2.getDate(),
+                createRequest2.getHour());
+        ReservationUpdateRequest updateRequest2 = reservationUpdateRequest(createRequest1.getDate(),
+                createRequest1.getHour());
+        ExecutorService pool = Executors.newFixedThreadPool(numReservations * 2);
+        try {
+            CyclicBarrier barrier = new CyclicBarrier(numReservations * 2);
+
+            List<Future<Boolean>> futures1 = IntStream.range(0, numReservations).mapToObj(i -> pool.submit(() -> {
+                barrier.await();
+                return updateReservation(customer, reservationIdsInSlot1[i], updateRequest1).then()
+                    .extract()
+                    .statusCode() == 200;
+            })).toList();
+
+            List<Future<Boolean>> futures2 = IntStream.range(0, numReservations).mapToObj(i -> pool.submit(() -> {
+                barrier.await();
+                return updateReservation(customer, reservationIdsInSlot2[i], updateRequest2).then()
+                    .extract()
+                    .statusCode() == 200;
+            })).toList();
+
+            futures1.forEach(f -> {
+                try {
+                    assertTrue(f.get(10, TimeUnit.SECONDS));
+                }
+                catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException(e);
+                }
+                catch (ExecutionException e) {
+                    throw new RuntimeException(e);
+                }
+                catch (TimeoutException e) {
+                    fail(e);
+                }
+            });
+
+            futures2.forEach(f -> {
+                try {
+                    assertTrue(f.get(10, TimeUnit.SECONDS));
+                }
+                catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException(e);
+                }
+                catch (ExecutionException e) {
+                    throw new RuntimeException(e);
+                }
+                catch (TimeoutException e) {
+                    fail(e);
+                }
+            });
+        }
+        finally {
+            pool.shutdown();
+        }
+
+        assertAll(
+                () -> assertEquals(10,
+                        getReservationSlotCount(store, createRequest1.getDate(), createRequest1.getHour())),
+                () -> assertEquals(10,
+                        getReservationSlotCount(store, createRequest2.getDate(), createRequest2.getHour())));
     }
 
 }
