@@ -18,6 +18,9 @@ import java.util.Objects;
 @Getter
 public class Store extends DeletableBaseEntity {
 
+    /** `-1` means that the store's each slot can have unlimited reservations. */
+    public static final int UNLIMITED_CAPACITY = -1;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "store_id", nullable = false)
@@ -39,9 +42,8 @@ public class Store extends DeletableBaseEntity {
     @Setter
     private String description;
 
-    /** `-1` means that the store's each slot can have unlimited reservations. */
     @Column(nullable = false)
-    private Integer capacity = -1;
+    private Integer capacity = UNLIMITED_CAPACITY;
 
     public Store(User user, String name, String address, String description) {
         this.user = user;
@@ -55,7 +57,7 @@ public class Store extends DeletableBaseEntity {
         this.name = name;
         this.address = address;
         this.description = description;
-        this.capacity = Objects.requireNonNullElse(capacity, -1);
+        this.capacity = Objects.requireNonNullElse(capacity, UNLIMITED_CAPACITY);
     }
 
     public void setCapacity(Integer capacity) {
