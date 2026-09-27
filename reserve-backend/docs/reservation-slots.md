@@ -59,11 +59,13 @@ number of affected rows.
 
 ## Changing a reservation
 
-A reservation change must be performed in the following order within one transaction:
+If the date and hour do not change, leave the slot counts unchanged.
+
+For a move, compare the old and new slots by date, then hour. Handle the earlier slot first so concurrent
+changes access the slots in the same order. Perform all steps in one transaction:
 
 1. Begin the transaction.
-2. Create the slot for the new date and hour.
-3. Increment the new slot's count and verify that exactly one row was affected.
-4. Decrement the old slot's count.
-5. Update the reservation's date and hour.
-6. Commit the transaction.
+2. If the new slot is earlier, create it if absent. Increment its count and verify that exactly one row was affected. Then decrement the old slot's count.
+3. If the old slot is earlier, decrement its count first. Then create the new slot if absent, increment its count, and verify that exactly one row was affected.
+4. Update the reservation's date and hour.
+5. Commit the transaction.
