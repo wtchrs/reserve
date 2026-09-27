@@ -50,6 +50,10 @@ public abstract class ReservationIntegrationTestSupport extends BaseRestAssuredT
         return reservationUpdateRequest(LocalDate.of(2026, 1, 2), 14);
     }
 
+    protected ReservationUpdateRequest reservationUpdateRequest(ReservationCreateRequest request) {
+        return reservationUpdateRequest(request.getDate(), request.getHour());
+    }
+
     protected ReservationUpdateRequest reservationUpdateRequest(LocalDate date, int hour) {
         ReservationUpdateRequest reservationUpdateRequest = new ReservationUpdateRequest();
         reservationUpdateRequest.setDate(date);

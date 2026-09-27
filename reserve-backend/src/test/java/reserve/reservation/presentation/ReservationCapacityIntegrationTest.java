@@ -18,6 +18,7 @@ import reserve.user.domain.User;
 import reserve.user.infrastructure.UserRepository;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.stream.IntStream;
@@ -51,6 +52,10 @@ public class ReservationCapacityIntegrationTest extends ReservationIntegrationTe
                   AND slot_hour = ?;
                 """;
         return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getInt("slot_count"), store.getId(), date, hour).get(0);
+    }
+
+    private static long extractReservationId(String locationHeader) {
+        return Long.parseLong(locationHeader.substring(locationHeader.lastIndexOf("/") + 1));
     }
 
     @Test
@@ -124,7 +129,7 @@ public class ReservationCapacityIntegrationTest extends ReservationIntegrationTe
             .header("Location", Matchers.startsWith("/v1/reservations/"))
             .extract()
             .header("Location");
-        long reservationId = Long.parseLong(locationHeader.substring(locationHeader.lastIndexOf("/") + 1));
+        long reservationId = extractReservationId(locationHeader);
 
         // Cancel
         cancelReservation(customer1, reservationId).then().statusCode(200);
@@ -152,7 +157,7 @@ public class ReservationCapacityIntegrationTest extends ReservationIntegrationTe
             .header("Location", Matchers.startsWith("/v1/reservations/"))
             .extract()
             .header("Location");
-        long reservationId = Long.parseLong(locationHeader.substring(locationHeader.lastIndexOf("/") + 1));
+        long reservationId = extractReservationId(locationHeader);
 
         assertEquals(1, getReservationSlotCount(store, createRequest.getDate(), createRequest.getHour()));
 
@@ -180,7 +185,7 @@ public class ReservationCapacityIntegrationTest extends ReservationIntegrationTe
             .header("Location", Matchers.startsWith("/v1/reservations/"))
             .extract()
             .header("Location");
-        long reservationId = Long.parseLong(locationHeader.substring(locationHeader.lastIndexOf("/") + 1));
+        long reservationId = extractReservationId(locationHeader);
         assertEquals(1, getReservationSlotCount(store, createRequest.getDate(), createRequest.getHour()));
 
         // Update
@@ -209,7 +214,7 @@ public class ReservationCapacityIntegrationTest extends ReservationIntegrationTe
             .header("Location", Matchers.startsWith("/v1/reservations/"))
             .extract()
             .header("Location");
-        long reservationId = Long.parseLong(locationHeader.substring(locationHeader.lastIndexOf("/") + 1));
+        long reservationId = extractReservationId(locationHeader);
 
         // Create at other slot
         ReservationCreateRequest createRequest2 = reservationCreateRequest(menu, store, LocalDate.of(2026, 1, 2), 14);
@@ -253,12 +258,11 @@ public class ReservationCapacityIntegrationTest extends ReservationIntegrationTe
             .header("Location", Matchers.startsWith("/v1/reservations/"))
             .extract()
             .header("Location");
-        long reservationId = Long.parseLong(locationHeader.substring(locationHeader.lastIndexOf("/") + 1));
+        long reservationId = extractReservationId(locationHeader);
         assertEquals(1, getReservationSlotCount(store, createRequest.getDate(), createRequest.getHour()));
 
         // Update to the same slot that is full.
-        ReservationUpdateRequest updateRequest = reservationUpdateRequest(createRequest.getDate(),
-                createRequest.getHour());
+        ReservationUpdateRequest updateRequest = reservationUpdateRequest(createRequest);
         updateReservation(customer, reservationId, updateRequest).then().statusCode(200);
         assertEquals(1, getReservationSlotCount(store, createRequest.getDate(), createRequest.getHour()));
     }
@@ -278,7 +282,7 @@ public class ReservationCapacityIntegrationTest extends ReservationIntegrationTe
             .header("Location", Matchers.startsWith("/v1/reservations/"))
             .extract()
             .header("Location");
-        long reservationId = Long.parseLong(locationHeader.substring(locationHeader.lastIndexOf("/") + 1));
+        long reservationId = extractReservationId(locationHeader);
         assertEquals(1, getReservationSlotCount(store, createRequest.getDate(), createRequest.getHour()));
 
         // Cancel
@@ -301,7 +305,7 @@ public class ReservationCapacityIntegrationTest extends ReservationIntegrationTe
             .header("Location", Matchers.startsWith("/v1/reservations/"))
             .extract()
             .header("Location");
-        long reservationId = Long.parseLong(locationHeader.substring(locationHeader.lastIndexOf("/") + 1));
+        long reservationId = extractReservationId(locationHeader);
         assertEquals(1, getReservationSlotCount(store, createRequest.getDate(), createRequest.getHour()));
 
         // Cancel
@@ -377,7 +381,7 @@ public class ReservationCapacityIntegrationTest extends ReservationIntegrationTe
             .header("Location", Matchers.startsWith("/v1/reservations/"))
             .extract()
             .header("Location");
-        long reservationId = Long.parseLong(locationHeader.substring(locationHeader.lastIndexOf("/") + 1));
+        long reservationId = extractReservationId(locationHeader);
 
         assertEquals(1, getReservationSlotCount(store, createRequest.getDate(), createRequest.getHour()));
 
@@ -428,7 +432,7 @@ public class ReservationCapacityIntegrationTest extends ReservationIntegrationTe
             .header("Location", Matchers.startsWith("/v1/reservations/"))
             .extract()
             .header("Location");
-        long reservationId = Long.parseLong(locationHeader.substring(locationHeader.lastIndexOf("/") + 1));
+        long reservationId = extractReservationId(locationHeader);
         assertEquals(1, getReservationSlotCount(store, createRequest.getDate(), createRequest.getHour()));
 
         // Update concurrently
@@ -465,9 +469,25 @@ public class ReservationCapacityIntegrationTest extends ReservationIntegrationTe
         assertEquals(1, getReservationSlotCount(store, updateRequest.getDate(), updateRequest.getHour()));
     }
 
+    private long[] createReservations(User customer, ReservationCreateRequest request, int count)
+            throws JsonProcessingException {
+        long[] results = new long[count];
+        for (int i = 0; i < count; i++) {
+            String locationHeader = createReservation(customer, request).then()
+                .statusCode(201)
+                .header("Location", Matchers.startsWith("/v1/reservations/"))
+                .extract()
+                .header("Location");
+            results[i] = extractReservationId(locationHeader);
+        }
+        return results;
+    }
+
     @Test
-    void completesUpdatesAndPreservesSlotCounts_whenReservationsMoveBetweenTwoSlotsConcurrently() {
-        final int numReservations = 10;
+    void completesUpdatesAndPreservesSlotCounts_whenReservationsMoveBetweenTwoSlotsConcurrently()
+            throws JsonProcessingException, ExecutionException, InterruptedException, TimeoutException {
+        int numReservations = 10;
+        int numTasks = numReservations * 2;
 
         User user = userRepository.save(new User("user", "password", "hello", "ReservationControllerCapacityTest"));
         User customer = userRepository
@@ -477,100 +497,54 @@ public class ReservationCapacityIntegrationTest extends ReservationIntegrationTe
 
         // Create
         ReservationCreateRequest createRequest1 = reservationCreateRequest(menu, store, LocalDate.of(2026, 1, 1), 12);
-        long[] reservationIdsInSlot1 = IntStream.range(0, numReservations).mapToLong(i -> {
-            String locationHeader;
-            try {
-                locationHeader = createReservation(customer, createRequest1).then()
-                    .statusCode(201)
-                    .header("Location", Matchers.startsWith("/v1/reservations/"))
-                    .extract()
-                    .header("Location");
-            }
-            catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
-            return Long.parseLong(locationHeader.substring(locationHeader.lastIndexOf("/") + 1));
-        }).toArray();
+        long[] slot1ReservationIds = createReservations(customer, createRequest1, numReservations);
 
         ReservationCreateRequest createRequest2 = reservationCreateRequest(menu, store, LocalDate.of(2026, 1, 2), 14);
-        long[] reservationIdsInSlot2 = IntStream.range(0, numReservations).mapToLong(i -> {
-            String locationHeader;
-            try {
-                locationHeader = createReservation(customer, createRequest2).then()
-                    .statusCode(201)
-                    .header("Location", Matchers.startsWith("/v1/reservations/"))
-                    .extract()
-                    .header("Location");
-            }
-            catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
-            return Long.parseLong(locationHeader.substring(locationHeader.lastIndexOf("/") + 1));
-        }).toArray();
+        long[] slot2ReservationIds = createReservations(customer, createRequest2, numReservations);
 
         // Update concurrently
-        ReservationUpdateRequest updateRequest1 = reservationUpdateRequest(createRequest2.getDate(),
-                createRequest2.getHour());
-        ReservationUpdateRequest updateRequest2 = reservationUpdateRequest(createRequest1.getDate(),
-                createRequest1.getHour());
+        ReservationUpdateRequest moveToSlot1 = reservationUpdateRequest(createRequest1);
+        ReservationUpdateRequest moveToSlot2 = reservationUpdateRequest(createRequest2);
+
         ExecutorService pool = Executors.newFixedThreadPool(numReservations * 2);
         try {
-            CyclicBarrier barrier = new CyclicBarrier(numReservations * 2);
+            CountDownLatch readySignal = new CountDownLatch(numTasks);
+            CountDownLatch startSignal = new CountDownLatch(1);
 
-            List<Future<Boolean>> futures1 = IntStream.range(0, numReservations).mapToObj(i -> pool.submit(() -> {
-                barrier.await();
-                return updateReservation(customer, reservationIdsInSlot1[i], updateRequest1).then()
-                    .extract()
-                    .statusCode() == 200;
-            })).toList();
+            record ReservationMove(long[] ids, ReservationUpdateRequest request) {
+            }
+            List<ReservationMove> reservationMoves = List.of(new ReservationMove(slot1ReservationIds, moveToSlot2),
+                    new ReservationMove(slot2ReservationIds, moveToSlot1));
 
-            List<Future<Boolean>> futures2 = IntStream.range(0, numReservations).mapToObj(i -> pool.submit(() -> {
-                barrier.await();
-                return updateReservation(customer, reservationIdsInSlot2[i], updateRequest2).then()
-                    .extract()
-                    .statusCode() == 200;
-            })).toList();
+            List<Future<Integer>> futures = new ArrayList<>();
 
-            futures1.forEach(f -> {
-                try {
-                    assertTrue(f.get(10, TimeUnit.SECONDS));
+            for (ReservationMove reservationMove : reservationMoves) {
+                for (long reservationId : reservationMove.ids()) {
+                    futures.add(pool.submit(() -> {
+                        readySignal.countDown();
+                        startSignal.await();
+                        return updateReservation(customer, reservationId, reservationMove.request()).then()
+                            .extract()
+                            .statusCode();
+                    }));
                 }
-                catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new RuntimeException(e);
-                }
-                catch (ExecutionException e) {
-                    throw new RuntimeException(e);
-                }
-                catch (TimeoutException e) {
-                    fail(e);
-                }
-            });
+            }
 
-            futures2.forEach(f -> {
-                try {
-                    assertTrue(f.get(10, TimeUnit.SECONDS));
-                }
-                catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new RuntimeException(e);
-                }
-                catch (ExecutionException e) {
-                    throw new RuntimeException(e);
-                }
-                catch (TimeoutException e) {
-                    fail(e);
-                }
-            });
+            assertTrue(readySignal.await(10, TimeUnit.SECONDS));
+            startSignal.countDown();
+
+            for (Future<Integer> future : futures) {
+                assertEquals(200, future.get(10, TimeUnit.SECONDS));
+            }
         }
         finally {
-            pool.shutdown();
+            pool.shutdownNow();
         }
 
         assertAll(
-                () -> assertEquals(10,
+                () -> assertEquals(numReservations,
                         getReservationSlotCount(store, createRequest1.getDate(), createRequest1.getHour())),
-                () -> assertEquals(10,
+                () -> assertEquals(numReservations,
                         getReservationSlotCount(store, createRequest2.getDate(), createRequest2.getHour())));
     }
 
