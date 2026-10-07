@@ -1,13 +1,7 @@
 package reserve.signin.infrastructure;
 
 import io.jsonwebtoken.*;
-import java.nio.charset.StandardCharsets;
-import java.security.Key;
-import java.time.Clock;
-import java.time.Instant;
-import java.util.Date;
-import java.util.Map;
-import javax.crypto.spec.SecretKeySpec;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import reserve.global.exception.AccessTokenException;
@@ -15,6 +9,14 @@ import reserve.global.exception.ErrorCode;
 import reserve.global.exception.InvalidAuthorizationException;
 import reserve.signin.domain.TokenDetails;
 import reserve.signin.dto.SignInToken;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Date;
+import java.util.Map;
 
 @Component
 public class JwtProvider {
@@ -31,14 +33,21 @@ public class JwtProvider {
 
     private final Key refreshTokenSigningKey;
 
-    private final int accessTokenExpPeriod;
+    private final Duration accessTokenExpPeriod;
 
-    private final int refreshTokenExpPeriod;
+    private final Duration refreshTokenExpPeriod;
 
+    @Autowired
     public JwtProvider(@Value("${application.security.jwt.accessTokenSecretKey}") String accessTokenSecret,
             @Value("${application.security.jwt.refreshTokenSecretKey}") String refreshTokenSecret,
             @Value("${application.security.jwt.accessTokenExpire}") int accessTokenExpPeriod,
             @Value("${application.security.jwt.refreshTokenExpire}") int refreshTokenExpPeriod, Clock clock) {
+        this(accessTokenSecret, refreshTokenSecret, Duration.ofSeconds(accessTokenExpPeriod),
+                Duration.ofSeconds(refreshTokenExpPeriod), clock);
+    }
+
+    public JwtProvider(String accessTokenSecret, String refreshTokenSecret, Duration accessTokenExpPeriod,
+            Duration refreshTokenExpPeriod, Clock clock) {
         this.accessTokenSigningKey = new SecretKeySpec(accessTokenSecret.getBytes(StandardCharsets.UTF_8),
                 SIGNATURE_ALGORITHM.getJcaName());
         this.refreshTokenSigningKey = new SecretKeySpec(refreshTokenSecret.getBytes(StandardCharsets.UTF_8),
@@ -64,10 +73,11 @@ public class JwtProvider {
         return generateToken(subject, claims, refreshTokenExpPeriod, refreshTokenSigningKey);
     }
 
-    private String generateToken(String subject, Map<String, String> claims, int expirationPeriod, Key signingKey) {
+    private String generateToken(String subject, Map<String, String> claims, Duration expirationPeriod,
+            Key signingKey) {
         Instant now = clock.instant();
         Date issued = Date.from(now);
-        Date expiration = Date.from(now.plusSeconds(expirationPeriod));
+        Date expiration = Date.from(now.plus(expirationPeriod));
         return Jwts.builder()
             .setHeaderParam(JWT_TYPE_HEADER_NAME, JWT_TYPE_HEADER_VALUE)
             .setClaims(claims)

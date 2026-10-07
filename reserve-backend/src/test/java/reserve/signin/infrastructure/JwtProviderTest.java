@@ -24,9 +24,9 @@ class JwtProviderTest {
 
     final String REFRESH_TOKEN_SECRET = "9876543210987654321098765432109876543210987654321098765432109876";
 
-    final int REFRESH_TOKEN_EXPIRATION = 604800;
+    final Duration REFRESH_TOKEN_EXPIRATION = Duration.ofDays(7);
 
-    final int ACCESS_TOKEN_EXPIRATION = 600;
+    final Duration ACCESS_TOKEN_EXPIRATION = Duration.ofMinutes(10);
 
     JwtProvider jwtProvider = new JwtProvider(ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET, ACCESS_TOKEN_EXPIRATION,
             REFRESH_TOKEN_EXPIRATION, Clock.systemUTC());
@@ -76,11 +76,11 @@ class JwtProviderTest {
         SignInToken signInToken = jwtProvider.generateSignInToken(TestUtils.getTokenDetails(1L));
 
         Claims accessTokenClaims = getTokenClaims(ACCESS_TOKEN_SECRET, signInToken.getAccessToken());
-        assertEquals(ACCESS_TOKEN_EXPIRATION * 1000,
+        assertEquals(ACCESS_TOKEN_EXPIRATION.getSeconds() * 1000,
                 accessTokenClaims.getExpiration().getTime() - accessTokenClaims.getIssuedAt().getTime());
 
         Claims refreshTokenClaims = getTokenClaims(REFRESH_TOKEN_SECRET, signInToken.getRefreshToken());
-        assertEquals(REFRESH_TOKEN_EXPIRATION * 1000,
+        assertEquals(REFRESH_TOKEN_EXPIRATION.getSeconds() * 1000,
                 refreshTokenClaims.getExpiration().getTime() - refreshTokenClaims.getIssuedAt().getTime());
     }
 
@@ -102,7 +102,8 @@ class JwtProviderTest {
         String token = provider.generateSignInToken(TestUtils.getTokenDetails(1L)).getAccessToken();
 
         // one second before expiration
-        clock.advance(Duration.ofSeconds(ACCESS_TOKEN_EXPIRATION - 1));
+        // clock.advance(Duration.ofSeconds(ACCESS_TOKEN_EXPIRATION - 1));
+        clock.advance(ACCESS_TOKEN_EXPIRATION.minusSeconds(1));
         assertFalse(provider.isAccessTokenExpired(token));
 
         // one second after expiration
@@ -119,7 +120,7 @@ class JwtProviderTest {
         String token = provider.generateSignInToken(TestUtils.getTokenDetails(1L)).getRefreshToken();
 
         // one second before expiration
-        clock.advance(Duration.ofSeconds(REFRESH_TOKEN_EXPIRATION - 1));
+        clock.advance(REFRESH_TOKEN_EXPIRATION.minusSeconds(1));
         assertFalse(provider.isRefreshTokenExpired(token));
 
         // one second after expiration
